@@ -30,6 +30,4 @@ phases depend on earlier ones being solid, especially the token schema.
 14. Keep templates separate from app-shell/nav components
 15. Publish `packages/core`, `packages/theme-neutral`, `packages/cli` as scoped npm packages once the API stabilizes — not before, since `swizzle` paths and prop names become breaking changes for anyone who's forked
 
-## Where to pick up right now
 
-Phase 1, step 4 — add the next primitive component. Everything else compounds on having more than one component to prove the pattern holds.
