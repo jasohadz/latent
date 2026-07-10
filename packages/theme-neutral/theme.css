@@ -1,0 +1,27 @@
+/* Generated from packages/tokens/tokens.json — keep in sync, don't hand-edit values */
+:root[data-latent-theme="neutral"] {
+  --lat-color-bg-default: #ffffff;
+  --lat-color-bg-subtle: #f5f5f5;
+  --lat-color-text-default: #1a1a1a;
+  --lat-color-text-muted: #666666;
+  --lat-color-accent-default: #2954e0;
+  --lat-color-accent-hover: #1e3fb0;
+  --lat-color-border-default: #d9d9d9;
+
+  --lat-space-xs: 4px;
+  --lat-space-sm: 8px;
+  --lat-space-md: 16px;
+  --lat-space-lg: 24px;
+  --lat-space-xl: 40px;
+
+  --lat-radius-sm: 4px;
+  --lat-radius-md: 8px;
+  --lat-radius-lg: 16px;
+
+  --lat-font-size-sm: 13px;
+  --lat-font-size-md: 15px;
+  --lat-font-size-lg: 20px;
+  --lat-font-weight-regular: 400;
+  --lat-font-weight-medium: 500;
+  --lat-font-weight-bold: 700;
+}

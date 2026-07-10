@@ -1,0 +1,30 @@
+.lat-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lat-space-xs);
+  border-radius: var(--lat-radius-sm);
+  border: 1px solid transparent;
+  font-weight: var(--lat-font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.lat-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.lat-button--sm { padding: var(--lat-space-xs) var(--lat-space-sm); font-size: var(--lat-font-size-sm); }
+.lat-button--md { padding: var(--lat-space-sm) var(--lat-space-md); font-size: var(--lat-font-size-md); }
+.lat-button--lg { padding: var(--lat-space-sm) var(--lat-space-lg); font-size: var(--lat-font-size-lg); }
+
+.lat-button--primary {
+  background-color: var(--lat-color-accent-default);
+  color: var(--lat-color-bg-default);
+}
+.lat-button--primary:not(:disabled):hover { background-color: var(--lat-color-accent-hover); }
+
+.lat-button--secondary {
+  background-color: var(--lat-color-bg-default);
+  color: var(--lat-color-text-default);
+  border-color: var(--lat-color-border-default);
+}
+.lat-button--secondary:not(:disabled):hover { background-color: var(--lat-color-bg-subtle); }
