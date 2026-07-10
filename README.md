@@ -52,17 +52,4 @@ run the command above against it before wiring up a real export.
 a JSON file with the same nesting as `tokens.json`, then run `sync figma
 --file` against it.
 
-## Next steps (in order — see the design-system-builder skill)
 
-1. Add 3-4 more primitives (Input, Stack, Text) following the exact same
-   three-file pattern as Button (`.tsx` + `.css` + `.doc.mjs`), each with
-   its own `figmaTokens` mapping
-2. Replace `discoverComponents()` in the CLI with an actual directory scan
-   of `*.doc.mjs` files instead of the hardcoded `["Button"]`
-3. Script the actual F8igma Console export → `sync figma` pipeline (right
-   now the export step is manual)
-4. Add `init` and `upgrade` commands to the CLI once there's more than
-   one consuming project
-5. Publish `packages/core`, `packages/theme-neutral`, `packages/cli` as
-   scoped npm packages once the API stabilizes — don't publish early,
-   swizzle path changes are breaking changes for anyone who's forked
