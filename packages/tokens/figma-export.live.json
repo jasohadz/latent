@@ -1,0 +1,14 @@
+{
+  "color": {
+    "bg": { "default": "#FFFFFF", "subtle": "#F5F5F5" },
+    "text": { "default": "#1A1A1A", "muted": "#666666" },
+    "accent": { "default": "#2954E0", "hover": "#1E3FB0" },
+    "border": { "default": "#D9D9D9" }
+  },
+  "space": { "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "40px" },
+  "radius": { "sm": "4px", "md": "8px", "lg": "16px" },
+  "font": {
+    "size": { "sm": "13px", "md": "15px", "lg": "20px" },
+    "weight": { "regular": "400", "medium": "500", "bold": "700" }
+  }
+}

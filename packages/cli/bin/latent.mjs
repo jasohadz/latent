@@ -4,7 +4,7 @@
 import { readFileSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { flattenTokens, tokenPathToCssVar } from "../../tokens/flatten.mjs";
+import { flattenTokens, tokenPathToCssVar, tokensEqual } from "../../tokens/flatten.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CORE_SRC = path.resolve(__dirname, "../../core/src");
@@ -93,7 +93,7 @@ async function cmdSyncFigma(filePath, json) {
   for (const [tokenPath, figmaValue] of Object.entries(figmaTokens)) {
     if (!(tokenPath in codeTokens)) {
       missingInCode.push({ token: tokenPath, figmaValue });
-    } else if (codeTokens[tokenPath] !== figmaValue) {
+    } else if (!tokensEqual(codeTokens[tokenPath], figmaValue)) {
       valueMismatches.push({ token: tokenPath, codeValue: codeTokens[tokenPath], figmaValue });
     }
   }

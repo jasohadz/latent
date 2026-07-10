@@ -16,3 +16,14 @@ export function flattenTokens(obj, prefix = "") {
 export function tokenPathToCssVar(path) {
   return `--lat-${path.replace(/\./g, "-")}`;
 }
+
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{3,8}$/;
+
+// Figma variable exports commonly use uppercase hex (#FFFFFF) while
+// tokens.json is authored lowercase (#ffffff) — same color, not drift.
+export function tokensEqual(a, b) {
+  if (typeof a === "string" && typeof b === "string" && HEX_COLOR_RE.test(a) && HEX_COLOR_RE.test(b)) {
+    return a.toLowerCase() === b.toLowerCase();
+  }
+  return a === b;
+}
