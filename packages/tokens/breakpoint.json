@@ -1,0 +1,46 @@
+{
+  "font-size": {
+    "display": {
+      "value": {
+        "mobile": "{typography.font-size.900}",
+        "tablet": "{typography.font-size.1200}",
+        "desktop": "{typography.font-size.1300}"
+      }
+    },
+    "h1": {
+      "value": {
+        "mobile": "{typography.font-size.700}",
+        "tablet": "{typography.font-size.900}",
+        "desktop": "{typography.font-size.1100}"
+      }
+    },
+    "h2": {
+      "value": {
+        "mobile": "{typography.font-size.600}",
+        "tablet": "{typography.font-size.700}",
+        "desktop": "{typography.font-size.900}"
+      }
+    },
+    "h3": {
+      "value": {
+        "mobile": "{typography.font-size.500}",
+        "tablet": "{typography.font-size.600}",
+        "desktop": "{typography.font-size.700}"
+      }
+    },
+    "body": {
+      "value": {
+        "mobile": "{typography.font-size.300}",
+        "tablet": "{typography.font-size.300}",
+        "desktop": "{typography.font-size.300}"
+      }
+    },
+    "caption": {
+      "value": {
+        "mobile": "{typography.font-size.100}",
+        "tablet": "{typography.font-size.200}",
+        "desktop": "{typography.font-size.200}"
+      }
+    }
+  }
+}

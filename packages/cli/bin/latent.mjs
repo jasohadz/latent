@@ -2,14 +2,23 @@
 // latent — CLI for the design system. Every command supports --json so an
 // agent gets structured output instead of parsing prose.
 import { readFileSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 import { flattenTokens, tokenPathToCssVar, tokensEqual } from "../../tokens/flatten.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CORE_SRC = path.resolve(__dirname, "../../core/src");
 
-const TOKENS_PATH = path.resolve(__dirname, "../../tokens/tokens.json");
+const TOKENS_DIR = path.resolve(__dirname, "../../tokens");
+
+// primitives/breakpoint are single-mode per token; semantic/density are
+// mode-aware ({ light, dark } / { default, condensed }) — see flatten.mjs.
+const LAYER_FILES = {
+  primitives: "primitives.json",
+  semantic: "semantic.json",
+  density: "density.json",
+  breakpoint: "breakpoint.json",
+};
 
 const COMMANDS = {
   list: { args: [], flags: ["--json"], responseTypes: ["component-list"] },
@@ -35,7 +44,7 @@ function err(code, extra = {}) {
 async function loadDoc(name) {
   const docPath = path.join(CORE_SRC, `${name}.doc.mjs`);
   if (!existsSync(docPath)) return null;
-  const mod = await import(docPath);
+  const mod = await import(pathToFileURL(docPath).href);
   return mod.default;
 }
 
@@ -75,30 +84,55 @@ async function cmdSwizzle(name, json, dest) {
   print(result, json);
 }
 
+// A flattened value is either a scalar (primitives/breakpoint-as-scalar)
+// or a per-mode object (semantic/density/breakpoint), e.g. { light, dark }.
+function isModeMap(value) {
+  return value && typeof value === "object" && !Array.isArray(value);
+}
+
+function diffLayer(layer, codeFlat, figmaFlat, missingInCode, missingInFigma, valueMismatches) {
+  for (const [tokenPath, figmaValue] of Object.entries(figmaFlat)) {
+    if (!(tokenPath in codeFlat)) {
+      missingInCode.push({ layer, token: tokenPath, figmaValue });
+      continue;
+    }
+    const codeValue = codeFlat[tokenPath];
+    if (isModeMap(figmaValue) || isModeMap(codeValue)) {
+      const modes = new Set([...Object.keys(codeValue ?? {}), ...Object.keys(figmaValue ?? {})]);
+      for (const mode of modes) {
+        const cv = codeValue?.[mode];
+        const fv = figmaValue?.[mode];
+        if (!tokensEqual(cv, fv)) {
+          valueMismatches.push({ layer, token: tokenPath, mode, codeValue: cv, figmaValue: fv });
+        }
+      }
+    } else if (!tokensEqual(codeValue, figmaValue)) {
+      valueMismatches.push({ layer, token: tokenPath, codeValue, figmaValue });
+    }
+  }
+  for (const tokenPath of Object.keys(codeFlat)) {
+    if (!(tokenPath in figmaFlat)) missingInFigma.push({ layer, token: tokenPath, codeValue: codeFlat[tokenPath] });
+  }
+}
+
 async function cmdSyncFigma(filePath, json) {
   if (!filePath) return print(err("ERR_MISSING_ARG", { arg: "--file" }), json);
   const resolvedFile = path.resolve(process.cwd(), filePath);
   if (!existsSync(resolvedFile)) return print(err("ERR_FILE_NOT_FOUND", { path: resolvedFile }), json);
-  if (!existsSync(TOKENS_PATH)) return print(err("ERR_FILE_NOT_FOUND", { path: TOKENS_PATH }), json);
 
-  const codeTokens = flattenTokens(JSON.parse(readFileSync(TOKENS_PATH, "utf-8")));
   const figmaRaw = JSON.parse(readFileSync(resolvedFile, "utf-8"));
   delete figmaRaw._comment;
-  const figmaTokens = flattenTokens(figmaRaw);
 
-  const missingInCode = [];   // in Figma, not in tokens.json
-  const missingInFigma = [];  // in tokens.json, not in Figma
-  const valueMismatches = []; // in both, different value
+  const missingInCode = [];   // in Figma, not in code
+  const missingInFigma = [];  // in code, not in Figma
+  const valueMismatches = []; // in both, different value (per-mode for semantic/density/breakpoint)
 
-  for (const [tokenPath, figmaValue] of Object.entries(figmaTokens)) {
-    if (!(tokenPath in codeTokens)) {
-      missingInCode.push({ token: tokenPath, figmaValue });
-    } else if (!tokensEqual(codeTokens[tokenPath], figmaValue)) {
-      valueMismatches.push({ token: tokenPath, codeValue: codeTokens[tokenPath], figmaValue });
-    }
-  }
-  for (const tokenPath of Object.keys(codeTokens)) {
-    if (!(tokenPath in figmaTokens)) missingInFigma.push({ token: tokenPath, codeValue: codeTokens[tokenPath] });
+  for (const layer of Object.keys(LAYER_FILES)) {
+    const tokensPath = path.join(TOKENS_DIR, LAYER_FILES[layer]);
+    if (!existsSync(tokensPath)) return print(err("ERR_FILE_NOT_FOUND", { path: tokensPath }), json);
+    const codeFlat = flattenTokens(JSON.parse(readFileSync(tokensPath, "utf-8")));
+    const figmaFlat = flattenTokens(figmaRaw[layer] ?? {});
+    diffLayer(layer, codeFlat, figmaFlat, missingInCode, missingInFigma, valueMismatches);
   }
 
   const drift = missingInCode.length + missingInFigma.length + valueMismatches.length;
@@ -106,9 +140,9 @@ async function cmdSyncFigma(filePath, json) {
     type: "sync-result",
     status: drift === 0 ? "in-sync" : "drift-detected",
     driftCount: drift,
-    missingInCode,   // token exists in Figma, needs adding to tokens.json
+    missingInCode,   // token exists in Figma, needs adding to code
     missingInFigma,  // token exists in code, missing from the Figma export
-    valueMismatches, // same token name, different value — likely someone edited one side only
+    valueMismatches, // same token+mode, different value — likely someone edited one side only
   };
   print(result, json);
   if (drift > 0) process.exitCode = 1;

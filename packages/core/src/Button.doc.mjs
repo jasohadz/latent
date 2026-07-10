@@ -17,10 +17,10 @@ export default {
   // property they should end up styling. check-parity greps the compiled
   // CSS for the corresponding --lat-* variable to confirm no drift.
   figmaTokens: {
-    "border-radius": "radius.sm",
-    "padding (md, y-axis)": "space.sm",
-    "padding (md, x-axis)": "space.md",
-    "font-size (md)": "font.size.md",
-    "background (primary)": "color.accent.default",
+    "border-radius": "radius.input",
+    "padding (md, y-axis)": "spacing.8",
+    "padding (md, x-axis)": "spacing.16",
+    "font-size (md)": "typography.button.font-size.md",
+    "background (primary)": "color.action.primary.default",
   },
 };
