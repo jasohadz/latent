@@ -53,8 +53,10 @@ property dropdown.
 
 ## Coverage
 
-480 of 628 variables were scoped (78 intentionally left `ALL_SCOPES` per
-the table above, 62 Density + 6 Breakpoint variables untouched by design).
+480 of 628 variables were scoped (80 intentionally left `ALL_SCOPES` per
+the table above — 13 `grid/*`, 2 primitive `blur/*`, 3 `color/selection/*`
++ `color/scrim/*`, 62 semantic `font/*` — plus 62 Density + 6 Breakpoint
+variables untouched by design).
 
 ## How it was applied
 
