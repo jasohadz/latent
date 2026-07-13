@@ -1,11 +1,22 @@
 #!/bin/sh
-# Blocks a commit if it touches token/style source files and those files
-# are internally inconsistent with their Figma export (sync figma /
-# check-styles report drift). Doesn't talk to Figma itself — it can only
-# verify the repo agrees with whatever the export files already contain.
-# If Figma changed and nobody re-pulled, this hook won't catch that; see
-# CLAUDE.md's "Figma Styles" section for the agent-driven pull step that
-# keeps the export files themselves fresh.
+# Two independent drift gates, each only running when relevant files are
+# staged:
+#
+# 1. Tokens/Styles — blocks if packages/tokens/** or STYLES.md are
+#    internally inconsistent with their Figma export (sync figma /
+#    check-styles). Doesn't talk to Figma itself; can only verify the repo
+#    agrees with whatever the export files already contain. If Figma
+#    changed and nobody re-pulled, this won't catch that — see CLAUDE.md's
+#    "Figma Styles" section for the agent-driven pull step that keeps the
+#    export files themselves fresh.
+#
+# 2. Components — blocks if a touched component's compiled CSS no longer
+#    matches its declared figmaTokens mapping (check-parity). A component
+#    with no figmaTokens yet (ERR_NO_FIGMA_SPEC) warns instead of blocking
+#    — it hasn't opted into parity checking, it isn't drifting from a spec
+#    that doesn't exist. Does NOT catch raw hardcoded values on properties
+#    nobody declared in figmaTokens — see HOW-TO.md's component-editing
+#    section for that open gap.
 #
 # Installed automatically via `npm install` (see package.json's postinstall,
 # which runs `git config core.hooksPath .githooks`). Works for any commit
@@ -13,48 +24,78 @@
 # editor or agent-specific mechanism.
 
 CHANGED=$(git diff --cached --name-only --diff-filter=ACMR)
-TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/tokens/|^STYLES\.md$')
-
-if [ -z "$TOUCHED" ]; then
-  exit 0
-fi
-
-echo "latent: token/style files changed — verifying sync before commit..."
 FAIL=0
 
 json_status() {
   node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).status)}catch(e){console.log('parse-error')}})"
 }
 
-if [ -f packages/tokens/figma-export.live.json ]; then
-  SYNC_OUT=$(node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.live.json --json)
-  SYNC_STATUS=$(printf '%s' "$SYNC_OUT" | json_status)
-  if [ "$SYNC_STATUS" != "in-sync" ]; then
-    echo ""
-    echo "BLOCKED (sync figma): drift against packages/tokens/figma-export.live.json"
-    echo "$SYNC_OUT"
-    FAIL=1
+# --- 1. Tokens/Styles ---
+TOKENS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/tokens/|^STYLES\.md$')
+if [ -n "$TOKENS_TOUCHED" ]; then
+  echo "latent: token/style files changed — verifying sync before commit..."
+
+  if [ -f packages/tokens/figma-export.live.json ]; then
+    SYNC_OUT=$(node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.live.json --json)
+    SYNC_STATUS=$(printf '%s' "$SYNC_OUT" | json_status)
+    if [ "$SYNC_STATUS" != "in-sync" ]; then
+      echo ""
+      echo "BLOCKED (sync figma): drift against packages/tokens/figma-export.live.json"
+      echo "$SYNC_OUT"
+      FAIL=1
+    fi
+  fi
+
+  if [ -f packages/tokens/styles-export.live.json ]; then
+    STYLES_OUT=$(node packages/cli/bin/latent.mjs check-styles --file packages/tokens/styles-export.live.json --json)
+    STYLES_STATUS=$(printf '%s' "$STYLES_OUT" | json_status)
+    if [ "$STYLES_STATUS" != "in-sync" ]; then
+      echo ""
+      echo "BLOCKED (check-styles): drift against packages/tokens/styles-export.live.json"
+      echo "$STYLES_OUT"
+      FAIL=1
+    fi
   fi
 fi
 
-if [ -f packages/tokens/styles-export.live.json ]; then
-  STYLES_OUT=$(node packages/cli/bin/latent.mjs check-styles --file packages/tokens/styles-export.live.json --json)
-  STYLES_STATUS=$(printf '%s' "$STYLES_OUT" | json_status)
-  if [ "$STYLES_STATUS" != "in-sync" ]; then
-    echo ""
-    echo "BLOCKED (check-styles): drift against packages/tokens/styles-export.live.json"
-    echo "$STYLES_OUT"
-    FAIL=1
-  fi
+# --- 2. Components ---
+COMPONENTS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/core/src/.*\.(tsx|css|doc\.mjs)$')
+if [ -n "$COMPONENTS_TOUCHED" ]; then
+  NAMES=$(printf '%s\n' "$COMPONENTS_TOUCHED" | sed -E 's#^packages/core/src/##; s#\..*##' | sort -u)
+  echo "latent: component files changed — running check-parity..."
+  for NAME in $NAMES; do
+    PARITY_OUT=$(node packages/cli/bin/latent.mjs check-parity "$NAME" --json)
+    PARITY_CODE=$(printf '%s' "$PARITY_OUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const o=JSON.parse(d);console.log(o.type==='error'?o.code:'')}catch(e){console.log('parse-error')}})")
+
+    if [ "$PARITY_CODE" = "ERR_NO_FIGMA_SPEC" ]; then
+      echo "WARN: $NAME has no figmaTokens mapping yet — check-parity skipped, not blocking."
+      continue
+    fi
+    if [ -n "$PARITY_CODE" ]; then
+      echo ""
+      echo "BLOCKED (check-parity $NAME): $PARITY_CODE"
+      echo "$PARITY_OUT"
+      FAIL=1
+      continue
+    fi
+
+    PARITY_STATUS=$(printf '%s' "$PARITY_OUT" | json_status)
+    if [ "$PARITY_STATUS" != "matches" ]; then
+      echo ""
+      echo "BLOCKED (check-parity $NAME): compiled CSS no longer matches its declared figmaTokens"
+      echo "$PARITY_OUT"
+      FAIL=1
+    fi
+  done
 fi
 
 if [ "$FAIL" = "1" ]; then
   echo ""
-  echo "Commit blocked. Either fix the drift above, or if the *.live.json"
-  echo "export files are themselves stale (Figma changed and nobody"
-  echo "re-pulled), regenerate them first, then retry the commit."
+  echo "Commit blocked. Fix the drift reported above before committing."
   exit 1
 fi
 
-echo "latent: sync check passed."
+if [ -n "$TOKENS_TOUCHED" ] || [ -n "$COMPONENTS_TOUCHED" ]; then
+  echo "latent: all checks passed."
+fi
 exit 0

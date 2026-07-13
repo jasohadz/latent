@@ -54,25 +54,31 @@ without needing Figma access at all.
 
 ## 5. Editing or adding components
 
+A new component is exactly three files in `packages/core/src/` sharing a
+basename — `Name.tsx`, `Name.css`, `Name.doc.mjs` — following `Button` as
+the reference. `list`/`docs`/`swizzle`/`check-parity` discover it
+automatically (`discoverComponents()` scans for `*.doc.mjs`, nothing to
+register by hand).
+
 If a brand needs more than a token rebrand — a new component, or changes to
 `packages/core/src/*.tsx`/`.css` — the same rule from `CLAUDE.md` applies
 with zero exceptions: **every color, spacing, radius, and font value in a
 component's CSS must be a `var(--lat-*)` reference, never a raw literal.**
-A hardcoded `#2563eb` or `16px` in a component's stylesheet is invisible to
-`sync figma`, `check-styles`, and the pre-commit hook — none of them read
-component CSS — so it won't get caught by anything built so far. If the
-token you need doesn't exist yet, add it to the primitives/semantic layer
-first (through the Figma sync workflow in step 3), then reference it —
-don't invent a one-off value to unblock yourself.
+If the token you need doesn't exist yet, add it to the primitives/semantic
+layer first (through the Figma sync workflow in step 3), then reference it
+— don't invent a one-off value to unblock yourself.
 
-`check-parity <Component>` (see `GUIDE.md` / the `design-system-builder`
-skill) verifies that a component's *declared* `figmaTokens` mapping is
-actually present in its compiled CSS — useful, but it only checks tokens
-the component's `.doc.mjs` already claims to use. It won't catch a raw
-value on a property nobody declared. Closing that gap for real would mean
-a CSS scanner (flag hex colors / raw px outside `var()`) wired into
-`check-parity` or the pre-commit hook — not built yet; flagging it here
-rather than pretending "note: don't do it" is sufficient enforcement.
+This is now partially enforced: the pre-commit hook runs `check-parity` for
+any staged component and blocks the commit if the compiled CSS no longer
+matches the tokens declared in its `.doc.mjs`'s `figmaTokens` map (a
+component with no `figmaTokens` yet warns instead of blocking — it hasn't
+opted in). What's still **not** caught: a raw value on a property nobody
+declared in `figmaTokens` in the first place. A hardcoded `#2563eb` on a
+property that was never listed is invisible to `check-parity`, `sync
+figma`, `check-styles`, and the rest of the hook. Closing that for real
+would mean a CSS scanner (flag hex colors / raw px outside `var()`,
+independent of what's declared) — not built yet; flagging it here rather
+than implying the current check is exhaustive.
 
 ## The gap: nothing detects "Figma changed and nobody re-synced"
 

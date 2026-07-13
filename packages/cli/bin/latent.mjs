@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // latent — CLI for the design system. Every command supports --json so an
 // agent gets structured output instead of parsing prose.
-import { readFileSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 import { flattenTokens, tokenPathToCssVar, tokensEqual } from "../../tokens/flatten.mjs";
@@ -50,9 +50,11 @@ async function loadDoc(name) {
 }
 
 function discoverComponents() {
-  // In this scaffold, only Button exists. In a real build, scan CORE_SRC
-  // for *.doc.mjs files instead of hardcoding.
-  return ["Button"];
+  if (!existsSync(CORE_SRC)) return [];
+  return readdirSync(CORE_SRC)
+    .filter((f) => f.endsWith(".doc.mjs"))
+    .map((f) => f.slice(0, -".doc.mjs".length))
+    .sort();
 }
 
 async function cmdList(json) {

@@ -23,7 +23,7 @@ Every primitive is exactly three files in `packages/core/src/`, sharing a basena
 
 No exceptions on the `.doc.mjs` file — it's the only thing that makes `list`, `docs`, `swizzle`, and `check-parity` work for a component.
 
-After adding files, `discoverComponents()` in `packages/cli/bin/latent.mjs` is currently hardcoded (`return ["Button"]`) rather than scanning for `*.doc.mjs`. Until that's replaced (a listed Phase 3 task), add the new component name to that hardcoded list or the CLI won't see it.
+`discoverComponents()` scans `packages/core/src` for `*.doc.mjs` files, so adding the three files is enough — no CLI edit needed for `list`/`docs`/`swizzle`/`check-parity` to see the new component.
 
 ## Editing tokens
 
@@ -46,7 +46,7 @@ node packages/cli/bin/latent.mjs check-styles --file packages/tokens/styles-expo
 node packages/cli/bin/latent.mjs manifest --json
 ```
 
-`check-parity` only checks components that declare `figmaTokens` in their `.doc.mjs` — if it reports `ERR_NO_FIGMA_SPEC`, the mapping is missing, not the CSS.
+`check-parity` only checks components that declare `figmaTokens` in their `.doc.mjs` — if it reports `ERR_NO_FIGMA_SPEC`, the mapping is missing, not the CSS. The pre-commit hook runs it automatically for any staged component (warns, doesn't block, on `ERR_NO_FIGMA_SPEC`) — but it only verifies *declared* tokens; a raw value on an undeclared property still isn't caught by anything.
 
 ## Reusing Figma Text/Effect Styles
 
