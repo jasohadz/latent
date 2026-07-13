@@ -16,8 +16,12 @@ node packages/cli/bin/latent.mjs check-styles --file <export>.json --json
 
 This diffs `packages/tokens/styles.json` against a fresh Figma pull, the same
 three-category report as `sync figma` (`missingInCode`, `missingInFigma`,
-`valueMismatches`), non-zero exit on drift. **Run it after any session that
-touches Text or Effect Styles** — same discipline as `sync figma` for
+`valueMismatches`), non-zero exit on drift. A pre-commit hook (`.githooks/`,
+auto-installed via `npm install`) already runs this automatically whenever a
+commit touches `packages/tokens/` or this file, blocking the commit on drift
+— but it can only check the repo against itself, not against live Figma, so
+still **run it manually after any session that touches Text or Effect
+Styles** — same discipline as `sync figma` for
 Variables. To regenerate the export file, pull live from Figma and resolve
 variable IDs to names (raw IDs aren't stable/comparable across sessions):
 
