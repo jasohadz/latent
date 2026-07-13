@@ -26,6 +26,7 @@ const COMMANDS = {
   swizzle: { args: ["<name>"], flags: ["--json", "--dest"], responseTypes: ["swizzle-result", "error"] },
   "sync figma": { args: [], flags: ["--file", "--json"], responseTypes: ["sync-result", "error"] },
   "check-parity": { args: ["<name>"], flags: ["--json"], responseTypes: ["parity-result", "error"] },
+  "check-styles": { args: [], flags: ["--file", "--json"], responseTypes: ["check-styles-result", "error"] },
   manifest: { args: [], flags: ["--json"], responseTypes: ["manifest"] },
 };
 
@@ -148,6 +149,68 @@ async function cmdSyncFigma(filePath, json) {
   if (drift > 0) process.exitCode = 1;
 }
 
+// Text/Effect Styles are a different Figma primitive from Variables — compound
+// objects (fontName/lineHeight/boundVariables, or an array of shadow layers)
+// rather than scalar leaves — so they get their own diff, not flattenTokens.
+function diffStyleValue(path, codeVal, figmaVal, mismatches) {
+  const codeIsObj = codeVal && typeof codeVal === "object";
+  const figmaIsObj = figmaVal && typeof figmaVal === "object";
+  if (codeIsObj && figmaIsObj) {
+    const keys = new Set([...Object.keys(codeVal), ...Object.keys(figmaVal)]);
+    for (const k of keys) {
+      diffStyleValue(path ? `${path}.${k}` : k, codeVal[k], figmaVal[k], mismatches);
+    }
+    return;
+  }
+  if (typeof codeVal === "number" && typeof figmaVal === "number" && Math.abs(codeVal - figmaVal) < 0.001) return;
+  if (codeVal !== figmaVal) mismatches.push({ field: path, codeValue: codeVal, figmaValue: figmaVal });
+}
+
+function diffStyleCategory(category, codeStyles, figmaStyles, missingInCode, missingInFigma, valueMismatches) {
+  for (const [name, figmaVal] of Object.entries(figmaStyles)) {
+    if (!(name in codeStyles)) {
+      missingInCode.push({ category, style: name });
+      continue;
+    }
+    const mismatches = [];
+    diffStyleValue("", codeStyles[name], figmaVal, mismatches);
+    for (const m of mismatches) valueMismatches.push({ category, style: name, ...m });
+  }
+  for (const name of Object.keys(codeStyles)) {
+    if (!(name in figmaStyles)) missingInFigma.push({ category, style: name });
+  }
+}
+
+async function cmdCheckStyles(filePath, json) {
+  if (!filePath) return print(err("ERR_MISSING_ARG", { arg: "--file" }), json);
+  const resolvedFile = path.resolve(process.cwd(), filePath);
+  if (!existsSync(resolvedFile)) return print(err("ERR_FILE_NOT_FOUND", { path: resolvedFile }), json);
+
+  const figmaRaw = JSON.parse(readFileSync(resolvedFile, "utf-8"));
+  const stylesPath = path.join(TOKENS_DIR, "styles.json");
+  if (!existsSync(stylesPath)) return print(err("ERR_FILE_NOT_FOUND", { path: stylesPath }), json);
+  const codeStyles = JSON.parse(readFileSync(stylesPath, "utf-8"));
+
+  const missingInCode = [];
+  const missingInFigma = [];
+  const valueMismatches = [];
+
+  diffStyleCategory("text", codeStyles.text ?? {}, figmaRaw.text ?? {}, missingInCode, missingInFigma, valueMismatches);
+  diffStyleCategory("effect", codeStyles.effect ?? {}, figmaRaw.effect ?? {}, missingInCode, missingInFigma, valueMismatches);
+
+  const drift = missingInCode.length + missingInFigma.length + valueMismatches.length;
+  const result = {
+    type: "check-styles-result",
+    status: drift === 0 ? "in-sync" : "drift-detected",
+    driftCount: drift,
+    missingInCode,   // style exists in Figma, not recorded in styles.json
+    missingInFigma,  // style exists in styles.json, missing/renamed in Figma
+    valueMismatches, // same style, some field differs — likely edited on one side only
+  };
+  print(result, json);
+  if (drift > 0) process.exitCode = 1;
+}
+
 async function cmdCheckParity(name, json) {
   if (!name) return print(err("ERR_MISSING_ARG", { arg: "name" }), json);
   const doc = await loadDoc(name);
@@ -217,6 +280,11 @@ async function main() {
     }
     case "check-parity":
       return cmdCheckParity(positional[0], json);
+    case "check-styles": {
+      const fileFlagIdx = rest.indexOf("--file");
+      const filePath = fileFlagIdx >= 0 ? rest[fileFlagIdx + 1] : undefined;
+      return cmdCheckStyles(filePath, json);
+    }
     case "manifest":
       return cmdManifest(json);
     default:

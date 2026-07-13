@@ -19,6 +19,7 @@ node packages/cli/bin/latent.mjs manifest --json
 node packages/cli/bin/latent.mjs swizzle <Component> --dest ./out
 node packages/cli/bin/latent.mjs sync figma --file <export>.json --json
 node packages/cli/bin/latent.mjs check-parity <Component> --json
+node packages/cli/bin/latent.mjs check-styles --file <export>.json --json
 ```
 
 (also available as `npm run ds -- <command>`, via the `ds` script in `package.json`). There is no automated test suite — verify changes by running the relevant CLI command(s) above and checking the JSON output / exit code.
@@ -39,6 +40,7 @@ node packages/cli/bin/latent.mjs check-parity <Component> --json
   - `swizzle <name>` copies a component's source file (resolved from its `.doc.mjs`'s `swizzlePath`) out to a consumer's own tree (`--dest`, default `./swizzled`). Once a component has been swizzled, its `swizzlePath` and prop names are effectively a public API — changing them is a breaking change.
   - `sync figma --file <export.json>` diffs a flattened Figma export against flattened `tokens.json` and reports three drift categories: `missingInCode`, `missingInFigma`, `valueMismatches`. Exits non-zero on any drift (CI-gateable). `packages/tokens/figma-export.sample.json` has intentional drift (renamed key, changed value, missing key) for exercising this.
   - `check-parity <name>` reads a component's `figmaTokens` map and greps the compiled CSS for each expected `--lat-*` custom property, to catch a component silently drifting from its declared design spec.
+  - `check-styles --file <export.json>` is `sync figma`'s counterpart for Text/Effect Styles — diffs `packages/tokens/styles.json` (the source of truth, mirrored in human-readable form by `STYLES.md`) against a fresh Figma export, same three drift categories, non-zero exit on drift. Run it after any session that creates, edits, or renames a Text or Effect Style.
   - Error codes (`ERR_UNKNOWN_COMPONENT`, `ERR_UNKNOWN_COMMAND`, `ERR_MISSING_ARG`, `ERR_FILE_NOT_FOUND`, `ERR_NO_FIGMA_SPEC`) are typed and **append-only** — never remove or repurpose one once shipped, add a new one instead.
 
 ## Conventions
@@ -51,10 +53,14 @@ node packages/cli/bin/latent.mjs check-parity <Component> --json
 ## Figma Styles (Text/Effect) — check before building
 
 The Figma file (`Latent DS`) has a library of named Text Styles and Effect
-Styles — see **`STYLES.md`** for the full inventory with values and token
-bindings. These are a different Figma primitive from Variables: `sync figma`
-and `packages/tokens/*.json` don't track them at all, so nothing enforces
-their use automatically — the only enforcement is this instruction.
+Styles. `packages/tokens/styles.json` is their source of truth; `STYLES.md`
+is the human-readable view of the same data. These are a different Figma
+primitive from Variables — `sync figma` never touches them — so they have
+their own verification command:
+
+```
+node packages/cli/bin/latent.mjs check-styles --file <export>.json --json
+```
 
 **Before creating any text node or shadow/effect in a Figma build session**,
 pull the live style lists first —
@@ -66,7 +72,13 @@ const effectStyles = await figma.getLocalEffectStylesAsync();
 
 — and apply a matching existing style (`setTextStyleIdAsync` /
 `setEffectStyleIdAsync`) instead of hand-rolling the equivalent raw
-properties. Only create a new style when no existing one fits the role, and
-when you do, update `STYLES.md`'s tables in the same session — that file is
-what a future session (or you, after context resets) checks first instead of
-re-discovering the library from scratch by trial and error.
+properties. **If no existing style fits the role, stop and flag it to the
+user instead of creating a new style unilaterally** — describe the gap (what
+role/values you need) and let them decide whether it should become a new
+named style, reuse an adjacent one, or stay a one-off.
+
+**After any session that creates, edits, or renames a Text or Effect Style**:
+update `packages/tokens/styles.json` and `STYLES.md`'s tables in the same
+session, regenerate a fresh export (see `STYLES.md` for the pull script), and
+run `check-styles` against it — treat non-zero exit the same as `sync figma`
+drift: don't end the session with it unresolved.

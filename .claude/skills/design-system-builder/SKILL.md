@@ -42,6 +42,7 @@ node packages/cli/bin/latent.mjs list --json
 node packages/cli/bin/latent.mjs docs <Component> --json
 node packages/cli/bin/latent.mjs check-parity <Component> --json
 node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.sample.json --json
+node packages/cli/bin/latent.mjs check-styles --file packages/tokens/styles-export.live.json --json
 node packages/cli/bin/latent.mjs manifest --json
 ```
 
@@ -59,11 +60,16 @@ const effectStyles = await figma.getLocalEffectStylesAsync();
 
 Apply a matching existing style (`setTextStyleIdAsync` / `setEffectStyleIdAsync`)
 rather than recreating its `fontSize`/`fontWeight`/`lineHeight` or `effects`
-array by hand — see `STYLES.md` (repo root) for the full inventory with values
-and which token each style is bound to. `sync figma` never catches drift here;
-Text Styles and Effect Styles are a different Figma primitive from Variables
-and aren't covered by `packages/tokens/*.json` at all. If nothing existing
-fits and the role is reusable (not one-off page chrome), create the style,
+array by hand — see `STYLES.md` (repo root) for the full inventory, and
+`packages/tokens/styles.json` for its machine-checkable source of truth.
+`sync figma` never catches drift here — Text/Effect Styles are a different
+Figma primitive from Variables — which is exactly what `check-styles` is for
+(see the command above); run it after any session that touches the style
+library, same discipline as `sync figma` for tokens. If nothing existing
+fits, **stop and flag it to the user rather than creating a new style
+unilaterally** — describe the role/values you need and let them decide
+whether it's a new named style, an adjacent existing one, or a one-off
+(page chrome used once doesn't need a style at all). Once a style exists,
 bind its properties to tokens the same way the existing styles do, and update
 `STYLES.md`'s tables before ending the session — that file only stays useful
 if every session that changes the style library updates it in the same pass.

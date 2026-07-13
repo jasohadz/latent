@@ -1,41 +1,66 @@
 # STYLES.md
 
-Figma **Styles** (Text Styles, Effect Styles) used by the Latent DS file. This is
-documentation only — unlike `packages/tokens/*.json`, nothing here is enforced
-by `sync figma`. That CLI command only diffs Figma **Variables**; Text Styles
-and Effect Styles are a different Figma primitive entirely (compound objects —
-font+size+weight+line-height, or a stack of shadow layers — that don't fit the
-scalar FLOAT/COLOR/STRING token schema `flattenTokens` expects), so they're
-tracked here by hand instead.
+Figma **Styles** (Text Styles, Effect Styles) used by the Latent DS file.
 
-**This file can drift from Figma.** Before relying on it, re-pull live:
+**`packages/tokens/styles.json` is the source of truth** — this file is a
+human-readable summary of it. Unlike the scalar Variable token files
+(`primitives.json`, `semantic.json`, ...), which `sync figma` verifies,
+Text/Effect Styles are a *different* Figma primitive — compound objects
+(font+size+weight+line-height, or a stack of shadow layers) that don't fit
+`flattenTokens`' scalar-leaf model — so they get their own file and their own
+CLI command:
+
+```
+node packages/cli/bin/latent.mjs check-styles --file <export>.json --json
+```
+
+This diffs `packages/tokens/styles.json` against a fresh Figma pull, the same
+three-category report as `sync figma` (`missingInCode`, `missingInFigma`,
+`valueMismatches`), non-zero exit on drift. **Run it after any session that
+touches Text or Effect Styles** — same discipline as `sync figma` for
+Variables. To regenerate the export file, pull live from Figma and resolve
+variable IDs to names (raw IDs aren't stable/comparable across sessions):
 
 ```js
 // in a use_figma / figma_execute call
-const textStyles = await figma.getLocalTextStylesAsync();
-const effectStyles = await figma.getLocalEffectStylesAsync();
+async function resolveBoundVars(boundVariables) {
+  if (!boundVariables) return {};
+  const out = {};
+  for (const [field, alias] of Object.entries(boundVariables)) {
+    if (!alias?.id) continue;
+    const v = await figma.variables.getVariableByIdAsync(alias.id);
+    out[field] = v ? v.name : null;
+  }
+  return out;
+}
+// walk getLocalTextStylesAsync() / getLocalEffectStylesAsync(), resolving
+// each style's boundVariables the same way — see packages/tokens/styles.json
+// for the exact shape to match, then write the result to a file and run
+// check-styles against it.
 ```
 
-## Before building anything in Figma: check this file first
+## Before building anything in Figma: check first, flag gaps, don't invent
 
-Every text node and every shadow/effect in this file should use one of the
-named styles below via `setTextStyleIdAsync` / `setEffectStyleIdAsync` —
-**never** recreate the equivalent raw properties (`fontSize`, `fontWeight`,
-manual `effects` array) by hand when a matching named style already exists.
-That's exactly how the `font/style/eyebrow` gap happened: a style was built
-correctly in Figma but the discipline of "check first, reuse before creating"
-wasn't written down anywhere durable, so nothing forced a future session to
-notice or record it.
+Every text node and every shadow/effect should use one of the named styles
+below via `setTextStyleIdAsync` / `setEffectStyleIdAsync` — **never** recreate
+the equivalent raw properties (`fontSize`, `fontWeight`, a manual `effects`
+array) by hand when a matching named style already exists. That's exactly how
+the `font/style/eyebrow` gap happened: a style was built correctly in Figma
+but nothing durable required checking first or recording it, so it went
+unnoticed until an explicit audit caught it.
 
 **Workflow for any new Figma build in this file:**
-1. Pull the current style lists (script above) before creating text or shadows.
+1. Pull the current style lists (script above, or `figma_get_text_styles`)
+   before creating any text or shadow.
 2. If an existing style matches the role you need, apply it — don't hand-roll.
-3. If nothing fits, decide: is this a one-off (documentation-page chrome, like
-   a section label used once) or a reusable role? Reusable roles get a new
-   named style — create it, bind its `fontSize`/`lineHeight`/`fontWeight`/
-   `fontFamily` to the matching token per the pattern below, then re-run this
-   file's audit (see "Keeping this file honest") and update the tables here
-   in the same session.
+3. **If nothing fits, stop and flag it to the user instead of creating a new
+   style unilaterally.** Describe the role/values you need; let them decide
+   whether it becomes a new named style, an adjacent existing one, or stays a
+   one-off (page chrome used once doesn't need a style at all).
+4. If a style is created — by you after confirmation, or by the user directly
+   in Figma — update **both** `packages/tokens/styles.json` and this file's
+   tables in the same session, then run `check-styles` to confirm zero drift
+   before ending the turn.
 
 ## Text Styles
 
@@ -101,8 +126,7 @@ design systems don't tokenize this granularly.
 
 ## Keeping this file honest
 
-Whenever a Figma session in this file creates or renames a Text Style or
-Effect Style, update the relevant table above **in that same session** —
-don't defer it. If you're auditing for drift, re-run the pull script at the
-top of this file and diff the names/values against these tables by hand
-(there's no CLI command for this the way `sync figma` covers Variables).
+Whenever a Figma session creates or renames a Text Style or Effect Style,
+update **both** `packages/tokens/styles.json` and the tables above in that
+same session, then run `check-styles` against a fresh export to confirm zero
+drift before ending the turn — don't defer it.

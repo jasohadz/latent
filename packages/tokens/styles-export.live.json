@@ -1,0 +1,181 @@
+{
+  "text": {
+    "Special/Display": {
+      "fontName": { "family": "Geist", "style": "Bold" },
+      "lineHeight": { "unit": "PERCENT", "value": 120.00000476837158 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": { "fontSize": "font-size/display" }
+    },
+    "Special/Caption": {
+      "fontName": { "family": "Geist", "style": "Medium" },
+      "lineHeight": { "unit": "PERCENT", "value": 150 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": { "fontSize": "font-size/caption" }
+    },
+    "Special/Eyebrow": {
+      "fontName": { "family": "Geist Mono", "style": "Medium" },
+      "lineHeight": { "unit": "PIXELS", "value": 18 },
+      "letterSpacing": { "unit": "PERCENT", "value": 4 },
+      "textCase": "UPPER",
+      "boundVariables": {
+        "fontSize": "font/style/eyebrow",
+        "fontFamily": "typography/font-family/mono",
+        "lineHeight": "typography/line-height/100/normal",
+        "fontWeight": "typography/font-weight/500"
+      }
+    },
+    "Heading/H1": {
+      "fontName": { "family": "Geist", "style": "Bold" },
+      "lineHeight": { "unit": "PERCENT", "value": 120.00000476837158 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": { "fontSize": "font-size/h1" }
+    },
+    "Heading/H2": {
+      "fontName": { "family": "Geist", "style": "SemiBold" },
+      "lineHeight": { "unit": "PERCENT", "value": 120.00000476837158 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": { "fontSize": "font-size/h2" }
+    },
+    "Heading/H3": {
+      "fontName": { "family": "Geist", "style": "SemiBold" },
+      "lineHeight": { "unit": "PERCENT", "value": 120.00000476837158 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": { "fontSize": "font-size/h3" }
+    },
+    "Heading/H4": {
+      "fontName": { "family": "Geist", "style": "SemiBold" },
+      "lineHeight": { "unit": "PIXELS", "value": 36 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": { "lineHeight": "typography/line-height/600/normal", "fontSize": "font/style/h4" }
+    },
+    "Body/Large": {
+      "fontName": { "family": "Geist", "style": "Regular" },
+      "lineHeight": { "unit": "PIXELS", "value": 27 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": { "lineHeight": "typography/line-height/400/normal", "fontSize": "font/style/body-large" }
+    },
+    "Body/Default": {
+      "fontName": { "family": "Geist", "style": "Regular" },
+      "lineHeight": { "unit": "PERCENT", "value": 150 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": { "fontSize": "font-size/body" }
+    },
+    "Body/Small": {
+      "fontName": { "family": "Geist", "style": "Regular" },
+      "lineHeight": { "unit": "PIXELS", "value": 21 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": { "lineHeight": "typography/line-height/200/normal", "fontSize": "font/style/body-small" }
+    },
+    "Body/Large/SemiBold": {
+      "fontName": { "family": "Geist", "style": "SemiBold" },
+      "lineHeight": { "unit": "PIXELS", "value": 27 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": {
+        "fontSize": "font/style/body-large",
+        "fontFamily": "typography/font-family/sans",
+        "lineHeight": "typography/line-height/400/normal",
+        "fontWeight": "typography/font-weight/600"
+      }
+    },
+    "Body/Large/Bold": {
+      "fontName": { "family": "Geist", "style": "Bold" },
+      "lineHeight": { "unit": "PIXELS", "value": 27 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": {
+        "fontSize": "font/style/body-large",
+        "fontFamily": "typography/font-family/sans",
+        "lineHeight": "typography/line-height/400/normal",
+        "fontWeight": "typography/font-weight/700"
+      }
+    },
+    "Body/Default/SemiBold": {
+      "fontName": { "family": "Geist", "style": "SemiBold" },
+      "lineHeight": { "unit": "PIXELS", "value": 24 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": {
+        "fontSize": "font/style/body",
+        "fontFamily": "typography/font-family/sans",
+        "lineHeight": "typography/line-height/300/normal",
+        "fontWeight": "typography/font-weight/600"
+      }
+    },
+    "Body/Default/Bold": {
+      "fontName": { "family": "Geist", "style": "Bold" },
+      "lineHeight": { "unit": "PIXELS", "value": 24 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": {
+        "fontSize": "font/style/body",
+        "fontFamily": "typography/font-family/sans",
+        "lineHeight": "typography/line-height/300/normal",
+        "fontWeight": "typography/font-weight/700"
+      }
+    },
+    "Body/Small/SemiBold": {
+      "fontName": { "family": "Geist", "style": "SemiBold" },
+      "lineHeight": { "unit": "PIXELS", "value": 21 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": {
+        "fontSize": "font/style/body-small",
+        "fontFamily": "typography/font-family/sans",
+        "lineHeight": "typography/line-height/200/normal",
+        "fontWeight": "typography/font-weight/600"
+      }
+    },
+    "Body/Small/Bold": {
+      "fontName": { "family": "Geist", "style": "Bold" },
+      "lineHeight": { "unit": "PIXELS", "value": 21 },
+      "letterSpacing": { "unit": "PERCENT", "value": 0 },
+      "textCase": "ORIGINAL",
+      "boundVariables": {
+        "fontSize": "font/style/body-small",
+        "fontFamily": "typography/font-family/sans",
+        "lineHeight": "typography/line-height/200/normal",
+        "fontWeight": "typography/font-weight/700"
+      }
+    }
+  },
+  "effect": {
+    "Elevation/sm": {
+      "effects": [
+        { "type": "DROP_SHADOW", "offset": { "x": 0, "y": 1 }, "radius": 2, "spread": 0, "color": { "r": 0, "g": 0, "b": 0, "a": 0.05000000074505806 }, "blendMode": "NORMAL", "boundVariables": {} }
+      ]
+    },
+    "Elevation/md": {
+      "effects": [
+        { "type": "DROP_SHADOW", "offset": { "x": 0, "y": 4 }, "radius": 6, "spread": -1, "color": { "r": 0, "g": 0, "b": 0, "a": 0.10000000149011612 }, "blendMode": "NORMAL", "boundVariables": {} },
+        { "type": "DROP_SHADOW", "offset": { "x": 0, "y": 2 }, "radius": 4, "spread": -2, "color": { "r": 0, "g": 0, "b": 0, "a": 0.10000000149011612 }, "blendMode": "NORMAL", "boundVariables": {} }
+      ]
+    },
+    "Elevation/lg": {
+      "effects": [
+        { "type": "DROP_SHADOW", "offset": { "x": 0, "y": 10 }, "radius": 15, "spread": -3, "color": { "r": 0, "g": 0, "b": 0, "a": 0.10000000149011612 }, "blendMode": "NORMAL", "boundVariables": {} },
+        { "type": "DROP_SHADOW", "offset": { "x": 0, "y": 4 }, "radius": 6, "spread": -4, "color": { "r": 0, "g": 0, "b": 0, "a": 0.10000000149011612 }, "blendMode": "NORMAL", "boundVariables": {} }
+      ]
+    },
+    "Elevation/xl": {
+      "effects": [
+        { "type": "DROP_SHADOW", "offset": { "x": 0, "y": 20 }, "radius": 25, "spread": -5, "color": { "r": 0, "g": 0, "b": 0, "a": 0.10000000149011612 }, "blendMode": "NORMAL", "boundVariables": {} },
+        { "type": "DROP_SHADOW", "offset": { "x": 0, "y": 8 }, "radius": 10, "spread": -6, "color": { "r": 0, "g": 0, "b": 0, "a": 0.10000000149011612 }, "blendMode": "NORMAL", "boundVariables": {} }
+      ]
+    },
+    "Elevation/2xl": {
+      "effects": [
+        { "type": "DROP_SHADOW", "offset": { "x": 0, "y": 25 }, "radius": 50, "spread": -12, "color": { "r": 0, "g": 0, "b": 0, "a": 0.25 }, "blendMode": "NORMAL", "boundVariables": {} }
+      ]
+    }
+  }
+}
