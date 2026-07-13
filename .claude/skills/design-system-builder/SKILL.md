@@ -47,6 +47,27 @@ node packages/cli/bin/latent.mjs manifest --json
 
 `check-parity` only checks components that declare `figmaTokens` in their `.doc.mjs` — if it reports `ERR_NO_FIGMA_SPEC`, the mapping is missing, not the CSS.
 
+## Reusing Figma Text/Effect Styles
+
+Before creating any text node or shadow/effect on any Figma page in this
+file, pull the current style libraries first:
+
+```js
+const textStyles = await figma.getLocalTextStylesAsync();
+const effectStyles = await figma.getLocalEffectStylesAsync();
+```
+
+Apply a matching existing style (`setTextStyleIdAsync` / `setEffectStyleIdAsync`)
+rather than recreating its `fontSize`/`fontWeight`/`lineHeight` or `effects`
+array by hand — see `STYLES.md` (repo root) for the full inventory with values
+and which token each style is bound to. `sync figma` never catches drift here;
+Text Styles and Effect Styles are a different Figma primitive from Variables
+and aren't covered by `packages/tokens/*.json` at all. If nothing existing
+fits and the role is reusable (not one-off page chrome), create the style,
+bind its properties to tokens the same way the existing styles do, and update
+`STYLES.md`'s tables before ending the session — that file only stays useful
+if every session that changes the style library updates it in the same pass.
+
 ## Boundaries to respect
 
 - Templates (Phase 4) stay separate from app-shell/nav components — a template composes a shared layout primitive with header/content/panel slots, nothing more.

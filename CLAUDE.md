@@ -47,3 +47,26 @@ node packages/cli/bin/latent.mjs check-parity <Component> --json
 - Don't hardcode colors/spacing in component CSS — add or reuse a `--lat-*` custom property instead.
 - Keep templates (Phase 4) separate from app-shell/nav components.
 - Don't publish `packages/core`, `packages/theme-neutral`, or `packages/cli` as real npm packages until the API stabilizes (per `GUIDE.md`) — swizzle paths and prop names become breaking changes for anyone who's already forked.
+
+## Figma Styles (Text/Effect) — check before building
+
+The Figma file (`Latent DS`) has a library of named Text Styles and Effect
+Styles — see **`STYLES.md`** for the full inventory with values and token
+bindings. These are a different Figma primitive from Variables: `sync figma`
+and `packages/tokens/*.json` don't track them at all, so nothing enforces
+their use automatically — the only enforcement is this instruction.
+
+**Before creating any text node or shadow/effect in a Figma build session**,
+pull the live style lists first —
+
+```js
+const textStyles = await figma.getLocalTextStylesAsync();
+const effectStyles = await figma.getLocalEffectStylesAsync();
+```
+
+— and apply a matching existing style (`setTextStyleIdAsync` /
+`setEffectStyleIdAsync`) instead of hand-rolling the equivalent raw
+properties. Only create a new style when no existing one fits the role, and
+when you do, update `STYLES.md`'s tables in the same session — that file is
+what a future session (or you, after context resets) checks first instead of
+re-discovering the library from scratch by trial and error.
