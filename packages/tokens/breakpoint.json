@@ -42,5 +42,28 @@
         "desktop": "{typography.font-size.200}"
       }
     }
+  },
+  "spacing": {
+    "page-margin": {
+      "value": {
+        "mobile": "{dimensions.20}",
+        "tablet": "{dimensions.40}",
+        "desktop": "{dimensions.96}"
+      }
+    },
+    "section-gap": {
+      "value": {
+        "mobile": "{dimensions.32}",
+        "tablet": "{dimensions.56}",
+        "desktop": "{dimensions.80}"
+      }
+    },
+    "stack-gap": {
+      "value": {
+        "mobile": "{dimensions.16}",
+        "tablet": "{dimensions.24}",
+        "desktop": "{dimensions.32}"
+      }
+    }
   }
 }

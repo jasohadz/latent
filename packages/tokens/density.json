@@ -3,175 +3,175 @@
     "0": {
       "value": {
         "default": "{dimensions.0}",
-        "condensed": 0
+        "condensed": "{dimensions.0}"
       }
     },
     "2": {
       "value": {
         "default": "{dimensions.2}",
-        "condensed": 2
+        "condensed": "{dimensions.2}"
       }
     },
     "4": {
       "value": {
         "default": "{dimensions.4}",
-        "condensed": 4
+        "condensed": "{dimensions.4}"
       }
     },
     "6": {
       "value": {
         "default": "{dimensions.6}",
-        "condensed": 4
+        "condensed": "{dimensions.4}"
       }
     },
     "8": {
       "value": {
         "default": "{dimensions.8}",
-        "condensed": 6
+        "condensed": "{dimensions.6}"
       }
     },
     "10": {
       "value": {
         "default": "{dimensions.10}",
-        "condensed": 8
+        "condensed": "{dimensions.8}"
       }
     },
     "12": {
       "value": {
         "default": "{dimensions.12}",
-        "condensed": 10
+        "condensed": "{dimensions.10}"
       }
     },
     "14": {
       "value": {
         "default": "{dimensions.14}",
-        "condensed": 10
+        "condensed": "{dimensions.10}"
       }
     },
     "16": {
       "value": {
         "default": "{dimensions.16}",
-        "condensed": 12
+        "condensed": "{dimensions.12}"
       }
     },
     "20": {
       "value": {
         "default": "{dimensions.20}",
-        "condensed": 16
+        "condensed": "{dimensions.16}"
       }
     },
     "24": {
       "value": {
         "default": "{dimensions.24}",
-        "condensed": 18
+        "condensed": "{dimensions.18}"
       }
     },
     "28": {
       "value": {
         "default": "{dimensions.28}",
-        "condensed": 22
+        "condensed": "{dimensions.22}"
       }
     },
     "32": {
       "value": {
         "default": "{dimensions.32}",
-        "condensed": 24
+        "condensed": "{dimensions.24}"
       }
     },
     "36": {
       "value": {
         "default": "{dimensions.36}",
-        "condensed": 28
+        "condensed": "{dimensions.28}"
       }
     },
     "40": {
       "value": {
         "default": "{dimensions.40}",
-        "condensed": 30
+        "condensed": "{dimensions.30}"
       }
     },
     "44": {
       "value": {
         "default": "{dimensions.44}",
-        "condensed": 34
+        "condensed": "{dimensions.34}"
       }
     },
     "48": {
       "value": {
         "default": "{dimensions.48}",
-        "condensed": 36
+        "condensed": "{dimensions.36}"
       }
     },
     "56": {
       "value": {
         "default": "{dimensions.56}",
-        "condensed": 42
+        "condensed": "{dimensions.42}"
       }
     },
     "64": {
       "value": {
         "default": "{dimensions.64}",
-        "condensed": 48
+        "condensed": "{dimensions.48}"
       }
     },
     "72": {
       "value": {
         "default": "{dimensions.72}",
-        "condensed": 54
+        "condensed": "{dimensions.54}"
       }
     },
     "80": {
       "value": {
         "default": "{dimensions.80}",
-        "condensed": 60
+        "condensed": "{dimensions.60}"
       }
     },
     "88": {
       "value": {
         "default": "{dimensions.88}",
-        "condensed": 66
+        "condensed": "{dimensions.66}"
       }
     },
     "96": {
       "value": {
         "default": "{dimensions.96}",
-        "condensed": 72
+        "condensed": "{dimensions.72}"
       }
     },
     "104": {
       "value": {
         "default": "{dimensions.104}",
-        "condensed": 78
+        "condensed": "{dimensions.78}"
       }
     },
     "112": {
       "value": {
         "default": "{dimensions.112}",
-        "condensed": 84
+        "condensed": "{dimensions.84}"
       }
     },
     "120": {
       "value": {
         "default": "{dimensions.120}",
-        "condensed": 90
+        "condensed": "{dimensions.90}"
       }
     },
     "128": {
       "value": {
         "default": "{dimensions.128}",
-        "condensed": 96
+        "condensed": "{dimensions.96}"
       }
     },
     "144": {
       "value": {
         "default": "{dimensions.144}",
-        "condensed": 108
+        "condensed": "{dimensions.108}"
       }
     },
     "160": {
       "value": {
         "default": "{dimensions.160}",
-        "condensed": 120
+        "condensed": "{dimensions.120}"
       }
     }
   },
