@@ -52,6 +52,28 @@ connection required, and guaranteed self-consistent by the hook. This is
 the payoff: the repo is now a portable source of truth any agent can trust
 without needing Figma access at all.
 
+## 5. Editing or adding components
+
+If a brand needs more than a token rebrand — a new component, or changes to
+`packages/core/src/*.tsx`/`.css` — the same rule from `CLAUDE.md` applies
+with zero exceptions: **every color, spacing, radius, and font value in a
+component's CSS must be a `var(--lat-*)` reference, never a raw literal.**
+A hardcoded `#2563eb` or `16px` in a component's stylesheet is invisible to
+`sync figma`, `check-styles`, and the pre-commit hook — none of them read
+component CSS — so it won't get caught by anything built so far. If the
+token you need doesn't exist yet, add it to the primitives/semantic layer
+first (through the Figma sync workflow in step 3), then reference it —
+don't invent a one-off value to unblock yourself.
+
+`check-parity <Component>` (see `GUIDE.md` / the `design-system-builder`
+skill) verifies that a component's *declared* `figmaTokens` mapping is
+actually present in its compiled CSS — useful, but it only checks tokens
+the component's `.doc.mjs` already claims to use. It won't catch a raw
+value on a property nobody declared. Closing that gap for real would mean
+a CSS scanner (flag hex colors / raw px outside `var()`) wired into
+`check-parity` or the pre-commit hook — not built yet; flagging it here
+rather than pretending "note: don't do it" is sufficient enforcement.
+
 ## The gap: nothing detects "Figma changed and nobody re-synced"
 
 Be direct with yourself about this one. The pre-commit hook and the
