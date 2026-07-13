@@ -1,0 +1,60 @@
+#!/bin/sh
+# Blocks a commit if it touches token/style source files and those files
+# are internally inconsistent with their Figma export (sync figma /
+# check-styles report drift). Doesn't talk to Figma itself — it can only
+# verify the repo agrees with whatever the export files already contain.
+# If Figma changed and nobody re-pulled, this hook won't catch that; see
+# CLAUDE.md's "Figma Styles" section for the agent-driven pull step that
+# keeps the export files themselves fresh.
+#
+# Installed automatically via `npm install` (see package.json's postinstall,
+# which runs `git config core.hooksPath .githooks`). Works for any commit
+# regardless of what tool/agent authored it — this is a git hook, not an
+# editor or agent-specific mechanism.
+
+CHANGED=$(git diff --cached --name-only --diff-filter=ACMR)
+TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/tokens/|^STYLES\.md$')
+
+if [ -z "$TOUCHED" ]; then
+  exit 0
+fi
+
+echo "latent: token/style files changed — verifying sync before commit..."
+FAIL=0
+
+json_status() {
+  node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).status)}catch(e){console.log('parse-error')}})"
+}
+
+if [ -f packages/tokens/figma-export.live.json ]; then
+  SYNC_OUT=$(node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.live.json --json)
+  SYNC_STATUS=$(printf '%s' "$SYNC_OUT" | json_status)
+  if [ "$SYNC_STATUS" != "in-sync" ]; then
+    echo ""
+    echo "BLOCKED (sync figma): drift against packages/tokens/figma-export.live.json"
+    echo "$SYNC_OUT"
+    FAIL=1
+  fi
+fi
+
+if [ -f packages/tokens/styles-export.live.json ]; then
+  STYLES_OUT=$(node packages/cli/bin/latent.mjs check-styles --file packages/tokens/styles-export.live.json --json)
+  STYLES_STATUS=$(printf '%s' "$STYLES_OUT" | json_status)
+  if [ "$STYLES_STATUS" != "in-sync" ]; then
+    echo ""
+    echo "BLOCKED (check-styles): drift against packages/tokens/styles-export.live.json"
+    echo "$STYLES_OUT"
+    FAIL=1
+  fi
+fi
+
+if [ "$FAIL" = "1" ]; then
+  echo ""
+  echo "Commit blocked. Either fix the drift above, or if the *.live.json"
+  echo "export files are themselves stale (Figma changed and nobody"
+  echo "re-pulled), regenerate them first, then retry the commit."
+  exit 1
+fi
+
+echo "latent: sync check passed."
+exit 0
