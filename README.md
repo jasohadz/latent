@@ -5,7 +5,9 @@
 Working proof-of-concept, verified by actually running every CLI command
 (see the commands below — all tested, including the error path).
 
-See [GUIDE.md](./GUIDE.md) for the full phase-by-phase build order.
+See [GUIDE.md](./GUIDE.md) for the full phase-by-phase build order, or
+[HOW-TO.md](./HOW-TO.md) if you're adopting this for your own brand —
+clone → rebrand in Figma → sync into the repo → build with agents.
 
 
 ## What's here
