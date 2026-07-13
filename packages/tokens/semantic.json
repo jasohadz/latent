@@ -826,6 +826,12 @@
           "light": "{typography.font-size.400}",
           "dark": "{typography.font-size.400}"
         }
+      },
+      "eyebrow": {
+        "value": {
+          "light": "{typography.font-size.100}",
+          "dark": "{typography.font-size.100}"
+        }
       }
     }
   },
