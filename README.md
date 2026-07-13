@@ -1,6 +1,6 @@
 <img width="300" height="155" alt="og-image-pattern" src="https://github.com/user-attachments/assets/3141a38d-366e-4a28-8feb-0ba4ab5dc3c1" />
 
-# Latent — a remix on the Astryx design system pattern
+# Latent
 
 Working proof-of-concept, verified by actually running every CLI command
 (see the commands below — all tested, including the error path).
