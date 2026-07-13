@@ -9,6 +9,10 @@ See [GUIDE.md](./GUIDE.md) for the full phase-by-phase build order, or
 [HOW-TO.md](./HOW-TO.md) if you're adopting this for your own brand —
 clone → rebrand in Figma → sync into the repo → build with agents.
 
+If you're a designer building components (not the CLI/schema itself),
+start with [DESIGNER-CHECKLIST.md](./DESIGNER-CHECKLIST.md) — a plain-language,
+step-by-step guide with no assumed technical background.
+
 
 ## What's here
 
