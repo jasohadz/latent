@@ -5,12 +5,6 @@ import "./Icon.css";
 export type IconSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type IconWeight = "light" | "regular" | "bold";
 
-const WEIGHT_STROKE: Record<IconWeight, number> = {
-  light: 1.5,
-  regular: 2,
-  bold: 2.5,
-};
-
 export interface IconProps extends React.SVGAttributes<SVGSVGElement> {
   /** Icon name in kebab-case, matching Lucide's own naming (e.g. "arrow-up", "trash-2"). */
   name: string;
@@ -28,8 +22,9 @@ function toPascalCase(kebab: string): string {
 
 /**
  * Icon — thin wrapper around lucide-react. Size comes from --lat-sizing-icon-*
- * custom properties; color is inherited via currentColor (set on an ancestor,
- * or override --lat-color-icon-* through a className) — never hardcode a fill.
+ * and weight from --lat-stroke-width-* custom properties; color is inherited
+ * via currentColor (set on an ancestor, or override --lat-color-icon-*
+ * through a className) — never hardcode a fill or stroke width.
  */
 export const Icon = React.forwardRef<SVGSVGElement, IconProps>(
   ({ name, size = "md", weight = "regular", className, ...rest }, ref) => {
@@ -42,11 +37,11 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(
       return null;
     }
 
-    const classes = ["lat-icon", `lat-icon--${size}`, className].filter(Boolean).join(" ");
+    const classes = ["lat-icon", `lat-icon--${size}`, `lat-icon--weight-${weight}`, className]
+      .filter(Boolean)
+      .join(" ");
 
-    return (
-      <LucideIcon ref={ref} className={classes} strokeWidth={WEIGHT_STROKE[weight]} {...rest} />
-    );
+    return <LucideIcon ref={ref} className={classes} {...rest} />;
   }
 );
 

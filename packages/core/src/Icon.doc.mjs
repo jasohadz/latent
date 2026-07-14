@@ -18,5 +18,8 @@ export default {
   figmaTokens: {
     "width/height (md)": "sizing.icon.md",
     "color (default)": "color.icon.default",
+    "stroke-width (light)": "stroke-width.light",
+    "stroke-width (regular)": "stroke-width.regular",
+    "stroke-width (bold)": "stroke-width.bold",
   },
 };

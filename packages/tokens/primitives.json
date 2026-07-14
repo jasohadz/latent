@@ -49,6 +49,11 @@
       "300": 32
     }
   },
+  "stroke-width": {
+    "light": 1.5,
+    "regular": 2,
+    "bold": 2.5
+  },
   "opacity": {
     "0": 0,
     "5": 0.05,

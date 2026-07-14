@@ -27,3 +27,15 @@
   width: var(--lat-sizing-icon-xl);
   height: var(--lat-sizing-icon-xl);
 }
+
+.lat-icon--weight-light {
+  stroke-width: var(--lat-stroke-width-light);
+}
+
+.lat-icon--weight-regular {
+  stroke-width: var(--lat-stroke-width-regular);
+}
+
+.lat-icon--weight-bold {
+  stroke-width: var(--lat-stroke-width-bold);
+}

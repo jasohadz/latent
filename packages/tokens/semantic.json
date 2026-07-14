@@ -1039,6 +1039,26 @@
       }
     }
   },
+  "stroke-width": {
+    "light": {
+      "value": {
+        "light": "{stroke-width.light}",
+        "dark": "{stroke-width.light}"
+      }
+    },
+    "regular": {
+      "value": {
+        "light": "{stroke-width.regular}",
+        "dark": "{stroke-width.regular}"
+      }
+    },
+    "bold": {
+      "value": {
+        "light": "{stroke-width.bold}",
+        "dark": "{stroke-width.bold}"
+      }
+    }
+  },
   "sizing-border": {
     "thin": {
       "value": {

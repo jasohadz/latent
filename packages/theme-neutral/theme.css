@@ -35,6 +35,9 @@
   --lat-primitive-grid-margin-100: 16px;
   --lat-primitive-grid-margin-200: 24px;
   --lat-primitive-grid-margin-300: 32px;
+  --lat-primitive-stroke-width-light: 1.5px;
+  --lat-primitive-stroke-width-regular: 2px;
+  --lat-primitive-stroke-width-bold: 2.5px;
   --lat-primitive-opacity-0: 0;
   --lat-primitive-opacity-5: 0.05;
   --lat-primitive-opacity-10: 0.1;
@@ -532,6 +535,9 @@
   --lat-sizing-border-default: var(--lat-primitive-border-width-200);
   --lat-sizing-border-thick: var(--lat-primitive-border-width-400);
   --lat-sizing-border-heavy: var(--lat-primitive-border-width-800);
+  --lat-stroke-width-light: var(--lat-primitive-stroke-width-light);
+  --lat-stroke-width-regular: var(--lat-primitive-stroke-width-regular);
+  --lat-stroke-width-bold: var(--lat-primitive-stroke-width-bold);
   --lat-spacing-0: var(--lat-primitive-dimensions-0);
   --lat-spacing-2: var(--lat-primitive-dimensions-2);
   --lat-spacing-4: var(--lat-primitive-dimensions-4);
