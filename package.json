@@ -5,5 +5,8 @@
   "scripts": {
     "ds": "node packages/cli/bin/latent.mjs",
     "postinstall": "git config core.hooksPath .githooks"
+  },
+  "dependencies": {
+    "lucide-react": "^1.24.0"
   }
 }

@@ -1,0 +1,29 @@
+.lat-icon {
+  color: var(--lat-color-icon-default);
+  flex-shrink: 0;
+}
+
+.lat-icon--xs {
+  width: var(--lat-sizing-icon-xs);
+  height: var(--lat-sizing-icon-xs);
+}
+
+.lat-icon--sm {
+  width: var(--lat-sizing-icon-sm);
+  height: var(--lat-sizing-icon-sm);
+}
+
+.lat-icon--md {
+  width: var(--lat-sizing-icon-md);
+  height: var(--lat-sizing-icon-md);
+}
+
+.lat-icon--lg {
+  width: var(--lat-sizing-icon-lg);
+  height: var(--lat-sizing-icon-lg);
+}
+
+.lat-icon--xl {
+  width: var(--lat-sizing-icon-xl);
+  height: var(--lat-sizing-icon-xl);
+}
