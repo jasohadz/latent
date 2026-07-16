@@ -2118,8 +2118,8 @@
           },
           "md": {
             "value": {
-              "default": "{typography.font-size.400}",
-              "condensed": "{typography.font-size.300}"
+              "default": "{typography.font-size.300}",
+              "condensed": "{typography.font-size.200}"
             }
           }
         },
@@ -2132,8 +2132,8 @@
           },
           "md": {
             "value": {
-              "default": "{typography.line-height.400.normal}",
-              "condensed": "{typography.line-height.300.tight}"
+              "default": "{typography.line-height.300.normal}",
+              "condensed": "{typography.line-height.200.tight}"
             }
           }
         }

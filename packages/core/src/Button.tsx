@@ -9,6 +9,8 @@ export interface ButtonProps
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
+  /** Optional trailing icon, e.g. `<Icon name="chevron-right" size="xs" />`. Omit for no icon. */
+  icon?: React.ReactNode;
 }
 
 /**
@@ -18,7 +20,7 @@ export interface ButtonProps
  */
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { variant = "primary", size = "md", isLoading = false, className, children, disabled, ...rest },
+    { variant = "primary", size = "md", isLoading = false, icon, className, children, disabled, ...rest },
     ref
   ) => {
     const classes = [
@@ -39,7 +41,25 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={isLoading || undefined}
         {...rest}
       >
-        {children}
+        {isLoading ? (
+          <>
+            <span className="lat-button__visually-hidden">{children}</span>
+            <span className="lat-button__spinner" aria-hidden="true">
+              <span className="lat-button__spinner-dot" />
+              <span className="lat-button__spinner-dot" />
+              <span className="lat-button__spinner-dot" />
+            </span>
+          </>
+        ) : (
+          <>
+            {children}
+            {icon ? (
+              <span className="lat-button__icon" aria-hidden="true">
+                {icon}
+              </span>
+            ) : null}
+          </>
+        )}
       </button>
     );
   }

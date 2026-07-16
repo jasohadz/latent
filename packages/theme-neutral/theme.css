@@ -535,6 +535,12 @@
   --lat-sizing-border-default: var(--lat-primitive-border-width-200);
   --lat-sizing-border-thick: var(--lat-primitive-border-width-400);
   --lat-sizing-border-heavy: var(--lat-primitive-border-width-800);
+  /* Not part of the primitives/semantic/density pipeline — measured off the
+     Button focus-ring layer in Figma (46:41), which can't be variable-bound
+     because the Plugin API's VariableBindableNodeField doesn't include x/y
+     position. Fixed across theme and density: a focus ring's offset from
+     the element it outlines is an a11y distance, not a compressible spacing value. */
+  --lat-sizing-focus-ring-offset: 3px;
   --lat-stroke-width-light: var(--lat-primitive-stroke-width-light);
   --lat-stroke-width-regular: var(--lat-primitive-stroke-width-regular);
   --lat-stroke-width-bold: var(--lat-primitive-stroke-width-bold);
@@ -625,9 +631,9 @@
   --lat-typography-input-hint-line-height-sm: var(--lat-primitive-typography-line-height-100-normal);
   --lat-typography-input-hint-line-height-md: var(--lat-primitive-typography-line-height-200-normal);
   --lat-typography-button-font-size-sm: var(--lat-primitive-typography-font-size-300);
-  --lat-typography-button-font-size-md: var(--lat-primitive-typography-font-size-400);
+  --lat-typography-button-font-size-md: var(--lat-primitive-typography-font-size-300);
   --lat-typography-button-line-height-sm: var(--lat-primitive-typography-line-height-300-normal);
-  --lat-typography-button-line-height-md: var(--lat-primitive-typography-line-height-400-normal);
+  --lat-typography-button-line-height-md: var(--lat-primitive-typography-line-height-300-normal);
   --lat-sizing-action-xs: var(--lat-primitive-dimensions-28);
   --lat-sizing-action-sm: var(--lat-primitive-dimensions-32);
   --lat-sizing-action-md: var(--lat-primitive-dimensions-36);
@@ -741,9 +747,9 @@
   --lat-typography-input-hint-line-height-sm: var(--lat-primitive-typography-line-height-100-tight);
   --lat-typography-input-hint-line-height-md: var(--lat-primitive-typography-line-height-100-tight);
   --lat-typography-button-font-size-sm: var(--lat-primitive-typography-font-size-200);
-  --lat-typography-button-font-size-md: var(--lat-primitive-typography-font-size-300);
+  --lat-typography-button-font-size-md: var(--lat-primitive-typography-font-size-200);
   --lat-typography-button-line-height-sm: var(--lat-primitive-typography-line-height-200-tight);
-  --lat-typography-button-line-height-md: var(--lat-primitive-typography-line-height-300-tight);
+  --lat-typography-button-line-height-md: var(--lat-primitive-typography-line-height-200-tight);
   --lat-sizing-action-xs: var(--lat-primitive-dimensions-24);
   --lat-sizing-action-sm: var(--lat-primitive-dimensions-28);
   --lat-sizing-action-md: var(--lat-primitive-dimensions-32);
