@@ -13,6 +13,9 @@ If you're a designer building components (not the CLI/schema itself),
 start with [DESIGNER-CHECKLIST.md](./DESIGNER-CHECKLIST.md) — a plain-language,
 step-by-step guide with no assumed technical background.
 
+See [NAMING-CONVENTIONS.md](./NAMING-CONVENTIONS.md) for how Figma
+layers and properties should be named so they map predictably to code.
+
 
 ## What's here
 
