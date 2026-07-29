@@ -1,0 +1,123 @@
+.lat-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--lat-color-surface-raised);
+  border: 1px solid var(--lat-color-border-subtle);
+  border-radius: var(--lat-radius-card);
+  box-shadow: var(--lat-elevation-sm);
+  overflow: hidden;
+}
+
+.lat-card--media-left,
+.lat-card--media-right {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.lat-card__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lat-spacing-16);
+  padding: var(--lat-spacing-32);
+}
+
+.lat-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--lat-spacing-12);
+  background-color: var(--lat-color-background-muted);
+  border-radius: var(--lat-radius-lg);
+  color: var(--lat-color-icon-default);
+}
+
+.lat-card__eyebrow {
+  color: var(--lat-color-text-tertiary);
+  font-family: var(--lat-font-family-mono);
+  font-size: var(--lat-font-style-eyebrow);
+  font-weight: var(--lat-font-weight-500);
+  line-height: var(--lat-font-line-height-100-normal);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lat-card__title {
+  color: var(--lat-color-text-primary);
+  font-size: var(--lat-font-style-h4);
+  line-height: var(--lat-font-line-height-600-normal);
+  font-weight: var(--lat-font-weight-600);
+}
+
+.lat-card__body {
+  color: var(--lat-color-text-secondary);
+  font-size: var(--lat-font-style-body);
+}
+
+.lat-card__media-image--top {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.lat-card__media-image--side {
+  flex: 1 1 0;
+  object-fit: cover;
+}
+
+/* Image Overlay layouts */
+.lat-card--image-overlay {
+  width: 360px;
+  height: 440px;
+}
+.lat-card--image-overlay-horizontal {
+  width: 640px;
+  height: 280px;
+}
+
+.lat-card__overlay-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lat-card__blur-stack {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+.lat-card__blur-stack--horizontal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: row;
+}
+.lat-card__blur-band {
+  flex: 1 1 0;
+}
+
+.lat-card__overlay-content {
+  position: relative;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lat-spacing-16);
+  padding: var(--lat-spacing-32);
+}
+.lat-card--image-overlay-horizontal .lat-card__overlay-content {
+  margin-top: 0;
+  margin-right: auto;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.lat-card__eyebrow--inverse,
+.lat-card__title--inverse,
+.lat-card__body--inverse {
+  color: var(--lat-color-text-inverse);
+}

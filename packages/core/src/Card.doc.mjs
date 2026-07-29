@@ -1,0 +1,53 @@
+export default {
+  name: "Card",
+  summary: "Flexible content container. 6 layout variants share one set of boolean and text properties.",
+  props: [
+    { name: "layout", type: '"content" | "media" | "media-left" | "media-right" | "image-overlay" | "image-overlay-horizontal"', default: "content", description: "content has no media. media puts a full-width image above the content block. media-left/media-right put it beside the block. image-overlay(-horizontal) are full-bleed image cards with a progressive-blur text scrim." },
+    { name: "showIcon", type: "boolean", default: "true", description: "Has no effect on the two image-overlay layouts, which have no icon badge." },
+    { name: "showEyebrow", type: "boolean", default: "true" },
+    { name: "showAction", type: "boolean", default: "true" },
+    { name: "icon", type: "React.ReactNode", default: "undefined", description: "e.g. <Icon name=\"sparkles\" />, shown inside the icon badge." },
+    { name: "eyebrowText", type: "string", default: '"OVERLINE"' },
+    { name: "title", type: "string", default: '"Get started with Latent"' },
+    { name: "body", type: "string", default: "—" },
+    { name: "ctaLabel", type: "string", default: '"Get started"' },
+    { name: "onCtaClick", type: "() => void", default: "undefined" },
+    { name: "imageSrc", type: "string", default: "undefined", description: "Required for media/media-left/media-right/image-overlay* layouts." },
+    { name: "imageAlt", type: "string", default: '""' },
+  ],
+  example: `<Card layout="media" imageSrc="/hero.jpg" title="Ship faster" body="..." ctaLabel="Learn more" />`,
+  doNot: [
+    "Don't use image-overlay layouts without imageSrc — there's no fallback background, so the progressive-blur scrim would render over nothing.",
+    "Don't expect exact 1:1 parity on the progressive blur — Figma uses 5 fixed bands (2–30px blur, 6%–62% tint); this is a CSS approximation of the same technique, not a pixel-identical port.",
+  ],
+  swizzlePath: "packages/core/src/Card.tsx",
+  // CTA reuses the real Button component, but Figma's CTA uses
+  // appearance=outline (blue border, link-colored text) which has no
+  // equivalent in code's Button (only primary/secondary exist) —
+  // "secondary" is the closest existing option, not an exact match.
+  // Flagged, not fixed here (would mean adding a variant to Button).
+  figmaTokens: {
+    "surface background": "color.surface.raised",
+    "surface border": "color.border.subtle",
+    "surface border-radius": "radius.card",
+    "surface shadow": "elevation.sm",
+    "content padding/gap": "spacing.32",
+    "content gap (items)": "spacing.16",
+    "icon badge padding": "spacing.12",
+    "icon badge background": "color.background.muted",
+    "icon badge border-radius": "radius.lg",
+    "icon color": "color.icon.default",
+    "eyebrow color": "color.text.tertiary",
+    "eyebrow font-family": "font-family.mono",
+    "eyebrow font-size": "font-style.eyebrow",
+    "eyebrow font-weight": "font-weight.500",
+    "eyebrow line-height": "font-line-height.100-normal",
+    "title color": "color.text.primary",
+    "title font-size": "font-style.h4",
+    "title line-height": "font-line-height.600-normal",
+    "title font-weight": "font-weight.600",
+    "body color": "color.text.secondary",
+    "body font-size": "font-style.body",
+    "overlay text color": "color.text.inverse",
+  },
+};
