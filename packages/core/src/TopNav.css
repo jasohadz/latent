@@ -1,0 +1,50 @@
+.lat-top-nav {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-8);
+}
+
+.lat-top-nav__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--lat-spacing-24);
+  padding: var(--lat-spacing-8) var(--lat-spacing-16);
+  border-radius: var(--lat-radius-lg);
+  border: 1px solid var(--lat-color-border-subtle);
+  /* Glass effect: same 72%-opacity + blur technique Card's Image Overlay
+     uses, applied flat rather than as a progressive ramp. */
+  background-color: color-mix(in srgb, var(--lat-color-surface-raised) 72%, transparent);
+  backdrop-filter: blur(20px);
+}
+
+.lat-top-nav__nav-row {
+  display: flex;
+  align-items: center;
+  gap: var(--lat-spacing-24);
+  flex: 1 1 auto;
+}
+
+.lat-top-nav__panel {
+  padding: var(--lat-spacing-12);
+  background-color: var(--lat-color-surface-raised);
+  border: 1px solid var(--lat-color-border-subtle);
+  border-radius: var(--lat-radius-card);
+  box-shadow: var(--lat-elevation-md);
+}
+
+.lat-top-nav__panel--grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--lat-spacing-4);
+}
+
+.lat-top-nav__panel--download {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-4);
+}
+
+.lat-top-nav__panel-row {
+  display: flex;
+  gap: var(--lat-spacing-4);
+}

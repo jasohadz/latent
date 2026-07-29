@@ -1,0 +1,32 @@
+export default {
+  name: "TopNav",
+  summary: "A floating glass top navigation bar with mega-menu dropdowns for Product and Download.",
+  props: [
+    { name: "menu", type: '"none" | "product" | "download"', default: "none" },
+    { name: "onMenuChange", type: "(menu: TopNavMenu) => void", default: "undefined" },
+    { name: "logo", type: "React.ReactNode", default: "undefined", description: "Latent's own logo mark isn't a ported component — supply your own brand icon." },
+    { name: "ctaLabel", type: "string", default: '"Free Trial"' },
+    { name: "onCtaClick", type: "() => void", default: "undefined" },
+    { name: "productItems", type: "Omit<MegaMenuItemProps, 'layout'>[]", default: "[]", description: "4 Standard-layout items for the Product panel's 2x2 grid." },
+    { name: "downloadFeatured", type: "Omit<MegaMenuItemProps, 'layout'>", default: "undefined", description: "The single Featured-layout item in the Download panel." },
+    { name: "downloadItems", type: "Omit<MegaMenuItemProps, 'layout'>[]", default: "[]", description: "3 Standard-layout items in the Download panel's row." },
+  ],
+  example: `<TopNav menu={menu} onMenuChange={setMenu} productItems={products} downloadFeatured={macDownload} downloadItems={otherDownloads} />`,
+  doNot: [
+    "Don't render Pricing with a chevron/menu — it's a plain link, unlike Product/Download.",
+  ],
+  swizzlePath: "packages/core/src/TopNav.tsx",
+  figmaTokens: {
+    "bar padding (vertical)": "spacing.8",
+    "bar padding (horizontal)": "spacing.16",
+    "bar gap": "spacing.24",
+    "bar border-radius": "radius.lg",
+    "bar border": "color.border.subtle",
+    "bar background": "color.surface.raised",
+    "panel padding": "spacing.12",
+    "panel background": "color.surface.raised",
+    "panel border": "color.border.subtle",
+    "panel border-radius": "radius.card",
+    "panel shadow": "elevation.md",
+  },
+};
