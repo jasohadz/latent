@@ -1,0 +1,89 @@
+.lat-search {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lat-spacing-8);
+  padding: var(--lat-spacing-4);
+  background-color: var(--lat-color-background-default);
+  border: 1px solid var(--lat-color-border-default);
+  border-radius: var(--lat-radius-lg);
+}
+
+.lat-search:hover:not(.lat-search--disabled) {
+  border-color: var(--lat-color-border-strong);
+}
+
+.lat-search--filled {
+  border-color: transparent;
+  background-color: var(--lat-color-background-muted);
+}
+
+.lat-search--disabled {
+  background-color: var(--lat-color-action-secondary-disabled);
+  border-color: var(--lat-color-border-strong);
+}
+
+.lat-search__field {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  gap: var(--lat-spacing-8);
+  padding: var(--lat-spacing-4) var(--lat-spacing-12) var(--lat-spacing-4) var(--lat-spacing-4);
+  border-radius: var(--lat-radius-input);
+}
+
+.lat-search__field:focus-within {
+  outline: var(--lat-sizing-border-thin) solid var(--lat-color-border-focus);
+  outline-offset: 1px;
+}
+
+.lat-search__leading-icon {
+  flex-shrink: 0;
+  color: var(--lat-color-icon-subtle);
+}
+
+.lat-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--lat-color-text-primary);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body);
+}
+.lat-search__input::placeholder {
+  color: var(--lat-color-text-tertiary);
+}
+.lat-search__input:focus {
+  outline: none;
+}
+
+.lat-search__clear {
+  display: inline-flex;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--lat-color-icon-subtle);
+  cursor: pointer;
+}
+
+.lat-search__submit {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: var(--lat-spacing-8);
+  border: 1px solid var(--lat-color-border-brand);
+  border-radius: var(--lat-radius-full);
+  background-color: var(--lat-color-action-primary-default);
+  cursor: pointer;
+}
+.lat-search__submit:disabled {
+  cursor: not-allowed;
+}
+
+.lat-search__submit-icon {
+  /* Figma binds this to color/icon/icon/button, which hasn't been ported
+     to code (resolves to near-white, same intent as color/icon/inverse). */
+  color: var(--lat-color-icon-inverse);
+}
