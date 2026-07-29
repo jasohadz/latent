@@ -1,0 +1,52 @@
+.lat-chat-input {
+  display: flex;
+  align-items: center;
+  gap: var(--lat-spacing-8);
+  padding: var(--lat-spacing-2);
+  background-color: var(--lat-color-background-default);
+  border-radius: var(--lat-radius-lg);
+}
+
+.lat-chat-input__attach {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--lat-radius-input);
+  background-color: var(--lat-color-action-secondary-default);
+  color: var(--lat-color-icon-default);
+  cursor: pointer;
+}
+
+.lat-chat-input__field {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--lat-color-text-primary);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body);
+}
+.lat-chat-input__field::placeholder {
+  color: var(--lat-color-text-tertiary);
+}
+.lat-chat-input__field:focus {
+  outline: none;
+}
+
+.lat-chat-input__send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--lat-radius-input);
+  background-color: var(--lat-color-background-inverse);
+  color: var(--lat-color-icon-inverse);
+  cursor: pointer;
+}

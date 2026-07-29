@@ -1,0 +1,27 @@
+.lat-message-bubble-row {
+  display: flex;
+}
+.lat-message-bubble-row--assistant {
+  justify-content: flex-start;
+}
+.lat-message-bubble-row--user {
+  justify-content: flex-end;
+}
+
+.lat-message-bubble {
+  padding: var(--lat-spacing-8) var(--lat-spacing-16);
+  border-radius: var(--lat-radius-input);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body);
+  max-width: 80%;
+}
+
+.lat-message-bubble--assistant {
+  background-color: var(--lat-color-action-primary-default);
+  color: var(--lat-color-text-on-brand);
+}
+
+.lat-message-bubble--user {
+  background-color: var(--lat-color-background-default);
+  color: var(--lat-color-text-primary);
+}
