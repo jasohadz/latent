@@ -1,0 +1,26 @@
+export default {
+  name: "MegaMenuItem",
+  summary: "The atomic row used inside TopNav's Product and Download dropdown panels.",
+  props: [
+    { name: "layout", type: '"standard" | "featured"', default: "standard", description: "featured adds a muted background and a real Badge instance." },
+    { name: "icon", type: "React.ReactNode", default: "undefined" },
+    { name: "title", type: "string", default: "—" },
+    { name: "description", type: "string", default: "—" },
+    { name: "badgeLabel", type: "string", default: '"New"', description: "Only rendered when layout=\"featured\"." },
+  ],
+  example: `<MegaMenuItem layout="featured" icon={<Icon name="apple" />} title="Download for macOS" description="Recommended for most users" badgeLabel="New" />`,
+  doNot: [],
+  swizzlePath: "packages/core/src/MegaMenuItem.tsx",
+  figmaTokens: {
+    "padding/gap": "spacing.12",
+    "border-radius": "radius.lg",
+    "featured background": "color.background.muted",
+    "icon color": "color.icon.default",
+    "title color": "color.text.primary",
+    "title font-family": "font-family.sans",
+    "title font-size": "font-style.body",
+    "title font-weight": "font-weight.600",
+    "description color": "color.text.tertiary",
+    "description font-size": "font-style.body-small",
+  },
+};

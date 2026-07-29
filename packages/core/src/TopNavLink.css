@@ -1,0 +1,24 @@
+.lat-top-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lat-spacing-4);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
+}
+
+.lat-top-nav-link__label {
+  color: var(--lat-color-text-secondary);
+  font-weight: var(--lat-font-weight-400);
+}
+
+.lat-top-nav-link__chevron {
+  color: var(--lat-color-icon-default);
+}
+
+.lat-top-nav-link--active .lat-top-nav-link__label {
+  color: var(--lat-color-text-primary);
+  font-weight: var(--lat-font-weight-600);
+}
