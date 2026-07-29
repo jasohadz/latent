@@ -1,0 +1,28 @@
+.lat-badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lat-spacing-8);
+  border: none;
+  border-radius: var(--lat-radius-full);
+  background-color: var(--lat-color-background-muted);
+  color: var(--lat-color-text-primary);
+  cursor: pointer;
+}
+
+.lat-badge-group--small {
+  padding: var(--lat-spacing-4);
+  font-size: var(--lat-font-style-body-small);
+}
+
+.lat-badge-group--large {
+  padding: var(--lat-spacing-4);
+  font-size: var(--lat-font-style-body);
+}
+
+.lat-badge-group__text {
+  line-height: var(--lat-font-line-height-200-normal);
+}
+
+.lat-badge-group__chevron {
+  color: var(--lat-color-icon-default);
+}

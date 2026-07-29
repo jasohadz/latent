@@ -1,0 +1,32 @@
+export default {
+  name: "Testimonial",
+  summary: "A quote card pairing a customer statement with a real Avatar instance, name, and role. For social-proof sections.",
+  props: [
+    { name: "quote", type: "string", default: "—" },
+    { name: "name", type: "string", default: "—" },
+    { name: "role", type: "string", default: "—" },
+    { name: "avatarInitial", type: "string", default: "name.charAt(0)", description: "Passed to Avatar's initial prop. Defaults to the first character of `name`." },
+  ],
+  example: `<Testimonial quote="Latent made it trivial to keep our design and code in sync." name="Jordan Reyes" role="Design Systems Lead" />`,
+  doNot: [
+    "Don't reach for Testimonial if you need an icon or button instead of a quote+person — use Card, which has boolean properties for exactly that.",
+  ],
+  swizzlePath: "packages/core/src/Testimonial.tsx",
+  figmaTokens: {
+    "container padding": "spacing.32",
+    "container gap": "spacing.24",
+    "container background": "color.surface.raised",
+    "container border": "color.border.subtle",
+    "container border-radius": "radius.card",
+    "container shadow": "elevation.sm",
+    "quote color": "color.text.primary",
+    "quote font-size": "font-style.body-large",
+    "quote line-height": "font-line-height.400-normal",
+    "footer gap": "spacing.12",
+    "name color": "color.text.primary",
+    "name font-size": "font-style.body",
+    "name font-weight": "font-weight.600",
+    "role color": "color.text.tertiary",
+    "role font-size": "font-style.body-small",
+  },
+};
