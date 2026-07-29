@@ -200,6 +200,12 @@
         "condensed": "{border.radius.100}"
       }
     },
+    "6": {
+      "value": {
+        "default": "{border.radius.150}",
+        "condensed": "{border.radius.150}"
+      }
+    },
     "lg": {
       "value": {
         "default": "{border.radius.200}",

@@ -503,6 +503,7 @@
   --lat-radius-xs: var(--lat-primitive-border-radius-25);
   --lat-radius-sm: var(--lat-primitive-border-radius-50);
   --lat-radius-md: var(--lat-primitive-border-radius-100);
+  --lat-radius-6: var(--lat-primitive-border-radius-150);
   --lat-radius-lg: var(--lat-primitive-border-radius-200);
   --lat-radius-xl: var(--lat-primitive-border-radius-300);
   --lat-radius-2xl: var(--lat-primitive-border-radius-400);
@@ -610,6 +611,7 @@
   --lat-radius-xs: var(--lat-primitive-border-radius-25);
   --lat-radius-sm: var(--lat-primitive-border-radius-50);
   --lat-radius-md: var(--lat-primitive-border-radius-100);
+  --lat-radius-6: var(--lat-primitive-border-radius-150);
   --lat-radius-lg: var(--lat-primitive-border-radius-200);
   --lat-radius-xl: var(--lat-primitive-border-radius-300);
   --lat-radius-2xl: var(--lat-primitive-border-radius-400);

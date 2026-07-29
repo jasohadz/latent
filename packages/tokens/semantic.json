@@ -860,6 +860,12 @@
         "dark": "{border.radius.100}"
       }
     },
+    "6": {
+      "value": {
+        "light": "{border.radius.150}",
+        "dark": "{border.radius.150}"
+      }
+    },
     "lg": {
       "value": {
         "light": "{border.radius.200}",

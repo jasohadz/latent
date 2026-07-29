@@ -1348,6 +1348,12 @@
           "dark": "{border.radius.100}"
         }
       },
+      "6": {
+        "value": {
+          "light": "{border.radius.150}",
+          "dark": "{border.radius.150}"
+        }
+      },
       "lg": {
         "value": {
           "light": "{border.radius.200}",
@@ -1964,6 +1970,12 @@
         "value": {
           "default": "{border.radius.100}",
           "condensed": "{border.radius.100}"
+        }
+      },
+      "6": {
+        "value": {
+          "default": "{border.radius.150}",
+          "condensed": "{border.radius.150}"
         }
       },
       "lg": {
