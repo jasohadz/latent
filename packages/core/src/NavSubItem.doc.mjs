@@ -1,0 +1,31 @@
+export default {
+  name: "NavSubItem",
+  summary: "The indented row used inside Nav Dropdown's expanded sub-list. Same Selected x State pattern as NavItem, with a fixed leading branch icon and no chevron.",
+  props: [
+    { name: "label", type: "string", default: "—" },
+    { name: "selected", type: "boolean", default: "false" },
+    { name: "showIcon", type: "boolean", default: "true", description: "Fixed to a corner-down-right branch icon — not swappable, unlike NavItem's leading icon." },
+    { name: "disabled", type: "boolean", default: "false" },
+  ],
+  example: `<NavSubItem label="Tutorials" onClick={handleClick} />`,
+  doNot: [
+    "Don't try to swap the leading icon — it's fixed to corner-down-right by design, unlike NavItem.",
+  ],
+  swizzlePath: "packages/core/src/NavSubItem.tsx",
+  figmaTokens: {
+    "padding (vertical)": "spacing.6",
+    "padding (horizontal) / gap": "spacing.10",
+    "border-radius": "radius.lg",
+    "hover background": "color.action.secondary.hover",
+    "pressed background": "color.action.secondary.pressed",
+    "focus ring color": "color.border.focus",
+    "focus ring width": "sizing.border.thin",
+    "icon color": "color.icon.default",
+    "label color": "color.text.secondary",
+    "label font-family": "font-family.sans",
+    "label font-size": "font-style.body",
+    "selected background": "color.background.muted",
+    "selected label color": "color.text.primary",
+    "selected label weight": "font-weight.600",
+  },
+};
