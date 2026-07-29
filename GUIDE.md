@@ -12,7 +12,7 @@ phases depend on earlier ones being solid, especially the token schema.
    - `semantic.json` and `density.json` — mode-aware (`{ value: { light, dark } }` / `{ value: { default, condensed } }`); each leaf stores an alias reference into `primitives.json` rather than a resolved literal.
    - `breakpoint.json` — mode-aware across `mobile`/`tablet`/`desktop`.
    Figma's variable collections (Primitives, Style Tokens, Density, Breakpoint) must mirror these names/nesting exactly.
-4. Primitives: 29 components now live in `packages/core/src/`, each following Button's exact three-file pattern (`.tsx` + `.css` + `.doc.mjs`, each with a `figmaTokens` mapping):
+4. Primitives: 30 components now live in `packages/core/src/`, each following Button's exact three-file pattern (`.tsx` + `.css` + `.doc.mjs`, each with a `figmaTokens` mapping):
    - **Atoms**: Button, Icon, Badge, Avatar, Toggle, ToggleMultiple, Switch, TextField, TextArea
    - **Composites**: AccordionItem, Card, BadgeGroup, AvatarGroup, Testimonial, Field, SubscribeField, Search, Stat, Panel, Calendar
    - **Navigation**: NavItem, NavSubItem, NavDropdown, SideNav, TopNavLink, MegaMenuItem, TopNav
@@ -25,7 +25,7 @@ phases depend on earlier ones being solid, especially the token schema.
 5. ~~Structure Figma variable collections to mirror `tokens.json` 1:1~~ — done: Figma's Primitives/Style Tokens/Density/Breakpoint collections (628 variables) now map directly onto the four token files, per `TOKEN-SCHEMA-V2.md`.
 6. Use F8igma Console (`figma_get_variables`, `resolveAliases: false` to preserve alias structure) to pull each collection live and regenerate the four token files plus `theme-neutral/theme.css` (mode-aware: light/dark via `[data-latent-mode]`, density via `[data-latent-density]`) — done, see `TOKEN-SCHEMA-V2.md`'s execution steps for the full recipe.
 7. Run `node packages/cli/bin/latent.mjs sync figma --file <export>.json --json` — now diffs per layer *and* per mode (a token that matches in Light but drifted in Dark reports as drift). Clean against a fresh export.
-8. Once a component's Figma spec is stable, run `check-parity <name>` to confirm the shipped CSS matches it — all 29 components are wired to semantic paths and pass.
+8. Once a component's Figma spec is stable, run `check-parity <name>` to confirm the shipped CSS matches it — all 30 components are wired to semantic paths and pass.
 9. (Later) automate steps 6-7 as a script or CI job instead of running by hand — still manual today, not done.
 
 ## Phase 3 — Agent-readiness layer (mostly done)
@@ -36,7 +36,7 @@ phases depend on earlier ones being solid, especially the token schema.
 
 ## Phase 4 — Templates & polish (next up)
 
-13. Build 2-3 content-only page templates (dashboard, settings, form) composing existing components into a shared layout primitive with header/content/panel slots — this is the current gap: the component library is deep (29 components across atoms, composites, nav, and chat) but nothing yet demonstrates them assembled into a real page.
+13. Build 2-3 content-only page templates (dashboard, settings, form) composing existing components into a shared layout primitive with header/content/panel slots — this is the current gap: the component library is deep (30 components across atoms, composites, nav, and chat) but nothing yet demonstrates them assembled into a real page.
 14. Keep templates separate from app-shell/nav components
 15. Publish `packages/core`, `packages/theme-neutral`, `packages/cli` as scoped npm packages once the API stabilizes — not before, since `swizzle` paths and prop names become breaking changes for anyone who's forked
 
