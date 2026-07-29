@@ -1,0 +1,59 @@
+.lat-accordion-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-8);
+  padding: var(--lat-spacing-16);
+  background-color: var(--lat-color-background-default);
+  border: 1px solid var(--lat-color-border-default);
+  border-radius: var(--lat-radius-lg);
+}
+
+.lat-accordion-item:hover {
+  border-color: var(--lat-color-border-strong);
+}
+
+.lat-accordion-item:focus-within {
+  border-color: var(--lat-color-border-brand);
+}
+
+.lat-accordion-item--disabled {
+  background-color: var(--lat-color-background-subtle);
+  border-color: var(--lat-color-border-subtle);
+}
+
+.lat-accordion-item__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lat-spacing-8);
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--lat-color-text-primary);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-size-300);
+  font-weight: var(--lat-font-weight-600);
+  cursor: pointer;
+  text-align: left;
+}
+.lat-accordion-item__header:disabled {
+  cursor: not-allowed;
+}
+.lat-accordion-item__header:focus {
+  outline: none;
+}
+
+.lat-accordion-item__chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+  color: var(--lat-color-icon-default);
+}
+
+.lat-accordion-item__answer {
+  color: var(--lat-color-text-primary);
+  /* Figma's answer text is bound to a Breakpoint-collection responsive
+     token (font-size/body) that hasn't been ported to code yet — using
+     the equivalent Style Tokens value (font/style/body, same 16px) here. */
+  font-size: var(--lat-font-style-body);
+}
