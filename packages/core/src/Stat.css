@@ -1,0 +1,32 @@
+.lat-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lat-spacing-8);
+  padding: var(--lat-spacing-32);
+  background-color: var(--lat-color-surface-raised);
+  border: 1px solid var(--lat-color-border-subtle);
+  border-radius: var(--lat-radius-card);
+  box-shadow: var(--lat-elevation-sm);
+}
+
+.lat-stat__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--lat-spacing-12);
+  background-color: var(--lat-color-background-muted);
+  border-radius: var(--lat-radius-lg);
+  color: var(--lat-color-icon-default);
+}
+
+.lat-stat__value {
+  color: var(--lat-color-text-primary);
+  font-size: var(--lat-font-style-h1);
+  font-weight: var(--lat-font-weight-700);
+}
+
+.lat-stat__label {
+  color: var(--lat-color-text-secondary);
+  font-size: var(--lat-font-style-body);
+}
