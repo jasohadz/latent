@@ -1,0 +1,11 @@
+.lat-nav-dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.lat-nav-dropdown__sub-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-2);
+  padding-left: var(--lat-spacing-20);
+}
