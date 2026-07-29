@@ -1,0 +1,30 @@
+.lat-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-4);
+}
+
+.lat-field__label {
+  color: var(--lat-color-text-secondary);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
+  font-weight: var(--lat-font-weight-600);
+  line-height: var(--lat-font-line-height-200-normal);
+}
+
+.lat-field__helper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lat-spacing-4);
+  color: var(--lat-color-text-tertiary);
+  font-size: var(--lat-font-style-body-small);
+  line-height: var(--lat-font-line-height-200-normal);
+}
+
+.lat-field__helper--error {
+  color: var(--lat-color-text-danger);
+}
+
+.lat-field__helper-icon {
+  flex-shrink: 0;
+}
