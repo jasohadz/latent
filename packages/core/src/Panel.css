@@ -1,0 +1,6 @@
+.lat-panel {
+  background-color: var(--lat-color-surface-raised);
+  border: 1px solid var(--lat-color-border-subtle);
+  border-radius: var(--lat-radius-card);
+  box-shadow: var(--lat-elevation-lg);
+}

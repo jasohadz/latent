@@ -1,0 +1,114 @@
+.lat-calendar {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-16);
+  padding: var(--lat-spacing-16);
+  background-color: var(--lat-color-background-default);
+  border: 1px solid var(--lat-color-border-subtle);
+  border-radius: var(--lat-radius-card);
+}
+
+.lat-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lat-spacing-8);
+}
+
+.lat-calendar__nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--lat-spacing-8);
+  border: 1px solid var(--lat-color-border-brand);
+  border-radius: var(--lat-radius-input);
+  background: transparent;
+  color: var(--lat-color-icon-default);
+  cursor: pointer;
+}
+.lat-calendar__nav-button:hover {
+  background-color: var(--lat-color-action-secondary-hover);
+}
+.lat-calendar__nav-button:focus { outline: none; }
+.lat-calendar__nav-button:focus-visible {
+  outline: var(--lat-sizing-border-thin) solid var(--lat-color-border-focus);
+  outline-offset: var(--lat-sizing-focus-ring-offset);
+}
+
+.lat-calendar__select-group {
+  display: flex;
+  gap: var(--lat-spacing-8);
+}
+
+.lat-calendar__select {
+  padding: var(--lat-spacing-4) var(--lat-spacing-8);
+  border: 1px solid var(--lat-color-border-default);
+  border-radius: var(--lat-radius-input);
+  background-color: var(--lat-color-background-default);
+  color: var(--lat-color-text-primary);
+  font-size: var(--lat-typography-input-value-font-size-sm);
+  line-height: var(--lat-typography-input-value-line-height-sm);
+}
+
+.lat-calendar__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-4);
+}
+
+.lat-calendar__weekday-row,
+.lat-calendar__row {
+  display: flex;
+  gap: var(--lat-spacing-4);
+}
+
+.lat-calendar__weekday {
+  width: 32px;
+  text-align: center;
+  color: var(--lat-color-text-tertiary);
+  font-size: var(--lat-font-size-200);
+}
+
+.lat-calendar__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--lat-radius-full);
+  background: transparent;
+  color: var(--lat-color-text-primary);
+  font-size: var(--lat-font-size-200);
+  cursor: pointer;
+}
+.lat-calendar__day:hover:not(:disabled) {
+  background-color: var(--lat-color-background-muted);
+}
+.lat-calendar__day:focus { outline: none; }
+.lat-calendar__day:focus-visible {
+  outline: var(--lat-sizing-border-thin) solid var(--lat-color-border-focus);
+  outline-offset: var(--lat-sizing-focus-ring-offset);
+}
+
+.lat-calendar__day--active {
+  background-color: var(--lat-color-action-primary-default);
+  color: var(--lat-color-text-on-brand);
+}
+.lat-calendar__day--range {
+  background-color: var(--lat-color-background-subtle);
+}
+.lat-calendar__day--disabled,
+.lat-calendar__day:disabled {
+  color: var(--lat-color-text-disabled);
+  cursor: not-allowed;
+}
+.lat-calendar__day--range-disabled {
+  background-color: var(--lat-color-background-subtle);
+  color: var(--lat-color-text-disabled);
+  cursor: not-allowed;
+}
+.lat-calendar__day--hidden {
+  color: var(--lat-color-text-tertiary);
+  cursor: default;
+}

@@ -620,6 +620,15 @@
   --lat-radius-input: var(--lat-primitive-border-radius-100);
   --lat-radius-card: var(--lat-primitive-border-radius-200);
   --lat-radius-modal: var(--lat-primitive-border-radius-400);
+  /* Elevation — from packages/tokens/styles.json (Figma Effect Styles), not
+     primitives/semantic/density.json. Effect Styles have no Light/Dark mode
+     (unlike Variables), so these are mode-independent — defined once here,
+     not overridden in the dark-mode block below. */
+  --lat-elevation-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --lat-elevation-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --lat-elevation-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --lat-elevation-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --lat-elevation-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --lat-typography-input-value-font-size-sm: var(--lat-primitive-typography-font-size-300);
   --lat-typography-input-value-font-size-md: var(--lat-primitive-typography-font-size-400);
   --lat-typography-input-value-line-height-sm: var(--lat-primitive-typography-line-height-300-normal);
