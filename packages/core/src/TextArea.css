@@ -1,0 +1,41 @@
+.lat-text-area {
+  display: block;
+  width: 100%;
+  height: 100px;
+  padding: var(--lat-spacing-8);
+  border-radius: var(--lat-radius-lg);
+  background: transparent;
+  border: 1px solid var(--lat-color-border-default);
+  color: var(--lat-color-text-primary);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
+  line-height: var(--lat-font-line-height-200-normal);
+  resize: vertical;
+}
+.lat-text-area::placeholder {
+  color: var(--lat-color-text-tertiary);
+}
+.lat-text-area:hover:not(:disabled) {
+  border-color: var(--lat-color-border-strong);
+}
+.lat-text-area:focus {
+  outline: none;
+  border-width: var(--lat-sizing-border-thin);
+  border-color: var(--lat-color-border-brand);
+}
+.lat-text-area:disabled {
+  border-color: var(--lat-color-border-subtle);
+  cursor: not-allowed;
+}
+.lat-text-area--error {
+  border-width: var(--lat-sizing-border-thin);
+  border-color: var(--lat-color-border-danger);
+}
+
+.lat-text-area--filled {
+  border-color: transparent;
+  background-color: var(--lat-color-background-muted);
+}
+.lat-text-area--filled:hover:not(:disabled) {
+  border-color: var(--lat-color-border-strong);
+}

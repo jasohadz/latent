@@ -1,0 +1,29 @@
+export default {
+  name: "TextArea",
+  summary: "Multi-line text input. Same visual family as TextField, identical token bindings, fixed at 100px height.",
+  props: [
+    { name: "appearance", type: '"filled" | "outline"', default: "outline", description: "filled has no border by default (gains one on hover); outline always has a border." },
+    { name: "error", type: "boolean", default: "false", description: "Not a native pseudo-state — set explicitly (e.g. from form validation) to show the danger border." },
+    { name: "...rest", type: "React.TextareaHTMLAttributes<HTMLTextAreaElement>", default: "—", description: "All standard textarea props (value, onChange, disabled, etc.) pass through." },
+  ],
+  example: `<TextArea appearance="outline" value={value} onChange={(e) => setValue(e.target.value)} />`,
+  doNot: [
+    "Don't resize below readable height — the 100px fixed height matches Figma; use CSS `resize` (already set to vertical) rather than a much shorter override.",
+  ],
+  swizzlePath: "packages/core/src/TextArea.tsx",
+  figmaTokens: {
+    "padding": "spacing.8",
+    "border-radius": "radius.lg",
+    "text color": "color.text.primary",
+    "placeholder color": "color.text.tertiary",
+    "font-size": "font-style.body-small",
+    "line-height": "font-line-height.200-normal",
+    "border (default)": "color.border.default",
+    "border (hover)": "color.border.strong",
+    "border (focus)": "color.border.brand",
+    "border width (focus/error)": "sizing.border.thin",
+    "border (disabled)": "color.border.subtle",
+    "border (error)": "color.border.danger",
+    "background (filled)": "color.background.muted",
+  },
+};
