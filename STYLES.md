@@ -85,9 +85,9 @@ as raw px, not %, so `Special/Eyebrow`'s 4% tracking is a literal match to
 | `Heading/H2` | Geist | SemiBold | responsive (24 shown = Mobile default) | 120% | `font-size/h2` (Breakpoint) |
 | `Heading/H3` | Geist | SemiBold | responsive (20 shown = Mobile default) | 120% | `font-size/h3` (Breakpoint) |
 | `Heading/H4` | Geist | SemiBold | 24 (static — no breakpoint entry) | 36px | `font/style/h4`, `line-height/600/normal` |
-| `Body/Large` | Geist | Regular | 18 (static) | 27px | `font/style/body-large`, `line-height/400/normal` |
-| `Body/Default` | Geist | Regular | responsive but flat (16 at all breakpoints) | 150% | `font-size/body` (Breakpoint) |
-| `Body/Small` | Geist | Regular | 14 (static) | 21px | `font/style/body-small`, `line-height/200/normal` |
+| `Body/Large/Large` | Geist | Regular | 18 (static) | 27px | `font/style/body-large`, `line-height/400/normal` |
+| `Body/Default/Default` | Geist | Regular | responsive but flat (16 at all breakpoints) | 150% | `font-size/body` (Breakpoint) |
+| `Body/Small/Small` | Geist | Regular | 14 (static) | 21px | `font/style/body-small`, `line-height/200/normal` |
 | `Body/Large/SemiBold` | Geist | SemiBold | 18 | 27px | `font/style/body-large`, `font-family/sans`, `font-weight/600`, `line-height/400/normal` |
 | `Body/Large/Bold` | Geist | Bold | 18 | 27px | `font/style/body-large`, `font-family/sans`, `font-weight/700`, `line-height/400/normal` |
 | `Body/Default/SemiBold` | Geist | SemiBold | 16 | 24px | `font/style/body`, `font-family/sans`, `font-weight/600`, `line-height/300/normal` |
@@ -95,7 +95,7 @@ as raw px, not %, so `Special/Eyebrow`'s 4% tracking is a literal match to
 | `Body/Small/SemiBold` | Geist | SemiBold | 14 | 21px | `font/style/body-small`, `font-family/sans`, `font-weight/600`, `line-height/200/normal` |
 | `Body/Small/Bold` | Geist | Bold | 14 | 21px | `font/style/body-small`, `font-family/sans`, `font-weight/700`, `line-height/200/normal` |
 
-`Special/Display`, `/H1`, `/H2`, `/H3`, `/Default` (Body) are **responsive** —
+`Special/Display`, `/H1`, `/H2`, `/H3`, `/Default/Default` (Body) are **responsive** —
 their bound variable lives in the Breakpoint collection (Mobile/Tablet/Desktop
 modes), so the same style resolves to a different size depending on the
 Breakpoint mode set on the frame it's applied to. The "size shown" column is

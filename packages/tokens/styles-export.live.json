@@ -54,21 +54,21 @@
       "textCase": "ORIGINAL",
       "boundVariables": { "lineHeight": "typography/line-height/600/normal", "fontSize": "font/style/h4" }
     },
-    "Body/Large": {
+    "Body/Large/Large": {
       "fontName": { "family": "Geist", "style": "Regular" },
       "lineHeight": { "unit": "PIXELS", "value": 27 },
       "letterSpacing": { "unit": "PERCENT", "value": 0 },
       "textCase": "ORIGINAL",
       "boundVariables": { "lineHeight": "typography/line-height/400/normal", "fontSize": "font/style/body-large" }
     },
-    "Body/Default": {
+    "Body/Default/Default": {
       "fontName": { "family": "Geist", "style": "Regular" },
       "lineHeight": { "unit": "PERCENT", "value": 150 },
       "letterSpacing": { "unit": "PERCENT", "value": 0 },
       "textCase": "ORIGINAL",
       "boundVariables": { "fontSize": "font-size/body" }
     },
-    "Body/Small": {
+    "Body/Small/Small": {
       "fontName": { "family": "Geist", "style": "Regular" },
       "lineHeight": { "unit": "PIXELS", "value": 21 },
       "letterSpacing": { "unit": "PERCENT", "value": 0 },
