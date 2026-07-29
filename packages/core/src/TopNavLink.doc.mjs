@@ -9,20 +9,18 @@ export default {
   example: `<TopNavLink label="Product" active showChevron onClick={openProductMenu} />`,
   doNot: [],
   swizzlePath: "packages/core/src/TopNavLink.tsx",
-  // Bug found in Figma, not reproduced here: the Active=No variant's Label
-  // text is literally raw "Inter Regular" (unbound font family/size/weight
-  // — only fill color is bound), the same "Legacy Reference" pattern
-  // flagged elsewhere in this file (Toggle/Switch superseded similar
-  // hardcoded-Inter components). Used font-family.sans (Geist) here
-  // instead, matching every other component and the Active=Yes state's
-  // own Geist SemiBold.
+  // Previously: Active=No's Label was raw unbound "Inter Regular" in
+  // Figma (a real bug, not reproduced in the original port). Fixed at
+  // the source — both Active=No and Active=Yes now share the same real
+  // "Body/Small/SemiBold" text style (Geist SemiBold, font-weight.600);
+  // only the fill color differs between states.
   figmaTokens: {
     "font-family": "font-family.sans",
     "font-size": "font-style.body-small",
+    "label weight": "font-weight.600",
+    "label line-height": "font-line-height.200-normal",
     "label color": "color.text.secondary",
-    "label weight": "font-weight.400",
     "chevron color": "color.icon.default",
     "active label color": "color.text.primary",
-    "active label weight": "font-weight.600",
   },
 };

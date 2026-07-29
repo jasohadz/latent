@@ -11,7 +11,8 @@
 
 .lat-top-nav-link__label {
   color: var(--lat-color-text-secondary);
-  font-weight: var(--lat-font-weight-400);
+  font-weight: var(--lat-font-weight-600);
+  line-height: var(--lat-font-line-height-200-normal);
 }
 
 .lat-top-nav-link__chevron {
@@ -20,5 +21,4 @@
 
 .lat-top-nav-link--active .lat-top-nav-link__label {
   color: var(--lat-color-text-primary);
-  font-weight: var(--lat-font-weight-600);
 }
