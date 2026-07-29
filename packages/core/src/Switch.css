@@ -1,0 +1,49 @@
+.lat-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lat-spacing-8);
+}
+
+.lat-switch__track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 44px;
+  height: 24px;
+  padding: 2px;
+  border: none;
+  border-radius: var(--lat-radius-full);
+  background-color: var(--lat-color-background-muted);
+  cursor: pointer;
+}
+
+.lat-switch__track--on {
+  background-color: var(--lat-color-action-primary-default);
+}
+
+.lat-switch__track--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lat-switch__thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--lat-radius-full);
+  background-color: var(--lat-color-surface-raised);
+  transition: transform 0.15s ease;
+}
+
+.lat-switch__track--on .lat-switch__thumb {
+  transform: translateX(20px);
+}
+
+.lat-switch__track--on.lat-switch__track--disabled {
+  background-color: var(--lat-color-action-primary-disabled);
+}
+
+.lat-switch__supporting-text {
+  color: var(--lat-color-text-tertiary);
+  font-size: var(--lat-font-size-200);
+  line-height: var(--lat-font-line-height-200-normal);
+}

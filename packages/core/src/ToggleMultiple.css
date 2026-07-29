@@ -1,0 +1,25 @@
+.lat-toggle-multiple {
+  display: inline-flex;
+  gap: var(--lat-spacing-4);
+  padding: var(--lat-spacing-4);
+  border-radius: var(--lat-radius-full);
+  background-color: var(--lat-color-background-muted);
+}
+
+.lat-toggle-multiple__option {
+  padding: var(--lat-spacing-8) var(--lat-spacing-24);
+  border: none;
+  border-radius: var(--lat-radius-full);
+  background: transparent;
+  color: var(--lat-color-text-tertiary);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-size-300);
+  font-weight: var(--lat-font-weight-400);
+  cursor: pointer;
+}
+
+.lat-toggle-multiple__option--selected {
+  background-color: var(--lat-color-surface-raised);
+  color: var(--lat-color-text-primary);
+  font-weight: var(--lat-font-weight-600);
+}
