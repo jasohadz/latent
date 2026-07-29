@@ -1,0 +1,32 @@
+export default {
+  name: "Avatar",
+  summary: "User representation as initials, an icon, or a placeholder image.",
+  props: [
+    { name: "size", type: '"small" | "medium" | "large"', default: "medium", description: "32/40/48px, bound to the Density collection's avatar sizing tokens." },
+    { name: "shape", type: '"circle" | "square"', default: "circle", description: "circle uses radius.full; square uses a fixed corner radius (radius.lg)." },
+    { name: "initial", type: "string", default: "undefined", description: "Single-character initial, e.g. \"F\". Only the first character is rendered — the shape has a fixed width, so multi-character strings would overflow." },
+    { name: "icon", type: "React.ReactNode", default: "undefined", description: "Generic pictogram icon, e.g. <Icon name=\"user\" />. Ignored if `src` is set." },
+    { name: "src", type: "string", default: "undefined", description: "Real photo URL, rendered as a real <img>. Takes precedence over icon/initial." },
+    { name: "alt", type: "string", default: '""', description: "Alt text for the image, when `src` is set." },
+  ],
+  example: `<Avatar size="medium" shape="circle" initial="F" />`,
+  doNot: [
+    "Don't pass a multi-character string to `initial` — it will overflow the fixed-width shape; use `icon` or `src` for anything richer.",
+    "Don't hardcode colors/sizes — add or reuse a --lat-* custom property instead.",
+  ],
+  swizzlePath: "packages/core/src/Avatar.tsx",
+  figmaTokens: {
+    "background": "color.background.muted",
+    "text/icon color": "color.text.secondary",
+    "font-family": "font-family.sans",
+    "font-weight": "font-weight.600",
+    "width/height (small)": "sizing.avatar.sm",
+    "font-size (small)": "font-size.200",
+    "width/height (medium)": "sizing.avatar.md",
+    "font-size (medium)": "font-size.300",
+    "width/height (large)": "sizing.avatar.lg",
+    "font-size (large)": "font-size.400",
+    "border-radius (circle)": "radius.full",
+    "border-radius (square)": "radius.lg",
+  },
+};

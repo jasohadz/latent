@@ -1,0 +1,57 @@
+.lat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lat-spacing-4);
+  border-radius: var(--lat-radius-full);
+  font-family: var(--lat-font-family-sans);
+  font-weight: var(--lat-font-weight-600);
+}
+
+.lat-badge__icon {
+  display: inline-flex;
+}
+
+.lat-badge__dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.lat-badge--small {
+  padding: var(--lat-spacing-2) var(--lat-spacing-8);
+  font-size: var(--lat-font-size-100);
+}
+.lat-badge--medium,
+.lat-badge--large {
+  padding: var(--lat-spacing-2) var(--lat-spacing-8);
+  font-size: var(--lat-font-size-200);
+}
+.lat-badge--large {
+  padding: var(--lat-spacing-4) var(--lat-spacing-12);
+}
+
+.lat-badge--neutral {
+  background-color: var(--lat-color-background-muted);
+  color: var(--lat-color-text-secondary);
+}
+.lat-badge--brand {
+  background-color: var(--lat-color-background-brand);
+  color: var(--lat-color-text-link);
+}
+.lat-badge--success {
+  background-color: var(--lat-color-background-success);
+  color: var(--lat-color-text-success);
+}
+.lat-badge--warning {
+  background-color: var(--lat-color-background-warning);
+  color: var(--lat-color-text-warning);
+}
+.lat-badge--danger {
+  background-color: var(--lat-color-background-danger);
+  color: var(--lat-color-text-danger);
+}
