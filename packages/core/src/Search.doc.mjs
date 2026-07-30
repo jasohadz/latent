@@ -39,7 +39,7 @@ export default {
     "submit border": "color.border.brand",
     "submit border-radius": "radius.full",
     "submit background": "color.action.primary.default",
-    "submit icon color": "color.icon.inverse",
+    "submit icon color": "color.icon.icon-button",
     "submit padding": "spacing.8",
   },
 };

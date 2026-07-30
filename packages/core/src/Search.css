@@ -83,7 +83,5 @@
 }
 
 .lat-search__submit-icon {
-  /* Figma binds this to color/icon/icon/button, which hasn't been ported
-     to code (resolves to near-white, same intent as color/icon/inverse). */
-  color: var(--lat-color-icon-inverse);
+  color: var(--lat-color-icon-icon-button);
 }
