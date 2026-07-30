@@ -817,6 +817,12 @@
             "dark": "{color.gray.900}"
           }
         },
+        "icon-button": {
+          "value": {
+            "light": "{color.slate.50}",
+            "dark": "{color.slate.50}"
+          }
+        },
         "brand": {
           "value": {
             "light": "{color.blue.600}",

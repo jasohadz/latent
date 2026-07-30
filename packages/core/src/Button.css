@@ -97,30 +97,15 @@
   stroke-width: var(--lat-stroke-width-light);
 }
 
-/* Figma binds both appearances' icon-only icon to the same color/icon/icon/button
-   token (unported; near-inverse). On a filled background that's visible —
-   matches Search's circular submit button precedent. */
-.lat-button--icon-only.lat-button--primary .lat-icon {
-  color: var(--lat-color-icon-inverse);
-}
-
-/* On the outline appearance's transparent background, that same token is a
-   real Figma-side bug: the icon is near-invisible. Using icon-default instead,
-   matching Calendar's nav-button, which hit the same bug and worked around it
-   the same way. */
-.lat-button--icon-only.lat-button--secondary .lat-icon {
-  color: var(--lat-color-icon-default);
-}
-
-/* Ghost's icon-only variant binds directly to color/icon/default in Figma —
-   no invisible-icon bug here, since it was built after the outline bug was
-   already known and avoided from the start. */
-.lat-button--icon-only.lat-button--ghost .lat-icon {
-  color: var(--lat-color-icon-default);
-}
-
-.lat-button--icon-only:disabled .lat-icon {
-  color: var(--lat-color-text-disabled);
+/* Every icon in Button — icon-only or trailing, any appearance, any state —
+   uses color/icon/icon/button in Figma (rebound uniformly there 2026-07-30,
+   explicit instruction, superseding the earlier per-appearance workarounds
+   below this comment used to need). Same value in light and dark mode
+   (aliases primitive slate/50 in both), and genuinely low-contrast against
+   the outline/ghost transparent background — that's the current Figma
+   source of truth, not a bug being reproduced here. */
+.lat-button .lat-icon {
+  color: var(--lat-color-icon-icon-button);
 }
 
 .lat-button--primary {

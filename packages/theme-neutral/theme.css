@@ -424,6 +424,9 @@
   --lat-color-icon-subtle: var(--lat-primitive-color-gray-400);
   --lat-color-icon-disabled: var(--lat-primitive-color-gray-300);
   --lat-color-icon-inverse: var(--lat-primitive-color-base-white);
+  /* Same value in both light and dark mode in Figma — aliases the same
+     primitive (slate/50) regardless of theme. */
+  --lat-color-icon-icon-button: var(--lat-primitive-color-slate-50);
   --lat-color-icon-brand: var(--lat-primitive-color-blue-600);
   --lat-color-icon-success: var(--lat-primitive-color-green-600);
   --lat-color-icon-warning: var(--lat-primitive-color-amber-600);
@@ -703,6 +706,7 @@
   --lat-color-icon-subtle: var(--lat-primitive-color-gray-600);
   --lat-color-icon-disabled: var(--lat-primitive-color-gray-700);
   --lat-color-icon-inverse: var(--lat-primitive-color-gray-900);
+  --lat-color-icon-icon-button: var(--lat-primitive-color-slate-50);
   --lat-color-icon-brand: var(--lat-primitive-color-blue-400);
   --lat-color-icon-success: var(--lat-primitive-color-green-400);
   --lat-color-icon-warning: var(--lat-primitive-color-amber-400);

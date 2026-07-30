@@ -63,23 +63,14 @@ export default {
     "icon-only padding (inner, around icon)": "spacing.4",
     "icon-only icon size": "sizing.icon.xs",
     "icon-only icon weight": "stroke-width.light",
-    "icon-only icon color (primary/filled)": "color.icon.inverse",
-    // Figma actually binds this to color/icon/icon/button (unported; a
-    // near-white/inverse tone) for BOTH filled and outline appearances. On
-    // primary's filled background it reads fine, so icon.inverse is a
-    // faithful substitute — same substitution Search's submit button already
-    // made.
-    "icon-only icon color (secondary/outline)": "color.icon.default",
-    // Figma binds this the same color/icon/icon/button token here too, but
-    // outline's background is transparent — making the icon nearly invisible.
-    // This is a real bug in the Figma file (independently flagged during the
-    // Calendar build), not a color to reproduce. icon.default is Calendar's
-    // own verified workaround for the identical bug on its nav buttons.
-    "icon-only icon color (ghost)": "color.icon.default",
-    // Ghost was added directly to Figma 2026-07-30 (in response to icon-only
-    // buttons all having a border) and bound to icon.default from the start,
-    // avoiding the color/icon/icon/button bug above entirely.
-    "ghost background (hover)": "color.action.secondary.hover",
-    "ghost background (pressed)": "color.action.secondary.pressed",
+    // All Button icons (icon-only or trailing, every appearance and state,
+    // including disabled) were rebound in Figma 2026-07-30 to a single
+    // uniform color/icon/icon/button, per explicit instruction — superseding
+    // the earlier per-appearance icon.inverse/icon.default workarounds this
+    // repo used to carry for the invisible-icon-bug on outline/ghost's
+    // transparent background. That bug is real and still present (this token
+    // is the same near-white value in both light and dark mode, aliasing
+    // primitive slate/50) — it is simply no longer worked around, by choice.
+    "icon color (all variants/states)": "color.icon.icon-button",
   },
 };
