@@ -1,7 +1,7 @@
 import React from "react";
 import "./Button.css";
 
-export type ButtonVariant = "primary" | "secondary";
+export type ButtonVariant = "primary" | "secondary" | "ghost";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps
@@ -11,6 +11,14 @@ export interface ButtonProps
   isLoading?: boolean;
   /** Optional trailing icon, e.g. `<Icon name="chevron-right" size="xs" />`. Omit for no icon. */
   icon?: React.ReactNode;
+  /**
+   * Renders a square, icon-only trigger (Figma's Button "icon only" variant).
+   * Pass the icon via `icon`, omit `children`, and always supply `aria-label`
+   * since no visible text remains for the accessible name. Same fixed size
+   * (36×36) regardless of `size` — Figma's icon-only variant doesn't scale
+   * with it either.
+   */
+  iconOnly?: boolean;
 }
 
 /**
@@ -20,14 +28,22 @@ export interface ButtonProps
  */
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { variant = "primary", size = "md", isLoading = false, icon, className, children, disabled, ...rest },
+    { variant = "primary", size = "md", isLoading = false, icon, iconOnly = false, className, children, disabled, ...rest },
     ref
   ) => {
+    if (process.env.NODE_ENV !== "production" && iconOnly && !rest["aria-label"]) {
+      console.warn("Button: iconOnly buttons must have an aria-label — there is no visible text for the accessible name.");
+    }
+    if (process.env.NODE_ENV !== "production" && variant === "ghost" && !iconOnly) {
+      console.warn("Button: the ghost variant is only defined in Figma for iconOnly buttons — its look with visible text is unverified.");
+    }
+
     const classes = [
       "lat-button",
       `lat-button--${variant}`,
       `lat-button--${size}`,
       isLoading ? "lat-button--loading" : "",
+      iconOnly ? "lat-button--icon-only" : "",
       className,
     ]
       .filter(Boolean)
@@ -43,13 +59,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading ? (
           <>
-            <span className="lat-button__visually-hidden">{children}</span>
+            {!iconOnly && <span className="lat-button__visually-hidden">{children}</span>}
             <span className="lat-button__spinner" aria-hidden="true">
               <span className="lat-button__spinner-dot" />
               <span className="lat-button__spinner-dot" />
               <span className="lat-button__spinner-dot" />
             </span>
           </>
+        ) : iconOnly ? (
+          <span className="lat-button__icon" aria-hidden="true">
+            {icon}
+          </span>
         ) : (
           <>
             {children}

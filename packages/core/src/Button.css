@@ -64,6 +64,65 @@
 .lat-button--md { padding: var(--lat-spacing-8); font-size: var(--lat-typography-button-font-size-md); line-height: var(--lat-typography-button-line-height-md); }
 .lat-button--lg { padding: var(--lat-spacing-8) var(--lat-spacing-24); font-size: var(--lat-font-size-500); line-height: var(--lat-font-line-height-500-normal); }
 
+/* Figma's icon-only variant uses radius/slimlg (--lat-radius-6) instead of
+   radius.input, constant across sizes. Padding does vary by size (verified
+   2026-07-30): sm/md/lg map to Figma's small/default/xl at spacing-6/8/12.
+   Figma's own "small" tier is actually non-square there (its inner icon
+   wrapper is 12x16, not 12x12) — not reproduced here; square padding on all
+   sides is assumed correct absent an explicit reason to match that asymmetry.
+   Overrides the size rules above regardless of source order (equal
+   specificity, declared later). */
+.lat-button--icon-only {
+  border-radius: var(--lat-radius-6);
+}
+.lat-button--icon-only.lat-button--sm { padding: var(--lat-spacing-6); }
+.lat-button--icon-only.lat-button--md { padding: var(--lat-spacing-8); }
+.lat-button--icon-only.lat-button--lg { padding: var(--lat-spacing-12); }
+
+/* Figma's icon-only structure is button padding + a nested LT-Icon instance
+   that has its own 4px padding around the actual icon (8+4+12+4+8=36 for md).
+   Mirrored here via the existing .lat-button__icon wrapper instead of adding
+   a new element. */
+.lat-button--icon-only .lat-button__icon {
+  padding: var(--lat-spacing-4);
+}
+
+/* .lat-icon sets its own color, so overriding it requires matching its
+   specificity via a descendant selector rather than relying on inherited
+   currentColor. Also pins size/weight to Figma's xs/light regardless of
+   what the caller's <Icon> was given. */
+.lat-button--icon-only .lat-icon {
+  width: var(--lat-sizing-icon-xs);
+  height: var(--lat-sizing-icon-xs);
+  stroke-width: var(--lat-stroke-width-light);
+}
+
+/* Figma binds both appearances' icon-only icon to the same color/icon/icon/button
+   token (unported; near-inverse). On a filled background that's visible —
+   matches Search's circular submit button precedent. */
+.lat-button--icon-only.lat-button--primary .lat-icon {
+  color: var(--lat-color-icon-inverse);
+}
+
+/* On the outline appearance's transparent background, that same token is a
+   real Figma-side bug: the icon is near-invisible. Using icon-default instead,
+   matching Calendar's nav-button, which hit the same bug and worked around it
+   the same way. */
+.lat-button--icon-only.lat-button--secondary .lat-icon {
+  color: var(--lat-color-icon-default);
+}
+
+/* Ghost's icon-only variant binds directly to color/icon/default in Figma —
+   no invisible-icon bug here, since it was built after the outline bug was
+   already known and avoided from the start. */
+.lat-button--icon-only.lat-button--ghost .lat-icon {
+  color: var(--lat-color-icon-default);
+}
+
+.lat-button--icon-only:disabled .lat-icon {
+  color: var(--lat-color-text-disabled);
+}
+
 .lat-button--primary {
   background-color: var(--lat-color-action-primary-default);
   color: var(--lat-color-text-on-brand);
@@ -85,3 +144,19 @@
 }
 .lat-button--secondary:not(:disabled):hover { background-color: var(--lat-color-action-secondary-hover); }
 .lat-button--secondary:not(:disabled):active { background-color: var(--lat-color-action-secondary-pressed); }
+
+/* Ghost — borderless/transparent, only defined in Figma for the icon-only
+   variant (added 2026-07-30 in response to icon-only buttons all having a
+   border). Not verified for regular text buttons; warns in dev if used
+   without iconOnly. */
+.lat-button--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--lat-color-text-primary);
+}
+.lat-button--ghost:not(:disabled):hover { background-color: var(--lat-color-action-secondary-hover); }
+.lat-button--ghost:not(:disabled):active { background-color: var(--lat-color-action-secondary-pressed); }
+.lat-button--ghost:disabled {
+  background-color: transparent;
+  border-color: transparent;
+}
