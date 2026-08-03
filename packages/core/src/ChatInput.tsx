@@ -32,7 +32,14 @@ export const ChatInput = React.forwardRef<HTMLInputElement, ChatInputProps>(
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onSubmit?.()}
         />
-        <button type="button" className="lat-chat-input__send" aria-label="Send message" onClick={onSubmit}>
+        <button
+          type="button"
+          className={["lat-chat-input__send", value.trim() ? "lat-chat-input__send--active" : ""]
+            .filter(Boolean)
+            .join(" ")}
+          aria-label="Send message"
+          onClick={onSubmit}
+        >
           <Icon name="arrow-up" size="md" />
         </button>
       </div>

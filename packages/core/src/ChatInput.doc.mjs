@@ -9,7 +9,9 @@ export default {
     { name: "placeholder", type: "string", default: '"Message Latent..."' },
   ],
   example: `<ChatInput value={message} onChange={setMessage} onSubmit={sendMessage} />`,
-  doNot: [],
+  doNot: [
+    "The send button's active (non-empty value) color isn't a documented Figma state — it's an app-requested affordance reusing color.action.primary.default, not a verified spec value.",
+  ],
   swizzlePath: "packages/core/src/ChatInput.tsx",
   // radius/slimlg (the leading/trailing button radius in Figma) hasn't
   // been ported to code — using the existing radius.input, same
@@ -27,6 +29,7 @@ export default {
     "field font-family": "font-family.sans",
     "field font-size": "font-style.body",
     "send background": "color.background.inverse",
+    "send background (active, has value)": "color.action.primary.default",
     "send icon color": "color.icon.inverse",
   },
 };
