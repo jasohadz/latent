@@ -496,6 +496,7 @@
   --lat-font-style-display: var(--lat-primitive-typography-font-size-1300);
   --lat-font-style-body: var(--lat-primitive-typography-font-size-300);
   --lat-font-style-caption: var(--lat-primitive-typography-font-size-100);
+  --lat-font-style-eyebrow: var(--lat-primitive-typography-font-size-100);
   --lat-font-style-h1: var(--lat-primitive-typography-font-size-1100);
   --lat-font-style-h2: var(--lat-primitive-typography-font-size-900);
   --lat-font-style-h3: var(--lat-primitive-typography-font-size-700);
@@ -655,7 +656,7 @@
   --lat-sizing-action-xl: var(--lat-primitive-dimensions-48);
 }
 
-[data-latent-mode="dark"] {
+:root[data-latent-mode="dark"] {
   --lat-color-text-primary: var(--lat-primitive-color-gray-50);
   --lat-color-text-secondary: var(--lat-primitive-color-gray-300);
   --lat-color-text-tertiary: var(--lat-primitive-color-gray-500);
@@ -720,7 +721,7 @@
   --lat-color-selection-text: var(--lat-primitive-color-blue-100);
 }
 
-[data-latent-density="condensed"] {
+:root[data-latent-density="condensed"] {
   --lat-spacing-0: 0px;
   --lat-spacing-2: 2px;
   --lat-spacing-4: 4px;
