@@ -26,6 +26,7 @@
   display: flex;
   align-items: center;
   flex: 1 1 auto;
+  min-width: 0;
   gap: var(--lat-spacing-8);
   padding: var(--lat-spacing-4) var(--lat-spacing-12) var(--lat-spacing-4) var(--lat-spacing-4);
   border-radius: var(--lat-radius-input);
