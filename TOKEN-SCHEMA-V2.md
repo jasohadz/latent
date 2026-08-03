@@ -48,11 +48,19 @@ packages/tokens/
   /* semantic, light mode is the default */
   --lat-color-action-primary-default: var(--lat-primitive-color-blue-600);
 }
-[data-latent-mode="dark"] {
+:root[data-latent-mode="dark"] {
   --lat-color-action-primary-default: var(--lat-primitive-color-blue-800); /* whatever dark actually maps to */
 }
 ```
-Density follows the same override pattern with `[data-latent-density="condensed"]`.
+The override block needs the `:root` prefix too, not just the attribute
+selector — `[data-latent-mode="dark"]` alone (specificity 0-1-0) is weaker
+than `:root[data-latent-theme="neutral"]` (0-2-0), so on an element carrying
+both attributes (the normal case: both live on `<html>`) the light-mode
+block would always win regardless of source order. Found and fixed
+2026-08-03 — theme.css previously shipped the under-specified version and
+dark mode silently never took effect.
+
+Density follows the same override pattern with `:root[data-latent-density="condensed"]` — same specificity fix applies.
 
 ## CLI changes required
 
