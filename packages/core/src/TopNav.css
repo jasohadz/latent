@@ -41,14 +41,3 @@
   grid-template-columns: repeat(2, 1fr);
   gap: var(--lat-spacing-4);
 }
-
-.lat-top-nav__panel--download {
-  display: flex;
-  flex-direction: column;
-  gap: var(--lat-spacing-4);
-}
-
-.lat-top-nav__panel-row {
-  display: flex;
-  gap: var(--lat-spacing-4);
-}

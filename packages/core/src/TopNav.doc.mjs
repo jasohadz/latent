@@ -9,7 +9,7 @@ export default {
     { name: "onCtaClick", type: "() => void", default: "undefined" },
     { name: "productItems", type: "Omit<MegaMenuItemProps, 'layout'>[]", default: "[]", description: "4 Standard-layout items for the Product panel's 2x2 grid." },
     { name: "downloadFeatured", type: "Omit<MegaMenuItemProps, 'layout'>", default: "undefined", description: "The single Featured-layout item in the Download panel." },
-    { name: "downloadItems", type: "Omit<MegaMenuItemProps, 'layout'>[]", default: "[]", description: "3 Standard-layout items in the Download panel's row." },
+    { name: "downloadItems", type: "Omit<MegaMenuItemProps, 'layout'>[]", default: "[]", description: "3 Standard-layout items, alongside downloadFeatured, in the same 2-column grid as the Product panel." },
   ],
   example: `<TopNav menu={menu} onMenuChange={setMenu} productItems={products} downloadFeatured={macDownload} downloadItems={otherDownloads} />`,
   doNot: [

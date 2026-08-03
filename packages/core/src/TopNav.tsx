@@ -65,13 +65,11 @@ export const TopNav = React.forwardRef<HTMLDivElement, TopNavProps>(
           </div>
         ) : null}
         {menu === "download" ? (
-          <div className="lat-top-nav__panel lat-top-nav__panel--download">
+          <div className="lat-top-nav__panel lat-top-nav__panel--grid">
             {downloadFeatured ? <MegaMenuItem layout="featured" {...downloadFeatured} /> : null}
-            <div className="lat-top-nav__panel-row">
-              {downloadItems.map((item, i) => (
-                <MegaMenuItem key={i} layout="standard" {...item} />
-              ))}
-            </div>
+            {downloadItems.map((item, i) => (
+              <MegaMenuItem key={i} layout="standard" {...item} />
+            ))}
           </div>
         ) : null}
       </div>
