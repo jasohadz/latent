@@ -5,6 +5,7 @@
   gap: var(--lat-spacing-4);
   border-radius: var(--lat-radius-input);
   border: 1px solid transparent;
+  font-family: var(--lat-font-family-sans);
   font-weight: var(--lat-font-weight-600);
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;

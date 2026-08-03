@@ -36,5 +36,6 @@
 
 .lat-mega-menu-item__description {
   color: var(--lat-color-text-tertiary);
+  font-family: var(--lat-font-family-sans);
   font-size: var(--lat-font-style-body-small);
 }

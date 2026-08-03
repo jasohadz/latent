@@ -6,6 +6,7 @@
   border-radius: var(--lat-radius-full);
   background-color: var(--lat-color-background-muted);
   color: var(--lat-color-text-primary);
+  font-family: var(--lat-font-family-sans);
   cursor: pointer;
 }
 
