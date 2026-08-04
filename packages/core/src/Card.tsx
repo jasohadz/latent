@@ -60,7 +60,11 @@ function ProgressiveBlur({ horizontal }: { horizontal: boolean }) {
         // was darkening/blurring almost the entire frame.
         const rank = horizontal ? i : n - 1 - i;
         const feather = 100 / n;
-        const coverage = ((rank + 1) / n) * 100;
+        // Pulled the whole ramp 15% back toward the anchor edge for the
+        // horizontal layout per feedback — the blur/tint was extending too
+        // far into the clear side of the photo.
+        const anchorOffset = horizontal ? 15 : 0;
+        const coverage = Math.max(0, ((rank + 1) / n) * 100 - anchorOffset);
         const solidEnd = Math.max(0, coverage - feather);
         const mask = `linear-gradient(${axis}, black 0%, black ${solidEnd}%, transparent ${coverage}%)`;
         return (
