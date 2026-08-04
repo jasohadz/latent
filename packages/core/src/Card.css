@@ -15,12 +15,29 @@
   align-items: stretch;
 }
 
+/* Figma insets the whole card 4px around the image+content stack for the
+   top-image layout only — Media Left/Right have no outer padding, image
+   bleeds flush to the card edge (already the default, nothing to add). */
+.lat-card--media {
+  padding: var(--lat-spacing-4);
+}
+
 .lat-card__content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--lat-spacing-16);
   padding: var(--lat-spacing-32);
+}
+
+/* Figma's content block uses smaller padding/gap once a media image is
+   present (padding-24/gap-12) vs. the media-less Content layout's
+   padding-32/gap-16 above. */
+.lat-card--media .lat-card__content,
+.lat-card--media-left .lat-card__content,
+.lat-card--media-right .lat-card__content {
+  gap: var(--lat-spacing-12);
+  padding: var(--lat-spacing-24);
 }
 
 .lat-card__icon {
@@ -84,20 +101,26 @@
   object-fit: cover;
 }
 
-.lat-card__blur-stack {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
+/* Figma's real crop for this layout's photo is zoomed in further than a
+   plain cover fit (its imageTransform shows only the leftmost ~70% of the
+   image's width and the middle ~55% of its height, not the full width/~78%
+   height a bare object-fit: cover produces) — reproduced by scaling the
+   already-cover-fitted image up ~1.431x from its left edge (horizontal
+   crop is left-anchored in Figma, not centered) while keeping it centered
+   vertically (Figma's vertical crop is symmetric around the mid-line). */
+.lat-card--image-overlay-horizontal .lat-card__overlay-image {
+  transform: scale(1.431);
+  transform-origin: 0% 50%;
 }
+
+.lat-card__blur-stack,
 .lat-card__blur-stack--horizontal {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: row;
 }
 .lat-card__blur-band {
-  flex: 1 1 0;
+  position: absolute;
+  inset: 0;
 }
 
 .lat-card__overlay-content {
@@ -115,9 +138,35 @@
   height: 100%;
   justify-content: flex-end;
 }
+.lat-card--image-overlay-horizontal .lat-card__body--inverse {
+  max-width: 50%;
+}
 
 .lat-card__eyebrow--inverse,
 .lat-card__title--inverse,
 .lat-card__body--inverse {
-  color: var(--lat-color-text-inverse);
+  /* color.text.on-brand, not color.text.inverse — confirmed against the real
+     bound Figma variable via get_design_context. on-brand is fixed white in
+     both modes (needed here: overlay text sits on a photo, not the theme
+     background); inverse flips to near-black in dark mode, which was
+     rendering illegible dark-on-dark text on this exact layout. */
+  color: var(--lat-color-text-on-brand);
+}
+
+/* The overlay CTA's real Figma appearance (get_design_context) is a
+   transparent-fill button with a color.border.brand border and
+   color.text.link label — not Button's ported secondary variant (neutral
+   border/text), which is what the generic <Button variant="secondary">
+   below renders by default. Scoped override, real tokens, no new color
+   invented. */
+.lat-card--image-overlay .lat-card__overlay-content .lat-button,
+.lat-card--image-overlay-horizontal .lat-card__overlay-content .lat-button {
+  background-color: transparent;
+  border-color: var(--lat-color-border-brand);
+  color: var(--lat-color-text-link);
+}
+.lat-card--image-overlay .lat-card__overlay-content .lat-button:not(:disabled):hover,
+.lat-card--image-overlay-horizontal .lat-card__overlay-content .lat-button:not(:disabled):hover {
+  background-color: var(--lat-color-background-brand);
+  color: var(--lat-color-text-link-hover);
 }

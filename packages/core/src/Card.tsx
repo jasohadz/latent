@@ -34,18 +34,48 @@ const BLUR_STEPS = [2, 9, 16, 23, 30];
 const TINT_STEPS = [0.06, 0.2, 0.34, 0.48, 0.62];
 
 function ProgressiveBlur({ horizontal }: { horizontal: boolean }) {
+  // Vertical: array order (ascending blur) maps top→bottom, which is
+  // correct as-is — text sits at the bottom (margin-top: auto), so the
+  // bottom band should be the most blurred/tinted, matching [2..30] in
+  // document order. Horizontal: text is anchored LEFT instead, so the
+  // *left* band needs to be the most blurred/tinted — reversing the arrays
+  // for this case, rather than the vertical case's natural order.
+  const blurSteps = horizontal ? [...BLUR_STEPS].reverse() : BLUR_STEPS;
+  const tintSteps = horizontal ? [...TINT_STEPS].reverse() : TINT_STEPS;
+  const n = blurSteps.length;
+  // 0% on this axis must land on the anchored (heaviest-blur) edge: left
+  // for horizontal (already true given the reversal above via "to right"),
+  // bottom for vertical — hence "to top", not "to bottom".
+  const axis = horizontal ? "to right" : "to top";
+
   return (
     <div className={horizontal ? "lat-card__blur-stack--horizontal" : "lat-card__blur-stack"}>
-      {BLUR_STEPS.map((blur, i) => (
-        <div
-          key={blur}
-          className="lat-card__blur-band"
-          style={{
-            backdropFilter: `blur(${blur}px)`,
-            backgroundColor: `rgba(0, 0, 0, ${TINT_STEPS[i]})`,
-          }}
-        />
-      ))}
+      {blurSteps.map((blur, i) => {
+        // rank 0 = heaviest band, sitting right at the anchor edge (0% on
+        // the axis above). Each successive rank covers a wider swath
+        // reaching further from the anchor before fading to transparent,
+        // so bands pile up near the anchor (max cumulative blur/tint) and
+        // thin out one by one toward the clear side of the image — not a
+        // one-directional ramp that stays opaque past its own band, which
+        // was darkening/blurring almost the entire frame.
+        const rank = horizontal ? i : n - 1 - i;
+        const feather = 100 / n;
+        const coverage = ((rank + 1) / n) * 100;
+        const solidEnd = Math.max(0, coverage - feather);
+        const mask = `linear-gradient(${axis}, black 0%, black ${solidEnd}%, transparent ${coverage}%)`;
+        return (
+          <div
+            key={blur}
+            className="lat-card__blur-band"
+            style={{
+              backdropFilter: `blur(${blur}px)`,
+              backgroundColor: `rgba(0, 0, 0, ${tintSteps[i]})`,
+              WebkitMaskImage: mask,
+              maskImage: mask,
+            }}
+          />
+        );
+      })}
     </div>
   );
 }

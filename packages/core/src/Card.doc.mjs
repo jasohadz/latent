@@ -48,6 +48,10 @@ export default {
     "title font-weight": "font-weight.600",
     "body color": "color.text.secondary",
     "body font-size": "font-style.body",
-    "overlay text color": "color.text.inverse",
+    "overlay text color": "color.text.on-brand",
+    "overlay CTA border": "color.border.brand",
+    "overlay CTA text": "color.text.link",
+    "overlay CTA background (hover)": "color.background.brand",
+    "overlay CTA text (hover)": "color.text.link-hover",
   },
 };
