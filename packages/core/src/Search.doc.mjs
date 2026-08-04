@@ -1,6 +1,6 @@
 export default {
   name: "Search",
-  summary: "Search field with a leading search icon, optional trailing clear button, and an attached circular submit button reusing Button's primary color ramp.",
+  summary: "Search field with an optional trailing clear button and an attached circular submit button reusing Button's primary color ramp. No leading icon rendered — Figma's Search component has a leading-icon boolean property, but it's off in every one of the 16 current variants.",
   props: [
     { name: "appearance", type: '"filled" | "outline"', default: "outline" },
     { name: "value", type: "string", default: "—" },
@@ -31,7 +31,6 @@ export default {
     "field padding": "spacing.12",
     "focus ring color": "color.border.focus",
     "focus ring width": "sizing.border.thin",
-    "leading icon color": "color.icon.subtle",
     "input text color": "color.text.primary",
     "input placeholder color": "color.text.tertiary",
     "input font-size": "font-style.body",

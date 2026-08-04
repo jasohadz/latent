@@ -4,7 +4,7 @@ export default {
   props: [
     { name: "name", type: "string", default: "—", description: "Icon name in kebab-case, matching Lucide's own naming and the names shown on the Figma Icons foundations page (e.g. \"arrow-up\", \"trash-2\")." },
     { name: "size", type: '"xs" | "sm" | "md" | "lg" | "xl"', default: "md", description: "Maps to --lat-sizing-icon-* (12/16/20/24/32px)." },
-    { name: "weight", type: '"light" | "regular" | "bold"', default: "regular", description: "Stroke weight (1.5 / 2 / 2.5px). Matches the Weight variant property on the Figma Icons foundations page." },
+    { name: "weight", type: '"light" | "regular" | "bold"', default: "light", description: "Stroke weight (1.5 / 2 / 2.5px). Matches the Weight variant property on the Figma Icons foundations page. Default lowered from regular to light 2026-08-03, confirmed 2026-08-04 against LT-Icon's own default variants in Figma (all render weight=light)." },
   ],
   example: `<Icon name="arrow-up" size="md" />`,
   doNot: [

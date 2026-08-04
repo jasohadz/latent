@@ -37,11 +37,6 @@
   outline-offset: 1px;
 }
 
-.lat-search__leading-icon {
-  flex-shrink: 0;
-  color: var(--lat-color-icon-subtle);
-}
-
 .lat-search__input {
   flex: 1 1 auto;
   min-width: 0;

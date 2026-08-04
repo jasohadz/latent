@@ -27,7 +27,7 @@ function toPascalCase(kebab: string): string {
  * through a className) — never hardcode a fill or stroke width.
  */
 export const Icon = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ name, size = "md", weight = "regular", className, ...rest }, ref) => {
+  ({ name, size = "md", weight = "light", className, ...rest }, ref) => {
     const LucideIcon = icons[toPascalCase(name) as keyof typeof icons] as LucideIcon | undefined;
 
     if (!LucideIcon) {
