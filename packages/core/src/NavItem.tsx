@@ -10,6 +10,13 @@ export interface NavItemProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
   showChevron?: boolean;
   /** e.g. "chevron-down" / "chevron-up" — Nav Dropdown flips this based on its own expanded state. */
   chevronName?: string;
+  /**
+   * Renders just the icon in a square button, dropping the label and
+   * chevron regardless of `showChevron` — used by Side Nav's Collapsed
+   * state. The existing padding naturally squares up once the label's
+   * gone (no separate fixed size needed).
+   */
+  iconOnly?: boolean;
 }
 
 /**
@@ -26,6 +33,7 @@ export const NavItem = React.forwardRef<HTMLButtonElement, NavItemProps>(
       icon,
       showChevron = true,
       chevronName = "chevron-down",
+      iconOnly = false,
       disabled,
       className,
       ...rest
@@ -35,16 +43,17 @@ export const NavItem = React.forwardRef<HTMLButtonElement, NavItemProps>(
     const classes = [
       "lat-nav-item",
       selected ? "lat-nav-item--selected" : "",
+      iconOnly ? "lat-nav-item--icon-only" : "",
       className,
     ]
       .filter(Boolean)
       .join(" ");
 
     return (
-      <button ref={ref} type="button" className={classes} disabled={disabled} {...rest}>
+      <button ref={ref} type="button" className={classes} disabled={disabled} aria-label={iconOnly ? label : undefined} {...rest}>
         {showIcon && icon ? <span className="lat-nav-item__icon">{icon}</span> : null}
-        <span className="lat-nav-item__label">{label}</span>
-        {showChevron ? (
+        {iconOnly ? null : <span className="lat-nav-item__label">{label}</span>}
+        {!iconOnly && showChevron ? (
           <Icon name={chevronName} size="sm" weight="light" className="lat-nav-item__chevron" />
         ) : null}
       </button>

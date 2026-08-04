@@ -8,6 +8,7 @@ export default {
     { name: "icon", type: "React.ReactNode", default: "undefined" },
     { name: "showChevron", type: "boolean", default: "true" },
     { name: "chevronName", type: "string", default: '"chevron-down"', description: "Nav Dropdown flips this to \"chevron-up\" based on its own expanded state." },
+    { name: "iconOnly", type: "boolean", default: "false", description: "Drops the label and chevron, leaving a square icon button — used by Side Nav's Collapsed state. Existing padding squares up on its own once the label's gone." },
     { name: "disabled", type: "boolean", default: "false" },
   ],
   example: `<NavItem label="Dashboard" icon={<Icon name="layout-dashboard" />} selected onClick={handleClick} />`,

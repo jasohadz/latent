@@ -13,11 +13,20 @@
   width: 240px;
 }
 
+/* Collapsed is a narrow icon rail now (Figma redesign), not a horizontal
+   brand pill — logo/brand hide entirely, leaving only the toggle button
+   above a vertical, icon-only nav list. */
 .lat-side-nav--collapsed {
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
   gap: var(--lat-spacing-8);
-  padding: var(--lat-spacing-8) var(--lat-spacing-12);
+  padding: var(--lat-spacing-12);
+}
+
+/* Figma's collapsed NavList keeps its top padding but drops the bottom
+   padding entirely (asymmetric) — unlike the expanded list's symmetric
+   12/0, so this is scoped rather than folded into the shared class. */
+.lat-side-nav--collapsed .lat-side-nav__list {
+  padding-bottom: 0;
 }
 
 .lat-side-nav__header {
@@ -25,6 +34,11 @@
   align-items: center;
   gap: var(--lat-spacing-8);
   padding-bottom: var(--lat-spacing-8);
+}
+
+.lat-side-nav__header--collapsed {
+  justify-content: center;
+  padding-bottom: 0;
 }
 
 .lat-side-nav__brand {

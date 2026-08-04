@@ -17,9 +17,10 @@ export interface SideNavProps {
 }
 
 /**
- * SideNav — a floating sidebar navigation panel. Collapsed tucks
- * everything into a compact brand pill with an expand toggle; Expanded
- * shows the full nav list plus a footer row. Styling comes entirely from
+ * SideNav — a floating sidebar navigation panel. Expanded shows the brand
+ * header, full nav list, and a footer row. Collapsed is a narrow icon
+ * rail: brand/footer hide entirely, and the same nav items render
+ * icon-only above just the expand toggle. Styling comes entirely from
  * --lat-* custom properties.
  */
 export const SideNav = React.forwardRef<HTMLDivElement, SideNavProps>(
@@ -48,13 +49,20 @@ export const SideNav = React.forwardRef<HTMLDivElement, SideNavProps>(
     if (collapsed) {
       return (
         <div ref={ref} className={classes}>
-          {logo}
-          <span className="lat-side-nav__brand">{brand}</span>
-          {showToggleIcon ? (
-            <button type="button" className="lat-side-nav__toggle" aria-label="Expand" onClick={onToggleCollapse}>
-              <Icon name="panel-left" size="sm" weight="light" />
-            </button>
-          ) : null}
+          <div className="lat-side-nav__header lat-side-nav__header--collapsed">
+            {showToggleIcon ? (
+              <button type="button" className="lat-side-nav__toggle" aria-label="Expand" onClick={onToggleCollapse}>
+                <Icon name="panel-left" size="sm" weight="light" />
+              </button>
+            ) : null}
+          </div>
+          <div className="lat-side-nav__list">
+            {React.Children.map(children, (child) =>
+              React.isValidElement(child)
+                ? React.cloneElement(child as React.ReactElement<{ iconOnly?: boolean }>, { iconOnly: true })
+                : child
+            )}
+          </div>
         </div>
       );
     }

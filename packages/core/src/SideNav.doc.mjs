@@ -1,15 +1,15 @@
 export default {
   name: "SideNav",
-  summary: "A floating sidebar navigation panel. Expanded shows the full item list; Collapsed tucks everything into a compact brand pill with an expand toggle.",
+  summary: "A floating sidebar navigation panel. Expanded shows the full item list plus brand header and footer; Collapsed is a narrow icon rail — brand/footer hide, and the same nav items render icon-only above just the expand toggle.",
   props: [
     { name: "collapsed", type: "boolean", default: "false" },
-    { name: "brand", type: "string", default: '"Acme Inc."' },
-    { name: "logo", type: "React.ReactNode", default: "undefined", description: "Latent's own logo mark isn't a ported component — supply your own brand icon." },
+    { name: "brand", type: "string", default: '"Acme Inc."', description: "Hidden while collapsed — Figma's Collapsed instance shows only the toggle in its header, no logo/brand." },
+    { name: "logo", type: "React.ReactNode", default: "undefined", description: "Latent's own logo mark isn't a ported component — supply your own brand icon. Hidden while collapsed, same as brand." },
     { name: "showToggleIcon", type: "boolean", default: "true" },
     { name: "onToggleCollapse", type: "() => void", default: "undefined" },
-    { name: "footerLabel", type: "string", default: '"Privacy"' },
+    { name: "footerLabel", type: "string", default: '"Privacy"', description: "Not rendered while collapsed — Figma's Collapsed instance has no footer row at all." },
     { name: "showFooterIcon", type: "boolean", default: "true" },
-    { name: "children", type: "React.ReactNode", default: "undefined", description: "Real NavItem / NavDropdown instances, in order. Ignored while collapsed." },
+    { name: "children", type: "React.ReactNode", default: "undefined", description: "Real NavItem / NavDropdown instances, in order. Rendered in both states — collapsed clones each child with iconOnly, so pass the same children regardless of collapsed state." },
   ],
   example: `<SideNav brand="Acme Inc." collapsed={collapsed} onToggleCollapse={() => setCollapsed(!collapsed)}><NavItem label="Overview" selected /><NavDropdown label="Resources" expanded={open} onToggle={setOpen} subItems={subs} /></SideNav>`,
   doNot: [

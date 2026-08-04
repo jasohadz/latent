@@ -16,6 +16,13 @@ export interface NavDropdownProps {
   expanded: boolean;
   onToggle: (expanded: boolean) => void;
   subItems: NavDropdownSubItem[];
+  /**
+   * Renders just the trigger's icon, matching NavItem's own iconOnly —
+   * used by Side Nav's Collapsed state. The sub-list never renders in this
+   * mode regardless of `expanded`, matching Figma's Collapsed instance
+   * (which has no sub-list content at all, not just a hidden one).
+   */
+  iconOnly?: boolean;
   className?: string;
 }
 
@@ -27,18 +34,19 @@ export interface NavDropdownProps {
  * from --lat-* custom properties.
  */
 export const NavDropdown = React.forwardRef<HTMLDivElement, NavDropdownProps>(
-  ({ label, icon, selected = false, expanded, onToggle, subItems, className }, ref) => {
+  ({ label, icon, selected = false, expanded, onToggle, subItems, iconOnly = false, className }, ref) => {
     return (
       <div ref={ref} className={["lat-nav-dropdown", className].filter(Boolean).join(" ")}>
         <NavItem
           label={label}
           icon={icon}
           selected={selected}
+          iconOnly={iconOnly}
           chevronName={expanded ? "chevron-up" : "chevron-down"}
           onClick={() => onToggle(!expanded)}
           aria-expanded={expanded}
         />
-        {expanded ? (
+        {!iconOnly && expanded ? (
           <div className="lat-nav-dropdown__sub-list">
             {subItems.map((item) => (
               <NavSubItem key={item.label} label={item.label} selected={item.selected} onClick={item.onClick} />

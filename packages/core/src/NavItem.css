@@ -1,6 +1,7 @@
 .lat-nav-item {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
   gap: var(--lat-spacing-10);
   padding: var(--lat-spacing-8) var(--lat-spacing-10);
@@ -9,6 +10,14 @@
   background: transparent;
   cursor: pointer;
   text-align: left;
+}
+
+/* Dropping the label/chevron leaves only the icon, so the existing
+   padding (8/10) squares up to exactly 36x36 on its own — matches
+   Figma's Collapsed Nav Item exactly, no fixed size needed. Width still
+   comes from the container (Side Nav's collapsed list is sized to match). */
+.lat-nav-item--icon-only {
+  width: auto;
 }
 
 .lat-nav-item:hover:not(:disabled) {
