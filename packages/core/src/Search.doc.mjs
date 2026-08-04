@@ -12,6 +12,7 @@ export default {
   example: `<Search appearance="outline" value={query} onChange={setQuery} onSubmit={handleSearch} />`,
   doNot: [
     "Don't expect a small/condensed size tier — built at one size (Density=Default) for v1, per Figma's own documented gap.",
+    "Don't expect a leading icon inside the field — Figma's Search component has a leading-icon boolean property, but it's off in all 16 current variants, so it isn't built. Revisit if a variant ever turns it on.",
   ],
   swizzlePath: "packages/core/src/Search.tsx",
   // Submit button is a bespoke circular element, not a <Button> instance —
