@@ -1,0 +1,294 @@
+<!-- Latent Sync — plugin UI. Inline CSS/JS on purpose: the repo has no build
+     step/bundler (see CLAUDE.md), and Figma loads this file's contents
+     directly as __html__, so a separate ui.js wouldn't resolve at runtime. -->
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    font: 12px -apple-system, "Inter", "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 12px;
+    color: #1a1a1a;
+  }
+  h2 { font-size: 13px; margin: 0 0 8px; }
+  fieldset { border: 1px solid #e0e0e0; border-radius: 6px; margin: 0 0 10px; padding: 8px 10px 10px; }
+  legend { font-size: 11px; font-weight: 600; color: #555; padding: 0 4px; }
+  label { display: block; font-size: 11px; color: #555; margin: 6px 0 2px; }
+  input[type="text"], input[type="password"] {
+    width: 100%; padding: 5px 6px; font-size: 12px;
+    border: 1px solid #ccc; border-radius: 4px; outline: none;
+  }
+  input:focus { border-color: #18a0fb; }
+  .row { display: flex; gap: 8px; }
+  .row > div { flex: 1; }
+  button {
+    width: 100%; padding: 7px 0; margin-top: 6px; font-size: 12px; font-weight: 500;
+    border: none; border-radius: 4px; cursor: pointer;
+  }
+  .btn-primary { background: #18a0fb; color: #fff; }
+  .btn-primary:disabled { background: #b8dffb; cursor: not-allowed; }
+  .btn-secondary { background: #f0f0f0; color: #1a1a1a; }
+  #log {
+    margin-top: 10px; padding: 8px; background: #f7f7f7; border-radius: 4px;
+    font-family: ui-monospace, monospace; font-size: 10.5px; white-space: pre-wrap;
+    max-height: 220px; overflow-y: auto; line-height: 1.5;
+  }
+  .warn { color: #a15c00; }
+  .err { color: #c0392b; }
+  .ok { color: #1a7f37; }
+  a { color: #18a0fb; }
+</style>
+
+<h2>Latent Sync</h2>
+
+<fieldset>
+  <legend>GitHub repo</legend>
+  <div class="row">
+    <div>
+      <label for="owner">Owner</label>
+      <input type="text" id="owner" placeholder="jasohadz" />
+    </div>
+    <div>
+      <label for="repo">Repo</label>
+      <input type="text" id="repo" placeholder="latent" />
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label for="baseBranch">Base branch</label>
+      <input type="text" id="baseBranch" placeholder="main" />
+    </div>
+    <div>
+      <label for="syncBranch">Sync branch</label>
+      <input type="text" id="syncBranch" placeholder="figma-sync" />
+    </div>
+  </div>
+  <label for="token">GitHub token (fine-grained PAT, Contents: Read &amp; write, this repo only)</label>
+  <input type="password" id="token" placeholder="github_pat_..." />
+</fieldset>
+
+<button class="btn-secondary" id="extractBtn">Extract from Figma</button>
+<button class="btn-primary" id="syncBtn" disabled>Sync to GitHub branch</button>
+
+<div id="log">Ready. Fill in settings, then Extract.</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const fields = ["owner", "repo", "baseBranch", "syncBranch", "token"];
+  const logEl = $("log");
+  let lastExtraction = null;
+
+  function log(line, cls) {
+    const div = document.createElement("div");
+    if (cls) div.className = cls;
+    div.textContent = line;
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function clearLog() {
+    logEl.innerHTML = "";
+  }
+
+  function currentSettings() {
+    const settings = {};
+    for (const f of fields) settings[f] = $(f).value.trim();
+    return settings;
+  }
+
+  function applySettings(settings) {
+    for (const f of fields) {
+      if (settings[f]) $(f).value = settings[f];
+    }
+    if (!$("baseBranch").value) $("baseBranch").value = "main";
+    if (!$("syncBranch").value) $("syncBranch").value = "figma-sync";
+  }
+
+  for (const f of fields) {
+    $(f).addEventListener("change", () => {
+      parent.postMessage({ pluginMessage: { type: "save-settings", settings: currentSettings() } }, "*");
+    });
+  }
+
+  parent.postMessage({ pluginMessage: { type: "get-settings" } }, "*");
+
+  window.onmessage = async (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+
+    if (msg.type === "settings") {
+      applySettings(msg.settings || {});
+      return;
+    }
+
+    if (msg.type === "extract-error") {
+      log(`Extraction failed: ${msg.message}`, "err");
+      $("extractBtn").disabled = false;
+      return;
+    }
+
+    if (msg.type === "extract-result") {
+      lastExtraction = { tokens: msg.tokens, styles: msg.styles };
+      const tokenCounts = Object.fromEntries(
+        Object.entries(msg.tokens).map(([layer, obj]) => [layer, JSON.stringify(obj).length])
+      );
+      log(`Extracted variables: ${summarizeLayers(msg.tokens)}`, "ok");
+      log(`Extracted styles: ${Object.keys(msg.styles.text).length} text, ${Object.keys(msg.styles.effect).length} effect`, "ok");
+      for (const w of msg.warnings) log(`Warning: ${w}`, "warn");
+      $("extractBtn").disabled = false;
+      $("syncBtn").disabled = false;
+      return;
+    }
+  };
+
+  function summarizeLayers(tokens) {
+    return Object.entries(tokens)
+      .map(([layer, obj]) => `${layer}=${countLeaves(obj)}`)
+      .join(", ");
+  }
+
+  function countLeaves(obj) {
+    if (obj === null || typeof obj !== "object") return 1;
+    if ("value" in obj && Object.keys(obj).length === 1) return 1;
+    return Object.values(obj).reduce((sum, v) => sum + countLeaves(v), 0);
+  }
+
+  $("extractBtn").addEventListener("click", () => {
+    $("extractBtn").disabled = true;
+    $("syncBtn").disabled = true;
+    clearLog();
+    log("Extracting variables and styles from Figma...");
+    parent.postMessage({ pluginMessage: { type: "extract" } }, "*");
+  });
+
+  // --- GitHub sync ---
+
+  async function githubRequest(base, token, path, opts = {}) {
+    const res = await fetch(`https://api.github.com/repos/${base.owner}/${base.repo}${path}`, {
+      ...opts,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        ...(opts.body ? { "Content-Type": "application/json" } : {}),
+        ...(opts.headers || {}),
+      },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`GitHub API ${res.status} on ${path}: ${body.slice(0, 300)}`);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  async function syncToGitHub(settings, tokensJson, stylesJson) {
+    const base = { owner: settings.owner, repo: settings.repo };
+    const token = settings.token;
+    const baseBranch = settings.baseBranch || "main";
+    const syncBranch = settings.syncBranch || "figma-sync";
+
+    log(`Reading ${baseBranch}...`);
+    const baseRef = await githubRequest(base, token, `/git/ref/heads/${baseBranch}`);
+    const baseSha = baseRef.object.sha;
+
+    let branchSha;
+    try {
+      const branchRef = await githubRequest(base, token, `/git/ref/heads/${syncBranch}`);
+      branchSha = branchRef.object.sha;
+      log(`Found existing branch ${syncBranch}, updating it.`);
+    } catch {
+      log(`Creating branch ${syncBranch} from ${baseBranch}...`);
+      await githubRequest(base, token, `/git/refs`, {
+        method: "POST",
+        body: JSON.stringify({ ref: `refs/heads/${syncBranch}`, sha: baseSha }),
+      });
+      branchSha = baseSha;
+    }
+
+    const branchCommit = await githubRequest(base, token, `/git/commits/${branchSha}`);
+
+    log("Uploading blobs...");
+    const tokensBlob = await githubRequest(base, token, `/git/blobs`, {
+      method: "POST",
+      body: JSON.stringify({ content: tokensJson, encoding: "utf-8" }),
+    });
+    const stylesBlob = await githubRequest(base, token, `/git/blobs`, {
+      method: "POST",
+      body: JSON.stringify({ content: stylesJson, encoding: "utf-8" }),
+    });
+
+    log("Creating tree + commit...");
+    const tree = await githubRequest(base, token, `/git/trees`, {
+      method: "POST",
+      body: JSON.stringify({
+        base_tree: branchCommit.tree.sha,
+        tree: [
+          { path: "packages/tokens/figma-export.live.json", mode: "100644", type: "blob", sha: tokensBlob.sha },
+          { path: "packages/tokens/styles-export.live.json", mode: "100644", type: "blob", sha: stylesBlob.sha },
+        ],
+      }),
+    });
+
+    const commit = await githubRequest(base, token, `/git/commits`, {
+      method: "POST",
+      body: JSON.stringify({
+        message: `Sync Figma export via Latent Sync plugin (${new Date().toISOString()})`,
+        tree: tree.sha,
+        parents: [branchSha],
+      }),
+    });
+
+    await githubRequest(base, token, `/git/refs/heads/${syncBranch}`, {
+      method: "PATCH",
+      body: JSON.stringify({ sha: commit.sha }),
+    });
+
+    return {
+      commitSha: commit.sha,
+      compareUrl: `https://github.com/${base.owner}/${base.repo}/compare/${baseBranch}...${syncBranch}?expand=1`,
+    };
+  }
+
+  $("syncBtn").addEventListener("click", async () => {
+    if (!lastExtraction) return;
+    const settings = currentSettings();
+    parent.postMessage({ pluginMessage: { type: "save-settings", settings } }, "*");
+
+    if (!settings.owner || !settings.repo || !settings.token) {
+      log("Fill in owner, repo, and token first.", "err");
+      return;
+    }
+
+    $("syncBtn").disabled = true;
+    $("extractBtn").disabled = true;
+    try {
+      const tokensJson = JSON.stringify(
+        {
+          _comment: `Generated by the Latent Sync Figma plugin on ${new Date().toISOString()}. Do not hand-edit — re-run the plugin instead.`,
+          ...lastExtraction.tokens,
+        },
+        null,
+        2
+      ) + "\n";
+      const stylesJson = JSON.stringify(
+        {
+          _comment: `Generated by the Latent Sync Figma plugin on ${new Date().toISOString()}. Do not hand-edit — re-run the plugin instead.`,
+          ...lastExtraction.styles,
+        },
+        null,
+        2
+      ) + "\n";
+
+      const { compareUrl, commitSha } = await syncToGitHub(settings, tokensJson, stylesJson);
+      log(`Committed ${commitSha.slice(0, 7)} to ${settings.syncBranch || "figma-sync"}.`, "ok");
+      log(`Review/merge: ${compareUrl}`, "ok");
+      log(`After merging, still run sync figma / check-styles / check-parity — this only automates the export step.`);
+    } catch (error) {
+      log(`Sync failed: ${error.message}`, "err");
+    } finally {
+      $("syncBtn").disabled = false;
+      $("extractBtn").disabled = false;
+    }
+  });
+</script>
