@@ -329,10 +329,12 @@
           "dark": "{color.gray.900}"
         }
       },
-      "icon-button": {
-        "value": {
-          "light": "{color.slate.50}",
-          "dark": "{color.slate.50}"
+      "icon": {
+        "button": {
+          "value": {
+            "light": "{color.slate.50}",
+            "dark": "{color.slate.50}"
+          }
         }
       },
       "brand": {
@@ -866,7 +868,7 @@
         "dark": "{border.radius.100}"
       }
     },
-    "6": {
+    "slimlg": {
       "value": {
         "light": "{border.radius.150}",
         "dark": "{border.radius.150}"

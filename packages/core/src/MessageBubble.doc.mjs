@@ -8,9 +8,11 @@ export default {
   example: `<MessageBubble sender="assistant">How can I help?</MessageBubble>`,
   doNot: [],
   swizzlePath: "packages/core/src/MessageBubble.tsx",
-  // radius/slimlg (Figma's actual bubble radius) hasn't been ported to
-  // code — using the existing radius.input, same substitution used
-  // elsewhere for this un-ported token. Text color for the assistant
+  // Figma's actual bubble radius is radius/slimlg, now ported to code as
+  // radius.slimlg (2026-08-20) — this still uses radius.input as a
+  // substitute, unchanged since that substitution predates the port and
+  // wasn't re-verified against Figma here; worth checking whether it should
+  // switch to radius.slimlg now that it's available. Text color for the assistant
   // bubble (color/text/on-brand, white) is inferred from its blue
   // color/action/primary/default fill matching Button's primary variant —
   // not independently re-verified against the exact Figma text node due

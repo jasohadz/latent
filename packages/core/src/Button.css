@@ -65,16 +65,16 @@
 .lat-button--md { padding: var(--lat-spacing-8); font-size: var(--lat-typography-button-font-size-md); line-height: var(--lat-typography-button-line-height-md); }
 .lat-button--lg { padding: var(--lat-spacing-8) var(--lat-spacing-24); font-size: var(--lat-font-size-500); line-height: var(--lat-font-line-height-500-normal); }
 
-/* Figma's icon-only variant uses radius/slimlg (--lat-radius-6) instead of
-   radius.input, constant across sizes. Padding does vary by size (verified
-   2026-07-30): sm/md/lg map to Figma's small/default/xl at spacing-6/8/12.
-   Figma's own "small" tier is actually non-square there (its inner icon
-   wrapper is 12x16, not 12x12) — not reproduced here; square padding on all
-   sides is assumed correct absent an explicit reason to match that asymmetry.
+/* Figma's icon-only variant uses radius/slimlg instead of radius.input,
+   constant across sizes. Padding does vary by size (verified 2026-07-30):
+   sm/md/lg map to Figma's small/default/xl at spacing-6/8/12. Figma's own
+   "small" tier is actually non-square there (its inner icon wrapper is
+   12x16, not 12x12) — not reproduced here; square padding on all sides is
+   assumed correct absent an explicit reason to match that asymmetry.
    Overrides the size rules above regardless of source order (equal
    specificity, declared later). */
 .lat-button--icon-only {
-  border-radius: var(--lat-radius-6);
+  border-radius: var(--lat-radius-slimlg);
 }
 .lat-button--icon-only.lat-button--sm { padding: var(--lat-spacing-6); }
 .lat-button--icon-only.lat-button--md { padding: var(--lat-spacing-8); }

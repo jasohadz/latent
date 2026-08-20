@@ -3,7 +3,7 @@ export default {
   summary: "Primitive action trigger. Three variants, three sizes, optional loading state, optional icon-only square mode.",
   props: [
     { name: "variant", type: '"primary" | "secondary" | "ghost"', default: "primary", description: "Visual weight. Use primary for the single main action per view; secondary for everything else. ghost is borderless/transparent — verified in Figma only for iconOnly buttons (e.g. a toolbar trigger); using it with visible text is unverified and warns in dev." },
-    { name: "size", type: '"sm" | "md" | "lg"', default: "md", description: "Padding and font-size scale. When iconOnly is true, this instead selects Figma's icon-only spacing tier: sm=spacing-6, md=spacing-8, lg=spacing-12 (radius stays radius.6 across all three)." },
+    { name: "size", type: '"sm" | "md" | "lg"', default: "md", description: "Padding and font-size scale. When iconOnly is true, this instead selects Figma's icon-only spacing tier: sm=spacing-6, md=spacing-8, lg=spacing-12 (radius stays radius.slimlg across all three)." },
     { name: "isLoading", type: "boolean", default: "false", description: "Disables the button, sets aria-busy, and swaps content for a 3-dot bounce spinner (matches the Figma LoadingSpinner prototype). Children remain in the DOM for the accessible name, just visually hidden — unless iconOnly is also true, in which case there are no children to hide and the aria-label alone carries the accessible name." },
     { name: "disabled", type: "boolean", default: "false", description: "Standard HTML disabled." },
     { name: "icon", type: "React.ReactNode", default: "undefined", description: "Trailing icon when iconOnly is false (e.g. <Icon name=\"chevron-right\" size=\"xs\" />, rendered after children, aria-hidden). The button's only content when iconOnly is true — size/weight are forced to Figma's xs/light regardless of what's passed to <Icon>." },
@@ -47,12 +47,13 @@ export default {
     // the size-tier padding changed and a "ghost" appearance was added, both
     // in Figma directly — against Button's component set, node 43:21945,
     // appearance x state x size x "icon only" axis, 90 variants total).
-    "icon-only border-radius": "radius.6",
-    // radius/slimlg in Figma; constant across all three "size" values and
-    // density-mode-independent (Default and Condensed both alias the same
-    // primitive, border.radius.150 = 6px). Ported here under the pre-existing
-    // "6" name (radius.6 / --lat-radius-6) rather than adding a new "slimlg"
-    // token — that numeric entry already existed, unused, from a prior session.
+    "icon-only border-radius": "radius.slimlg",
+    // Constant across all three "size" values and density-mode-independent
+    // (Default and Condensed both alias the same primitive, border.radius.150
+    // = 6px). Originally ported under a placeholder "6" name (that numeric
+    // entry existed, unused, from a prior session) to avoid adding a
+    // duplicate token; renamed to match Figma's real "slimlg" name once the
+    // Latent Sync plugin's first live pull surfaced it as drift (2026-08-20).
     "icon-only padding (sm/small)": "spacing.6",
     "icon-only padding (md/default)": "spacing.8",
     "icon-only padding (lg/xl)": "spacing.12",
@@ -71,6 +72,6 @@ export default {
     // transparent background. That bug is real and still present (this token
     // is the same near-white value in both light and dark mode, aliasing
     // primitive slate/50) — it is simply no longer worked around, by choice.
-    "icon color (all variants/states)": "color.icon.icon-button",
+    "icon color (all variants/states)": "color.icon.icon.button",
   },
 };

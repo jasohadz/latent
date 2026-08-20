@@ -13,9 +13,11 @@ export default {
     "The send button's active (non-empty value) color isn't a documented Figma state — it's an app-requested affordance reusing color.action.primary.default, not a verified spec value.",
   ],
   swizzlePath: "packages/core/src/ChatInput.tsx",
-  // radius/slimlg (the leading/trailing button radius in Figma) hasn't
-  // been ported to code — using the existing radius.input, same
-  // substitution already used elsewhere for this un-ported token.
+  // Figma's leading/trailing button radius is radius/slimlg, now ported to
+  // code as radius.slimlg (2026-08-20) — this still uses radius.input as a
+  // substitute, unchanged since that substitution predates the port and
+  // wasn't re-verified against Figma here; worth checking whether it should
+  // switch to radius.slimlg now that it's available.
   figmaTokens: {
     "container padding": "spacing.2",
     "container gap": "spacing.8",

@@ -182,7 +182,7 @@
         "condensed": "{border.radius.0}"
       }
     },
-    "xs": {
+    "xxs": {
       "value": {
         "default": "{border.radius.25}",
         "condensed": "{border.radius.25}"
@@ -197,10 +197,10 @@
     "md": {
       "value": {
         "default": "{border.radius.100}",
-        "condensed": "{border.radius.100}"
+        "condensed": "{border.radius.75}"
       }
     },
-    "6": {
+    "slimlg": {
       "value": {
         "default": "{border.radius.150}",
         "condensed": "{border.radius.150}"
@@ -209,49 +209,49 @@
     "lg": {
       "value": {
         "default": "{border.radius.200}",
-        "condensed": "{border.radius.200}"
+        "condensed": "{border.radius.100}"
       }
     },
     "xl": {
       "value": {
         "default": "{border.radius.300}",
-        "condensed": "{border.radius.300}"
+        "condensed": "{border.radius.200}"
       }
     },
     "2xl": {
       "value": {
         "default": "{border.radius.400}",
-        "condensed": "{border.radius.400}"
+        "condensed": "{border.radius.300}"
       }
     },
     "3xl": {
       "value": {
         "default": "{border.radius.600}",
-        "condensed": "{border.radius.600}"
+        "condensed": "{border.radius.500}"
       }
     },
     "full": {
       "value": {
         "default": "{border.radius.9999}",
-        "condensed": "{border.radius.9999}"
+        "condensed": "{border.radius.1000}"
       }
     },
     "input": {
       "value": {
         "default": "{border.radius.100}",
-        "condensed": "{border.radius.100}"
+        "condensed": "{border.radius.50}"
       }
     },
     "card": {
       "value": {
         "default": "{border.radius.200}",
-        "condensed": "{border.radius.200}"
+        "condensed": "{border.radius.100}"
       }
     },
     "modal": {
       "value": {
         "default": "{border.radius.400}",
-        "condensed": "{border.radius.400}"
+        "condensed": "{border.radius.150}"
       }
     }
   },

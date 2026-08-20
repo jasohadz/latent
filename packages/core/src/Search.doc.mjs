@@ -37,9 +37,9 @@ export default {
     "input font-size": "font-style.body",
     "clear icon color": "color.icon.subtle",
     "submit border": "color.border.brand",
-    "submit border-radius": "radius.6",
+    "submit border-radius": "radius.slimlg",
     "submit background": "color.action.primary.default",
-    "submit icon color": "color.icon.icon-button",
+    "submit icon color": "color.icon.icon.button",
     "submit padding": "spacing.8",
   },
 };
