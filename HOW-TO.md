@@ -24,25 +24,36 @@ straight from the live variables/styles, not from hardcoded values.
 
 ## 3. Sync your rebrand into the repo
 
-This is the step that actually needs an agent (Claude Code or otherwise)
-with a live connection to your Figma file — nothing in the repo can pull
-Figma data on its own. Point your agent at `CLAUDE.md` (repo-wide) and the
-`design-system-builder` skill; both describe the pull/reconcile workflow in
-detail. The short version:
+**Run the Latent Sync Figma plugin** (`packages/figma-plugin/` — see its
+README for setup) — Plugins → Development → Latent Sync in Figma desktop,
+Extract, then Sync to GitHub branch. It pulls variable data from all four
+collections (Primitives, Semantic, Density, Breakpoint — the Semantic one
+was briefly misnamed "Style Tokens" in the Figma file, if you're rebranding
+an older clone check it's actually called "Semantic") and style data
+(`getLocalTextStylesAsync`/`getLocalEffectStylesAsync`, bound variable IDs
+resolved to names), pushes both `packages/tokens/{figma-export.live,
+styles-export.live}.json` to a `figma-sync` branch, and a GitHub Actions
+check (`.github/workflows/latent-sync-check.yml`) automatically runs `sync
+figma`/`check-styles`/`check-parity` against what it just pushed.
 
-1. Pull fresh variable data from all four collections (Primitives, Style
-   Tokens, Density, Breakpoint) and fresh style data (`getLocalTextStylesAsync`/
-   `getLocalEffectStylesAsync`), resolving bound variable IDs to names.
-2. Update `packages/tokens/{primitives,semantic,density,breakpoint,styles}.json`
-   to match.
-3. Regenerate `packages/tokens/{figma-export.live,styles-export.live}.json`
-   from that same pull.
-4. Run `sync figma` and `check-styles` against those export files and fix
-   anything they report before moving on.
-5. Commit. The pre-commit hook (`.githooks/`, installed via step 1's
+That leaves one manual step — the plugin generates the *export* files, not
+`packages/tokens/{primitives,semantic,density,breakpoint,styles}.json`
+themselves:
+
+1. Review the CI check on the `figma-sync` branch (or run `sync figma`/
+   `check-styles` locally against the files it pushed).
+2. Reconcile whatever drift it reports into the actual token files by hand
+   — investigate which side is actually wrong before just copying Figma's
+   value over (see `CLAUDE.md`).
+3. Commit. The pre-commit hook (`.githooks/`, installed via step 1's
    `npm install`) re-runs both checks automatically and blocks the commit
    if the files you just wrote are inconsistent with each other — a safety
-   net for step 2–3, not a replacement for doing them.
+   net for step 2, not a replacement for doing it.
+
+No plugin, or a Figma file you can't install a dev plugin into? Point an
+agent (Claude Code or otherwise) at `CLAUDE.md` and the
+`design-system-builder` skill instead — both describe the same pull/
+reconcile workflow the plugin automates, done by hand via an MCP Figma tool.
 
 ## 4. Build layouts
 
@@ -82,18 +93,22 @@ than implying the current check is exhaustive.
 
 ## The gap: nothing detects "Figma changed and nobody re-synced"
 
-Be direct with yourself about this one. The pre-commit hook and the
-`sync figma`/`check-styles` commands only compare the repo against its own
-`*-export.live.json` snapshot — they verify internal consistency, not that
-the snapshot still matches what's actually in Figma right now. If you (or
-a teammate, or an agent) edit Figma directly and don't run step 3
-afterward, **every check in this repo will report "in-sync" while actually
-being stale.** There's no automated tripwire for this today — closing it
-for real would mean a Figma personal access token wired into a scheduled
-job (CI, most likely), which is a real credential/infrastructure decision,
-not something wired up by default.
+Be direct with yourself about this one. The pre-commit hook, `sync figma`/
+`check-styles`, and now `.github/workflows/latent-sync-check.yml` all only
+compare the repo against a `*-export.live.json` snapshot — they verify
+internal consistency (and, since 2026-08-20, do so automatically once that
+snapshot is pushed), not that the snapshot still matches what's actually in
+Figma *right now*. The Latent Sync plugin closed the "remembered to sync,
+forgot to run the checks" gap — it doesn't touch the "forgot to sync at
+all" gap. If you (or a teammate, or an agent) edit Figma directly and never
+open the plugin afterward, **every check in this repo will report "in-sync"
+while actually being stale.** Closing that for real would mean a Figma
+personal access token wired into a scheduled job that polls Figma
+independent of anyone remembering to click Sync — a real credential/
+infrastructure decision, not something wired up by default.
 
-Until/unless you set that up: treat "did I re-sync after editing Figma?"
-as a manual discipline, the same way you'd remember to run tests before
-pushing on a repo with no CI. The hook catches you forgetting to finish
-step 3 once you've started it; it can't catch you skipping step 3 entirely.
+Until/unless you set that up: treat "did I run the plugin after editing
+Figma?" as a manual discipline, the same way you'd remember to run tests
+before pushing on a repo with no CI. The plugin + CI catch you forgetting
+to finish step 3 once you've started it; nothing catches you skipping step
+3 entirely.

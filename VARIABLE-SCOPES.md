@@ -31,8 +31,9 @@ since these are reused across many semantic aliases:
 | `typography/list-spacing/*` | `LETTER_SPACING` |
 | `grid/*` | left `ALL_SCOPES` — no dedicated layout-grid scope exists |
 
-**Semantic** (`packages/tokens/semantic.json`, Figma's "Style Tokens"
-collection) — narrower, since these are what designers pick from directly:
+**Semantic** (`packages/tokens/semantic.json`, Figma's "Semantic" collection
+— briefly misnamed "Style Tokens" in the Figma file itself, renamed back
+2026-08-20) — narrower, since these are what designers pick from directly:
 
 | Category | Scopes |
 |---|---|
@@ -71,7 +72,10 @@ renames and zero unexpected deletes.
 
 One implementation note for future runs: the DTCG payload's group-level
 `$extensions["figma-console-mcp"].originalName` (e.g. `"Primitives"`,
-`"Style Tokens"`) must be preserved on every request — without it the
+`"Semantic"`) must be preserved on every request — without it the
 import tool can't map the payload's lowercase set name (`primitives`,
-`style-tokens`) back to Figma's real collection name and misclassifies
-every token as a rename into a new collection instead of an update.
+`semantic`) back to Figma's real collection name and misclassifies
+every token as a rename into a new collection instead of an update. (At
+the time this was originally run, the Semantic collection was named
+"Style Tokens" in Figma — use whatever the collection is actually named
+now, per `figma_get_variables`, not this doc's original wording.)

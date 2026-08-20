@@ -13,7 +13,9 @@ The Figma file now has a real two-layer architecture:
 - **Primitives** (366 vars, 1 mode "Value") — raw scale: color ramps
   (slate/gray/red/... 50-950), spacing, radius, font-size, weight, etc.
   Figma naming uses `/` (e.g. `color/blue/600`).
-- **Style Tokens** (194 vars, Light + Dark modes) — semantic aliases
+- **Semantic** (194 vars at the time this was written, now ~200; Light +
+  Dark modes; briefly misnamed "Style Tokens" in the Figma file itself,
+  renamed back 2026-08-20 — see `packages/figma-plugin`) — semantic aliases
   referencing Primitives (e.g. `color/action/primary/default` → some
   `color/blue/600`-equivalent, per mode)
 - **Density** (62 vars, Default + Condensed modes)
