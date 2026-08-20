@@ -16,7 +16,13 @@ resolve drift — see "What this doesn't do" below.
    script.
 3. Commits both files in one atomic commit to a dedicated branch (default
    `figma-sync`) via the GitHub REST API, and prints a compare/PR link.
-   **Nothing is pushed to `main` automatically.**
+   **Nothing is pushed to `main` automatically.** Every sync force-rebuilds
+   the branch fresh off `main`'s current tree, not its own prior tree — so
+   if `main` moved since the branch was last synced (a new component, an
+   updated workflow file, anything), the branch reflects that too instead of
+   silently freezing at whatever `main` looked like when it was first
+   created. Treat `figma-sync` as fully disposable — its history isn't
+   meant to be preserved across syncs.
 4. That push triggers `.github/workflows/latent-sync-check.yml`, which runs
    the real CLI — `sync figma`, `check-styles`, and `check-parity` for every
    component — against the files the plugin just committed, and reports

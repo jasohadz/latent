@@ -191,22 +191,7 @@
     log(`Reading ${baseBranch}...`);
     const baseRef = await githubRequest(base, token, `/git/ref/heads/${baseBranch}`);
     const baseSha = baseRef.object.sha;
-
-    let branchSha;
-    try {
-      const branchRef = await githubRequest(base, token, `/git/ref/heads/${syncBranch}`);
-      branchSha = branchRef.object.sha;
-      log(`Found existing branch ${syncBranch}, updating it.`);
-    } catch {
-      log(`Creating branch ${syncBranch} from ${baseBranch}...`);
-      await githubRequest(base, token, `/git/refs`, {
-        method: "POST",
-        body: JSON.stringify({ ref: `refs/heads/${syncBranch}`, sha: baseSha }),
-      });
-      branchSha = baseSha;
-    }
-
-    const branchCommit = await githubRequest(base, token, `/git/commits/${branchSha}`);
+    const baseCommit = await githubRequest(base, token, `/git/commits/${baseSha}`);
 
     log("Uploading blobs...");
     const tokensBlob = await githubRequest(base, token, `/git/blobs`, {
@@ -218,11 +203,16 @@
       body: JSON.stringify({ content: stylesJson, encoding: "utf-8" }),
     });
 
+    // base_tree is always baseCommit's (main's current tree), never the sync
+    // branch's own prior tree — so every sync carries forward whatever else
+    // changed on main (workflow file, tokens, components) instead of the
+    // branch silently freezing at whatever main looked like when it was
+    // first created.
     log("Creating tree + commit...");
     const tree = await githubRequest(base, token, `/git/trees`, {
       method: "POST",
       body: JSON.stringify({
-        base_tree: branchCommit.tree.sha,
+        base_tree: baseCommit.tree.sha,
         tree: [
           { path: "packages/tokens/figma-export.live.json", mode: "100644", type: "blob", sha: tokensBlob.sha },
           { path: "packages/tokens/styles-export.live.json", mode: "100644", type: "blob", sha: stylesBlob.sha },
@@ -235,14 +225,25 @@
       body: JSON.stringify({
         message: `Sync Figma export via Latent Sync plugin (${new Date().toISOString()})`,
         tree: tree.sha,
-        parents: [branchSha],
+        parents: [baseSha],
       }),
     });
 
-    await githubRequest(base, token, `/git/refs/heads/${syncBranch}`, {
-      method: "PATCH",
-      body: JSON.stringify({ sha: commit.sha }),
-    });
+    // Always force-update: the sync branch is disposable and rebuilt fresh
+    // off main every time, so it never fast-forwards from its own prior tip.
+    try {
+      await githubRequest(base, token, `/git/refs/heads/${syncBranch}`, {
+        method: "PATCH",
+        body: JSON.stringify({ sha: commit.sha, force: true }),
+      });
+      log(`Updated existing branch ${syncBranch}.`);
+    } catch {
+      await githubRequest(base, token, `/git/refs`, {
+        method: "POST",
+        body: JSON.stringify({ ref: `refs/heads/${syncBranch}`, sha: commit.sha }),
+      });
+      log(`Created branch ${syncBranch}.`);
+    }
 
     return {
       commitSha: commit.sha,
