@@ -1,0 +1,45 @@
+name: Latent Sync Check
+
+# Runs the same sync figma / check-styles / check-parity commands documented
+# in CLAUDE.md against every push the Latent Sync Figma plugin
+# (packages/figma-plugin/) makes to figma-sync — so drift is reported as a
+# check on the branch/PR the plugin already links to, instead of relying on
+# someone remembering to run these locally after merging. Invokes the CLI
+# directly, no reimplemented logic, so this can't silently drift from what
+# the CLI actually checks.
+
+on:
+  push:
+    branches:
+      - figma-sync
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: sync figma (Variables)
+        run: node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.live.json --json
+
+      - name: check-styles (Text/Effect Styles)
+        run: node packages/cli/bin/latent.mjs check-styles --file packages/tokens/styles-export.live.json --json
+
+      - name: check-parity (every component)
+        run: |
+          names=$(node packages/cli/bin/latent.mjs list --json | node -e "
+            let d = '';
+            process.stdin.on('data', c => d += c);
+            process.stdin.on('end', () => console.log(JSON.parse(d).components.join(' ')));
+          ")
+          fail=0
+          for name in $names; do
+            echo "::group::check-parity $name"
+            node packages/cli/bin/latent.mjs check-parity "$name" --json || fail=1
+            echo "::endgroup::"
+          done
+          exit $fail

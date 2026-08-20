@@ -281,9 +281,23 @@
       ) + "\n";
 
       const { compareUrl, commitSha } = await syncToGitHub(settings, tokensJson, stylesJson);
-      log(`Committed ${commitSha.slice(0, 7)} to ${settings.syncBranch || "figma-sync"}.`, "ok");
+      const branchUsed = settings.syncBranch || "figma-sync";
+      log(`Committed ${commitSha.slice(0, 7)} to ${branchUsed}.`, "ok");
       log(`Review/merge: ${compareUrl}`, "ok");
-      log(`After merging, still run sync figma / check-styles / check-parity — this only automates the export step.`);
+      if (branchUsed === "figma-sync") {
+        log(
+          `sync figma / check-styles / check-parity run automatically via CI on this push — see: ` +
+            `https://github.com/${settings.owner}/${settings.repo}/commit/${commitSha}/checks`,
+          "ok"
+        );
+      } else {
+        log(
+          `The CI check (.github/workflows/latent-sync-check.yml) only triggers on the default ` +
+            `"figma-sync" branch — you're using "${branchUsed}", so still run sync figma / ` +
+            `check-styles / check-parity yourself.`,
+          "warn"
+        );
+      }
     } catch (error) {
       log(`Sync failed: ${error.message}`, "err");
     } finally {

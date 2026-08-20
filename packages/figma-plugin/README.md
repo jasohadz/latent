@@ -17,6 +17,12 @@ resolve drift — see "What this doesn't do" below.
 3. Commits both files in one atomic commit to a dedicated branch (default
    `figma-sync`) via the GitHub REST API, and prints a compare/PR link.
    **Nothing is pushed to `main` automatically.**
+4. That push triggers `.github/workflows/latent-sync-check.yml`, which runs
+   the real CLI — `sync figma`, `check-styles`, and `check-parity` for every
+   component — against the files the plugin just committed, and reports
+   pass/fail as a check on the branch/commit. This only fires when the sync
+   branch is the default `figma-sync`; a renamed branch needs those commands
+   run by hand (see "What this doesn't do" below).
 
 ## Setup
 
@@ -51,13 +57,17 @@ no new schema was introduced.
 ## What this doesn't do
 
 - **Doesn't touch `primitives.json` / `semantic.json` / `density.json` /
-  `breakpoint.json` / `styles.json` directly.** Those stay hand-reconciled —
-  run `sync figma --file packages/tokens/figma-export.live.json` and
-  `check-styles --file packages/tokens/styles-export.live.json` after
-  merging the plugin's branch, same as today, and resolve drift the way
-  `CLAUDE.md`/`STYLES.md` describe (investigate which side is wrong, don't
-  default to "Figma wins" blindly if a value looks off — see the
+  `breakpoint.json` / `styles.json` directly.** Those stay hand-reconciled.
+  The CI check (see above) tells you *whether* there's drift against
+  `figma-export.live.json`/`styles-export.live.json`, same three categories
+  `sync figma`/`check-styles` always report — resolving it is still on you,
+  the way `CLAUDE.md`/`STYLES.md` describe (investigate which side is wrong,
+  don't default to "Figma wins" blindly if a value looks off — see the
   `latent-figma-source-of-truth` discipline).
-- **Doesn't run `check-parity`** or touch any component file.
-- **Doesn't auto-merge.** You review the diff on the `figma-sync` branch
-  like any other PR before merging to `main`.
+- **Doesn't run `check-parity` itself** — CI does, on push to `figma-sync`,
+  but the plugin's own JS never touches a component file, by design (see
+  `latent-figma-sync-plugin` memory for why: reimplementing that check in
+  the plugin would mean the diff/parity logic exists in two places that
+  could quietly drift from each other).
+- **Doesn't auto-merge.** You review the diff — and the CI check result —
+  on the `figma-sync` branch like any other PR before merging to `main`.
