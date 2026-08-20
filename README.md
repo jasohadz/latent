@@ -54,13 +54,18 @@ CLI-native operation with the same fail-loudly discipline as everything else:
   one. Catches a component quietly drifting from its design spec.
 
 The sample export at `packages/tokens/figma-export.sample.json` has
-intentional drift (one renamed key, one changed value, one missing key)
-so you can see `sync figma` catch all three categories right away —
-run the command above against it before wiring up a real export.
+exactly 3 intentional drift cases (one missing-in-code, one value
+mismatch, one missing-in-Figma) so you can see `sync figma` catch all
+three categories right away — run the command above against it before
+wiring up a real export. It's generated, not hand-edited — see
+`packages/tokens/generate-sample-fixture.mjs`.
 
-**Real workflow:** use F8igma Console (`figma_get_variables` /
-`figma_export_tokens`) to pull your actual Figma variable collection to
-a JSON file with the same nesting as `tokens.json`, then run `sync figma
---file` against it.
+**Real workflow:** run the **Latent Sync** Figma plugin
+(`packages/figma-plugin/` — see its README for setup) to pull your
+actual Figma variables/styles and push them to a `figma-sync` branch
+automatically, no manual export step. Without the plugin, you can still
+pull one-off via an MCP Figma tool (e.g. F8igma Console's
+`figma_get_variables`) to a JSON file with the same nesting as
+`tokens.json`, then run `sync figma --file` against it by hand.
 
 

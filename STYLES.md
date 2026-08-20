@@ -20,13 +20,20 @@ three-category report as `sync figma` (`missingInCode`, `missingInFigma`,
 auto-installed via `npm install`) already runs this automatically whenever a
 commit touches `packages/tokens/` or this file, blocking the commit on drift
 — but it can only check the repo against itself, not against live Figma, so
-still **run it manually after any session that touches Text or Effect
-Styles** — same discipline as `sync figma` for
-Variables. To regenerate the export file, pull live from Figma and resolve
-variable IDs to names (raw IDs aren't stable/comparable across sessions):
+still **run it after any session that touches Text or Effect Styles** — same
+discipline as `sync figma` for Variables.
+
+**To regenerate the export file**, run the **Latent Sync** Figma plugin
+(`packages/figma-plugin/` — see its README) — its "Extract from Figma" step
+pulls `getLocalTextStylesAsync()`/`getLocalEffectStylesAsync()` and resolves
+each style's `boundVariables` to names automatically, then its "Sync to
+GitHub branch" step pushes `packages/tokens/styles-export.live.json` for you.
+Without the plugin, the same resolution done by hand (raw variable IDs
+aren't stable/comparable across sessions):
 
 ```js
-// in a use_figma / figma_execute call
+// in a use_figma / figma_execute call — see packages/figma-plugin/code.js's
+// resolveBoundVars for the version the plugin actually runs
 async function resolveBoundVars(boundVariables) {
   if (!boundVariables) return {};
   const out = {};
