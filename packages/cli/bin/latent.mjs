@@ -3,13 +3,28 @@
 // agent gets structured output instead of parsing prose.
 import { readFileSync, readdirSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { flattenTokens, tokenPathToCssVar, tokensEqual } from "../../tokens/flatten.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CORE_SRC = path.resolve(__dirname, "../../core/src");
+const REPO_ROOT = path.resolve(__dirname, "../../..");
 
 const TOKENS_DIR = path.resolve(__dirname, "../../tokens");
+
+// Known-stale facts that have appeared in prose before and could again —
+// append-only, same discipline as ERROR_CODES. allowNear exempts a line
+// that's clearly giving historical context (e.g. "renamed from X") rather
+// than asserting X is still current.
+const DOC_BLOCKLIST = [
+  {
+    term: "Style Tokens",
+    allowNear: /renamed|misnamed|was (?:called|named)/i,
+    reason:
+      'Figma\'s Semantic collection was renamed from "Style Tokens" on 2026-08-20 — a bare mention likely describes it as still current.',
+  },
+];
 
 // primitives/breakpoint are single-mode per token; semantic/density are
 // mode-aware ({ light, dark } / { default, condensed }) — see flatten.mjs.
@@ -27,6 +42,8 @@ const COMMANDS = {
   "sync figma": { args: [], flags: ["--file", "--json"], responseTypes: ["sync-result", "error"] },
   "check-parity": { args: ["<name>"], flags: ["--json"], responseTypes: ["parity-result", "error"] },
   "check-styles": { args: [], flags: ["--file", "--json"], responseTypes: ["check-styles-result", "error"] },
+  "check-docs": { args: [], flags: ["--json"], responseTypes: ["check-docs-result"] },
+  verify: { args: [], flags: ["--json"], responseTypes: ["verify-result"] },
   manifest: { args: [], flags: ["--json"], responseTypes: ["manifest"] },
 };
 
@@ -118,10 +135,10 @@ function diffLayer(layer, codeFlat, figmaFlat, missingInCode, missingInFigma, va
   }
 }
 
-async function cmdSyncFigma(filePath, json) {
-  if (!filePath) return print(err("ERR_MISSING_ARG", { arg: "--file" }), json);
+async function computeSyncFigma(filePath) {
+  if (!filePath) return err("ERR_MISSING_ARG", { arg: "--file" });
   const resolvedFile = path.resolve(process.cwd(), filePath);
-  if (!existsSync(resolvedFile)) return print(err("ERR_FILE_NOT_FOUND", { path: resolvedFile }), json);
+  if (!existsSync(resolvedFile)) return err("ERR_FILE_NOT_FOUND", { path: resolvedFile });
 
   const figmaRaw = JSON.parse(readFileSync(resolvedFile, "utf-8"));
   delete figmaRaw._comment;
@@ -132,14 +149,14 @@ async function cmdSyncFigma(filePath, json) {
 
   for (const layer of Object.keys(LAYER_FILES)) {
     const tokensPath = path.join(TOKENS_DIR, LAYER_FILES[layer]);
-    if (!existsSync(tokensPath)) return print(err("ERR_FILE_NOT_FOUND", { path: tokensPath }), json);
+    if (!existsSync(tokensPath)) return err("ERR_FILE_NOT_FOUND", { path: tokensPath });
     const codeFlat = flattenTokens(JSON.parse(readFileSync(tokensPath, "utf-8")));
     const figmaFlat = flattenTokens(figmaRaw[layer] ?? {});
     diffLayer(layer, codeFlat, figmaFlat, missingInCode, missingInFigma, valueMismatches);
   }
 
   const drift = missingInCode.length + missingInFigma.length + valueMismatches.length;
-  const result = {
+  return {
     type: "sync-result",
     status: drift === 0 ? "in-sync" : "drift-detected",
     driftCount: drift,
@@ -147,8 +164,12 @@ async function cmdSyncFigma(filePath, json) {
     missingInFigma,  // token exists in code, missing from the Figma export
     valueMismatches, // same token+mode, different value — likely someone edited one side only
   };
+}
+
+async function cmdSyncFigma(filePath, json) {
+  const result = await computeSyncFigma(filePath);
   print(result, json);
-  if (drift > 0) process.exitCode = 1;
+  if (result.type === "sync-result" && result.driftCount > 0) process.exitCode = 1;
 }
 
 // Text/Effect Styles are a different Figma primitive from Variables — compound
@@ -183,14 +204,14 @@ function diffStyleCategory(category, codeStyles, figmaStyles, missingInCode, mis
   }
 }
 
-async function cmdCheckStyles(filePath, json) {
-  if (!filePath) return print(err("ERR_MISSING_ARG", { arg: "--file" }), json);
+async function computeCheckStyles(filePath) {
+  if (!filePath) return err("ERR_MISSING_ARG", { arg: "--file" });
   const resolvedFile = path.resolve(process.cwd(), filePath);
-  if (!existsSync(resolvedFile)) return print(err("ERR_FILE_NOT_FOUND", { path: resolvedFile }), json);
+  if (!existsSync(resolvedFile)) return err("ERR_FILE_NOT_FOUND", { path: resolvedFile });
 
   const figmaRaw = JSON.parse(readFileSync(resolvedFile, "utf-8"));
   const stylesPath = path.join(TOKENS_DIR, "styles.json");
-  if (!existsSync(stylesPath)) return print(err("ERR_FILE_NOT_FOUND", { path: stylesPath }), json);
+  if (!existsSync(stylesPath)) return err("ERR_FILE_NOT_FOUND", { path: stylesPath });
   const codeStyles = JSON.parse(readFileSync(stylesPath, "utf-8"));
 
   const missingInCode = [];
@@ -201,7 +222,7 @@ async function cmdCheckStyles(filePath, json) {
   diffStyleCategory("effect", codeStyles.effect ?? {}, figmaRaw.effect ?? {}, missingInCode, missingInFigma, valueMismatches);
 
   const drift = missingInCode.length + missingInFigma.length + valueMismatches.length;
-  const result = {
+  return {
     type: "check-styles-result",
     status: drift === 0 ? "in-sync" : "drift-detected",
     driftCount: drift,
@@ -209,19 +230,23 @@ async function cmdCheckStyles(filePath, json) {
     missingInFigma,  // style exists in styles.json, missing/renamed in Figma
     valueMismatches, // same style, some field differs — likely edited on one side only
   };
-  print(result, json);
-  if (drift > 0) process.exitCode = 1;
 }
 
-async function cmdCheckParity(name, json) {
-  if (!name) return print(err("ERR_MISSING_ARG", { arg: "name" }), json);
+async function cmdCheckStyles(filePath, json) {
+  const result = await computeCheckStyles(filePath);
+  print(result, json);
+  if (result.type === "check-styles-result" && result.driftCount > 0) process.exitCode = 1;
+}
+
+async function computeCheckParity(name) {
+  if (!name) return err("ERR_MISSING_ARG", { arg: "name" });
   const doc = await loadDoc(name);
-  if (!doc) return print(err("ERR_UNKNOWN_COMPONENT", { requested: name }), json);
-  if (!doc.figmaTokens) return print(err("ERR_NO_FIGMA_SPEC", { requested: name }), json);
+  if (!doc) return err("ERR_UNKNOWN_COMPONENT", { requested: name });
+  if (!doc.figmaTokens) return err("ERR_NO_FIGMA_SPEC", { requested: name });
 
   const tsxPath = path.resolve(__dirname, "../../..", doc.swizzlePath);
   const cssPath = tsxPath.replace(/\.tsx$/, ".css");
-  if (!existsSync(cssPath)) return print(err("ERR_FILE_NOT_FOUND", { path: cssPath }), json);
+  if (!existsSync(cssPath)) return err("ERR_FILE_NOT_FOUND", { path: cssPath });
   const css = readFileSync(cssPath, "utf-8");
 
   const checks = Object.entries(doc.figmaTokens).map(([property, tokenPath]) => {
@@ -230,14 +255,119 @@ async function cmdCheckParity(name, json) {
   });
   const mismatches = checks.filter((c) => !c.found);
 
-  const result = {
+  return {
     type: "parity-result",
     component: name,
     status: mismatches.length === 0 ? "matches" : "drift-detected",
     checks,
   };
+}
+
+async function cmdCheckParity(name, json) {
+  const result = await computeCheckParity(name);
   print(result, json);
-  if (mismatches.length > 0) process.exitCode = 1;
+  if (result.type === "parity-result" && result.status !== "matches") process.exitCode = 1;
+}
+
+// Blank-line-separated paragraphs, not lines — markdown source commonly
+// wraps one sentence across multiple lines, so a qualifying phrase like
+// "renamed from" can land on a different source line than the flagged term
+// while still reading as one sentence. Checking a whole paragraph as one
+// string avoids flagging that as a violation.
+function splitIntoParagraphs(lines) {
+  const paragraphs = [];
+  let start = -1;
+  let buf = [];
+  lines.forEach((line, i) => {
+    if (line.trim() === "") {
+      if (buf.length > 0) {
+        paragraphs.push({ startLine: start, text: buf.join(" ") });
+        buf = [];
+      }
+    } else {
+      if (buf.length === 0) start = i;
+      buf.push(line);
+    }
+  });
+  if (buf.length > 0) paragraphs.push({ startLine: start, text: buf.join(" ") });
+  return paragraphs;
+}
+
+function computeCheckDocs() {
+  const lsFiles = execFileSync("git", ["ls-files", "*.md"], { cwd: REPO_ROOT, encoding: "utf-8" });
+  const files = lsFiles.split("\n").filter(Boolean);
+
+  const violations = [];
+  for (const relPath of files) {
+    const fullPath = path.join(REPO_ROOT, relPath);
+    if (!existsSync(fullPath)) continue; // tracked-but-deleted in the working tree
+    const paragraphs = splitIntoParagraphs(readFileSync(fullPath, "utf-8").split("\n"));
+    for (const para of paragraphs) {
+      for (const entry of DOC_BLOCKLIST) {
+        if (para.text.includes(entry.term) && !entry.allowNear.test(para.text)) {
+          violations.push({ file: relPath, line: para.startLine + 1, term: entry.term, reason: entry.reason });
+        }
+      }
+    }
+  }
+
+  return {
+    type: "check-docs-result",
+    status: violations.length === 0 ? "clean" : "violations-found",
+    violations,
+  };
+}
+
+function cmdCheckDocs(json) {
+  const result = computeCheckDocs();
+  print(result, json);
+  if (result.violations.length > 0) process.exitCode = 1;
+}
+
+// Runs every drift check this repo has in one call — sync figma, check-styles,
+// check-parity (every component, honoring the same "ERR_NO_FIGMA_SPEC warns,
+// doesn't block" exception the pre-commit hook documents), and check-docs.
+// This is what both .github/workflows/latent-sync-check.yml and a human at
+// the terminal should reach for instead of running each check separately.
+async function computeVerify() {
+  const syncFigma = await computeSyncFigma(path.join(TOKENS_DIR, "figma-export.live.json"));
+  const checkStyles = await computeCheckStyles(path.join(TOKENS_DIR, "styles-export.live.json"));
+
+  const checkParity = [];
+  for (const name of discoverComponents()) {
+    checkParity.push(await computeCheckParity(name));
+  }
+
+  const checkDocs = computeCheckDocs();
+
+  const failed = [];
+  if (syncFigma.type === "error" || syncFigma.driftCount > 0) failed.push("sync figma");
+  if (checkStyles.type === "error" || checkStyles.driftCount > 0) failed.push("check-styles");
+  for (const result of checkParity) {
+    if (result.type === "error") {
+      if (result.code === "ERR_NO_FIGMA_SPEC") continue; // opted out, not drifting
+      failed.push(`check-parity ${result.requested ?? ""}`.trim());
+    } else if (result.status !== "matches") {
+      failed.push(`check-parity ${result.component}`);
+    }
+  }
+  if (checkDocs.violations.length > 0) failed.push("check-docs");
+
+  return {
+    type: "verify-result",
+    status: failed.length === 0 ? "clean" : "failed",
+    failed,
+    syncFigma,
+    checkStyles,
+    checkParity,
+    checkDocs,
+  };
+}
+
+async function cmdVerify(json) {
+  const result = await computeVerify();
+  print(result, json);
+  if (result.status !== "clean") process.exitCode = 1;
 }
 
 function cmdManifest(json) {
@@ -287,6 +417,10 @@ async function main() {
       const filePath = fileFlagIdx >= 0 ? rest[fileFlagIdx + 1] : undefined;
       return cmdCheckStyles(filePath, json);
     }
+    case "check-docs":
+      return cmdCheckDocs(json);
+    case "verify":
+      return cmdVerify(json);
     case "manifest":
       return cmdManifest(json);
     default:

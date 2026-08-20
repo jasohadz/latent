@@ -287,15 +287,15 @@
       log(`Review/merge: ${compareUrl}`, "ok");
       if (branchUsed === "figma-sync") {
         log(
-          `sync figma / check-styles / check-parity run automatically via CI on this push — see: ` +
-            `https://github.com/${settings.owner}/${settings.repo}/commit/${commitSha}/checks`,
+          `verify (sync figma + check-styles + check-parity + check-docs) runs automatically via CI ` +
+            `on this push — see: https://github.com/${settings.owner}/${settings.repo}/commit/${commitSha}/checks`,
           "ok"
         );
       } else {
         log(
           `The CI check (.github/workflows/latent-sync-check.yml) only triggers on the default ` +
-            `"figma-sync" branch — you're using "${branchUsed}", so still run sync figma / ` +
-            `check-styles / check-parity yourself.`,
+            `"figma-sync" branch — you're using "${branchUsed}", so run it yourself: ` +
+            `node packages/cli/bin/latent.mjs verify --json`,
           "warn"
         );
       }

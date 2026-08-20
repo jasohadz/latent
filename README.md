@@ -34,6 +34,8 @@ node packages/cli/bin/latent.mjs manifest --json
 node packages/cli/bin/latent.mjs swizzle Button --dest ./out
 node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.sample.json --json
 node packages/cli/bin/latent.mjs check-parity Button --json
+node packages/cli/bin/latent.mjs check-docs --json
+node packages/cli/bin/latent.mjs verify --json
 ```
 
 ## The differentiator: Figma is a first-class citizen, not an afterthought
@@ -52,6 +54,14 @@ CLI-native operation with the same fail-loudly discipline as everything else:
   mapping (declared in its `.doc.mjs`) and confirms the compiled CSS
   actually references the expected `--lat-*` custom property for each
   one. Catches a component quietly drifting from its design spec.
+- **`check-docs`** — scans every tracked `.md` file for known-stale facts
+  (an append-only blocklist, e.g. a Figma collection's old pre-rename
+  name). Catches documentation drift with the same non-zero-exit discipline
+  as everything else here.
+- **`verify`** — runs all of the above (`sync figma`/`check-styles` against
+  the live export files, `check-parity` for every component, `check-docs`)
+  in one call, one aggregated result. The single command to reach for,
+  whether that's you at the terminal or CI.
 
 The sample export at `packages/tokens/figma-export.sample.json` has
 exactly 3 intentional drift cases (one missing-in-code, one value
@@ -63,8 +73,11 @@ wiring up a real export. It's generated, not hand-edited — see
 **Real workflow:** run the **Latent Sync** Figma plugin
 (`packages/figma-plugin/` — see its README for setup) to pull your
 actual Figma variables/styles and push them to a `figma-sync` branch
-automatically, no manual export step. Without the plugin, you can still
-pull one-off via an MCP Figma tool (e.g. F8igma Console's
+automatically, no manual export step. That push triggers a GitHub Actions
+check that runs `verify` for you; run the exact same command yourself —
+`node packages/cli/bin/latent.mjs verify --json` — any time you want a
+single pass/fail answer without waiting on CI. Without the plugin, you can
+still pull one-off via an MCP Figma tool (e.g. F8igma Console's
 `figma_get_variables`) to a JSON file with the same nesting as
 `tokens.json`, then run `sync figma --file` against it by hand.
 

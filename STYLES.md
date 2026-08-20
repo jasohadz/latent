@@ -14,6 +14,10 @@ CLI command:
 node packages/cli/bin/latent.mjs check-styles --file <export>.json --json
 ```
 
+(Or run `node packages/cli/bin/latent.mjs verify --json` instead, which runs
+this alongside `sync figma`/`check-parity`/`check-docs` in one call against
+the current `*.live.json` files — no `--file` needed. See `CLAUDE.md`.)
+
 This diffs `packages/tokens/styles.json` against a fresh Figma pull, the same
 three-category report as `sync figma` (`missingInCode`, `missingInFigma`,
 `valueMismatches`), non-zero exit on drift. A pre-commit hook (`.githooks/`,

@@ -33,22 +33,23 @@ an older clone check it's actually called "Semantic") and style data
 (`getLocalTextStylesAsync`/`getLocalEffectStylesAsync`, bound variable IDs
 resolved to names), pushes both `packages/tokens/{figma-export.live,
 styles-export.live}.json` to a `figma-sync` branch, and a GitHub Actions
-check (`.github/workflows/latent-sync-check.yml`) automatically runs `sync
-figma`/`check-styles`/`check-parity` against what it just pushed.
+check (`.github/workflows/latent-sync-check.yml`) automatically runs
+`verify` — `sync figma` + `check-styles` + `check-parity` for every
+component + `check-docs`, one command — against what it just pushed.
 
 That leaves one manual step — the plugin generates the *export* files, not
 `packages/tokens/{primitives,semantic,density,breakpoint,styles}.json`
 themselves:
 
-1. Review the CI check on the `figma-sync` branch (or run `sync figma`/
-   `check-styles` locally against the files it pushed).
+1. Review the CI check on the `figma-sync` branch, or run the same thing
+   locally: `node packages/cli/bin/latent.mjs verify --json`.
 2. Reconcile whatever drift it reports into the actual token files by hand
    — investigate which side is actually wrong before just copying Figma's
    value over (see `CLAUDE.md`).
 3. Commit. The pre-commit hook (`.githooks/`, installed via step 1's
-   `npm install`) re-runs both checks automatically and blocks the commit
-   if the files you just wrote are inconsistent with each other — a safety
-   net for step 2, not a replacement for doing it.
+   `npm install`) re-runs the relevant checks automatically and blocks the
+   commit if the files you just wrote are inconsistent with each other — a
+   safety net for step 2, not a replacement for doing it.
 
 No plugin, or a Figma file you can't install a dev plugin into? Point an
 agent (Claude Code or otherwise) at `CLAUDE.md` and the
@@ -93,8 +94,9 @@ than implying the current check is exhaustive.
 
 ## The gap: nothing detects "Figma changed and nobody re-synced"
 
-Be direct with yourself about this one. The pre-commit hook, `sync figma`/
-`check-styles`, and now `.github/workflows/latent-sync-check.yml` all only
+Be direct with yourself about this one. The pre-commit hook, `verify` (and
+the individual `sync figma`/`check-styles`/`check-parity`/`check-docs`
+commands it wraps), and `.github/workflows/latent-sync-check.yml` all only
 compare the repo against a `*-export.live.json` snapshot — they verify
 internal consistency (and, since 2026-08-20, do so automatically once that
 snapshot is pushed), not that the snapshot still matches what's actually in

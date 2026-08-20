@@ -24,11 +24,13 @@ resolve drift — see "What this doesn't do" below.
    created. Treat `figma-sync` as fully disposable — its history isn't
    meant to be preserved across syncs.
 4. That push triggers `.github/workflows/latent-sync-check.yml`, which runs
-   the real CLI — `sync figma`, `check-styles`, and `check-parity` for every
-   component — against the files the plugin just committed, and reports
+   `node packages/cli/bin/latent.mjs verify --json` — `sync figma` +
+   `check-styles` + `check-parity` for every component + `check-docs`, one
+   command — against the files the plugin just committed, and reports
    pass/fail as a check on the branch/commit. This only fires when the sync
-   branch is the default `figma-sync`; a renamed branch needs those commands
-   run by hand (see "What this doesn't do" below).
+   branch is the default `figma-sync`; a renamed branch needs `verify` run
+   by hand (see "What this doesn't do" below). Run that same `verify`
+   command yourself any time, from any branch, without waiting on CI.
 
 ## Setup
 
@@ -70,9 +72,10 @@ no new schema was introduced.
   the way `CLAUDE.md`/`STYLES.md` describe (investigate which side is wrong,
   don't default to "Figma wins" blindly if a value looks off — see the
   `latent-figma-source-of-truth` discipline).
-- **Doesn't run `check-parity` itself** — CI does, on push to `figma-sync`,
-  but the plugin's own JS never touches a component file, by design (see
-  `latent-figma-sync-plugin` memory for why: reimplementing that check in
+- **Doesn't run `check-parity` or `check-docs` itself** — `verify` (via CI
+  on push to `figma-sync`, or run by hand) does, but the plugin's own JS
+  never touches a component or markdown file, by design (see
+  `latent-figma-sync-plugin` memory for why: reimplementing those checks in
   the plugin would mean the diff/parity logic exists in two places that
   could quietly drift from each other).
 - **Doesn't auto-merge.** You review the diff — and the CI check result —

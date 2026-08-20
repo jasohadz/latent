@@ -18,6 +18,20 @@
 #    nobody declared in figmaTokens — see HOW-TO.md's component-editing
 #    section for that open gap.
 #
+# 3. Docs — blocks if a staged .md file contains a known-stale term
+#    (check-docs, e.g. a Figma collection's old pre-rename name asserted as
+#    current). Append-only blocklist in packages/cli/bin/latent.mjs's
+#    DOC_BLOCKLIST — doesn't catch general staleness, only terms someone's
+#    already added there after finding them wrong once.
+#
+# `verify` (packages/cli/bin/latent.mjs) runs all of sync figma/check-styles/
+# check-parity/check-docs unconditionally in one call — this hook doesn't
+# use it, since running full parity across all 30 components on every commit
+# regardless of what changed would be needless overhead; the scoping below
+# is deliberate. Reach for `verify` yourself at the terminal, or see it run
+# in .github/workflows/latent-sync-check.yml after every Latent Sync
+# plugin push.
+#
 # Installed automatically via `npm install` (see package.json's postinstall,
 # which runs `git config core.hooksPath .githooks`). Works for any commit
 # regardless of what tool/agent authored it — this is a git hook, not an
@@ -102,13 +116,27 @@ if [ -n "$COMPONENTS_TOUCHED" ]; then
   done
 fi
 
+# --- 3. Docs ---
+DOCS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '\.md$')
+if [ -n "$DOCS_TOUCHED" ]; then
+  echo "latent: markdown files changed — running check-docs..."
+  DOCS_OUT=$(node packages/cli/bin/latent.mjs check-docs --json)
+  DOCS_STATUS=$(printf '%s' "$DOCS_OUT" | json_status)
+  if [ "$DOCS_STATUS" != "clean" ]; then
+    echo ""
+    echo "BLOCKED (check-docs): known-stale term found in a tracked .md file"
+    echo "$DOCS_OUT"
+    FAIL=1
+  fi
+fi
+
 if [ "$FAIL" = "1" ]; then
   echo ""
   echo "Commit blocked. Fix the drift reported above before committing."
   exit 1
 fi
 
-if [ -n "$TOKENS_TOUCHED" ] || [ -n "$COMPONENTS_TOUCHED" ]; then
+if [ -n "$TOKENS_TOUCHED" ] || [ -n "$COMPONENTS_TOUCHED" ] || [ -n "$DOCS_TOUCHED" ]; then
   echo "latent: all checks passed."
 fi
 exit 0
