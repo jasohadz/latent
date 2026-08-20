@@ -33,14 +33,27 @@ function rgbaToHex({ r, g, b, a }) {
   return a < 1 ? `${hex}${toHex(a)}` : hex;
 }
 
-// Alias values reference another variable by its dotted path, matching how
-// semantic.json/density.json/breakpoint.json already write refs, e.g.
-// "{color.blue.600}" — see generate-sample-fixture.mjs for a real example.
-async function resolveVariableValue(raw, resolvedType) {
+// Figma FLOATs round-trip through float32, so a hand-typed 0.05 comes back
+// as 0.05000000074505806 — round it away rather than let it register as
+// spurious drift against tokens.json's clean values.
+function roundFloat(n) {
+  return typeof n === "number" ? Math.round(n * 1e6) / 1e6 : n;
+}
+
+// Alias values reference another variable by its dotted path. References
+// into primitives.json are bare ("{color.blue.600}", "{dimensions.0}") since
+// it's the base layer; references into any other layer are qualified with
+// that layer's name ("{density.spacing.0}") — see semantic.json's own
+// "spacing" tokens for a real example of the qualified form.
+async function resolveVariableValue(raw, resolvedType, collectionLayerById) {
   if (raw && typeof raw === "object" && raw.type === "VARIABLE_ALIAS") {
     const target = await figma.variables.getVariableByIdAsync(raw.id);
-    return target ? `{${target.name.replace(/\//g, ".")}}` : null;
+    if (!target) return null;
+    const dottedName = target.name.replace(/\//g, ".");
+    const targetLayer = collectionLayerById.get(target.variableCollectionId);
+    return targetLayer && targetLayer !== "primitives" ? `{${targetLayer}.${dottedName}}` : `{${dottedName}}`;
   }
+  if (resolvedType === "FLOAT") return roundFloat(raw);
   if (resolvedType === "COLOR") return rgbaToHex(raw);
   return raw;
 }
@@ -49,6 +62,12 @@ async function extractVariables() {
   const warnings = [];
   const result = { primitives: {}, semantic: {}, density: {}, breakpoint: {} };
   const collections = await figma.variables.getLocalVariableCollectionsAsync();
+
+  const collectionLayerById = new Map();
+  for (const collection of collections) {
+    const layer = matchLayer(collection.name);
+    if (layer) collectionLayerById.set(collection.id, layer);
+  }
 
   for (const collection of collections) {
     const layer = matchLayer(collection.name);
@@ -71,12 +90,12 @@ async function extractVariables() {
         const modeMap = {};
         for (const mode of modes) {
           const raw = variable.valuesByMode[mode.modeId];
-          modeMap[mode.name.trim().toLowerCase()] = await resolveVariableValue(raw, variable.resolvedType);
+          modeMap[mode.name.trim().toLowerCase()] = await resolveVariableValue(raw, variable.resolvedType, collectionLayerById);
         }
         setNested(result[layer], pathParts, { value: modeMap });
       } else {
         const raw = variable.valuesByMode[modes[0].modeId];
-        setNested(result[layer], pathParts, await resolveVariableValue(raw, variable.resolvedType));
+        setNested(result[layer], pathParts, await resolveVariableValue(raw, variable.resolvedType, collectionLayerById));
       }
     }
   }
@@ -109,11 +128,15 @@ async function extractStyles() {
   const effect = {};
   for (const style of await figma.getLocalEffectStylesAsync()) {
     effect[style.name] = {
+      // visible/showShadowBehindNode are real Figma effect fields, but
+      // styles.json's schema never captured them (near-constant bookkeeping
+      // flags, not design data) — dropping them keeps this matching the
+      // established shape instead of manufacturing drift on every effect.
       effects: await Promise.all(
-        style.effects.map(async (e) => ({
-          ...e,
-          boundVariables: await resolveBoundVars(e.boundVariables),
-        }))
+        style.effects.map(async (e) => {
+          const { visible, showShadowBehindNode, ...rest } = e;
+          return { ...rest, boundVariables: await resolveBoundVars(e.boundVariables) };
+        })
       ),
     };
   }
