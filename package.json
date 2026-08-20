@@ -4,6 +4,7 @@
   "workspaces": ["packages/*"],
   "scripts": {
     "ds": "node packages/cli/bin/latent.mjs",
+    "generate-sample-fixture": "node packages/tokens/generate-sample-fixture.mjs",
     "postinstall": "git config core.hooksPath .githooks"
   },
   "dependencies": {

@@ -30,6 +30,19 @@ json_status() {
   node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).status)}catch(e){console.log('parse-error')}})"
 }
 
+# --- 0. Sample fixture ---
+# figma-export.sample.json is a demo fixture with 3 intentional drift cases
+# for exercising `sync figma`. It's generated from the same 4 schema files,
+# so it can't silently accumulate unrelated staleness the way a hand-edited
+# copy could (see generate-sample-fixture.mjs's header comment) — regenerate
+# and re-stage it automatically whenever the schema changes.
+SCHEMA_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/tokens/(primitives|semantic|density|breakpoint)\.json$')
+if [ -n "$SCHEMA_TOUCHED" ]; then
+  echo "latent: token schema changed — regenerating figma-export.sample.json..."
+  node packages/tokens/generate-sample-fixture.mjs
+  git add packages/tokens/figma-export.sample.json
+fi
+
 # --- 1. Tokens/Styles ---
 TOKENS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/tokens/|^STYLES\.md$')
 if [ -n "$TOKENS_TOUCHED" ]; then
