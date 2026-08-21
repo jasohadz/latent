@@ -7,6 +7,15 @@ The last few steps also cover what happens after a component exists:
 how you actually use a library of finished components to have an agent
 build whole pages, not just one piece at a time.
 
+**This checklist is for building a *new* component.** If you only changed
+an *existing* value — a color, spacing, or corner radius already in the
+library, nothing new — you don't need any of this, and you don't need an
+AI agent either. Open the **Latent Sync** Figma plugin (Plugins →
+Development → Latent Sync in Figma desktop), click **Extract from Figma**,
+then **Sync to GitHub branch**. That's the whole thing — see
+`packages/figma-plugin/README.md` if someone technical needs the setup
+steps.
+
 ---
 
 ## ✅ Step 1: Use colors, sizes, and spacing from the library — never type your own
@@ -121,8 +130,8 @@ and paste this in, swapping in the actual component name:
 Add an [Input] component following Button's three-file pattern. Pull its
 bound variables via figma_get_component_for_development, use that for
 the figmaTokens mapping. Check STYLES.md for any text/effect styles it
-uses. Register it in the CLI, then run docs, check-parity, and sync
-figma until clean before committing.
+uses. Register it in the CLI, then run docs and verify until clean
+before committing.
 ```
 
 You don't need to understand everything in that sentence — it's telling
