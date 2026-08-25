@@ -995,6 +995,10 @@ async function buildComponentCatalog() {
   return catalog;
 }
 
+function isComposeNodeLike(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value) && typeof value.component === "string";
+}
+
 // Recursive tree walker. A CompositionNode is { component, props?, children? }
 // — components nest (a React.ReactNode/function prop represents nesting,
 // not a scalar to validate, see parsePropType above), so this validates the
@@ -1022,6 +1026,23 @@ function validateComposition(node, catalog, path, errors) {
           errors.push({ path: `${path}.props.${propName}`, message: `"${propName}" is not a valid prop for ${component}` });
           continue;
         }
+        // A ReactNode-typed prop (parsePropType's "any") can itself hold a
+        // nested composition — PageLayout's header/panel/footer, for
+        // instance. Recurse into it if its value actually looks like a
+        // composition node (or an array of them), rather than leaving it
+        // unchecked just because the prop's own declared type couldn't be
+        // constrained to a scalar. Found this gap building the first real
+        // template, not by reasoning about it in the abstract.
+        if (isComposeNodeLike(value)) {
+          validateComposition(value, catalog, `${path}.props.${propName}`, errors);
+          continue;
+        }
+        if (Array.isArray(value) && value.some(isComposeNodeLike)) {
+          value.forEach((item, i) => {
+            if (isComposeNodeLike(item)) validateComposition(item, catalog, `${path}.props.${propName}[${i}]`, errors);
+          });
+          continue;
+        }
         if (propSchema.kind === "enum" && !propSchema.values.includes(value)) {
           errors.push({
             path: `${path}.props.${propName}`,
@@ -1038,9 +1059,18 @@ function validateComposition(node, catalog, path, errors) {
       }
     }
   }
+  // children is either a plain string (text content — several components,
+  // e.g. Badge, take their label via JSX children rather than a dedicated
+  // prop, since `extends` passthrough isn't itemized in .doc.mjs's props
+  // array; nothing to validate about arbitrary text) or an array of nested
+  // composition nodes, validated recursively. Found needing the string case
+  // by trying to model Badge's real API accurately, not by assuming a tree
+  // is always nested components.
   if (children !== undefined) {
-    if (!Array.isArray(children)) {
-      errors.push({ path: `${path}.children`, message: "children must be an array" });
+    if (typeof children === "string") {
+      // text content — nothing to validate
+    } else if (!Array.isArray(children)) {
+      errors.push({ path: `${path}.children`, message: "children must be a string or an array of composition nodes" });
     } else {
       children.forEach((child, i) => validateComposition(child, catalog, `${path}.children[${i}]`, errors));
     }
