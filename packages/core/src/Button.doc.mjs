@@ -17,6 +17,7 @@ export default {
     "Don't use the ghost variant with visible text (children) — Figma only defines it for iconOnly.",
   ],
   swizzlePath: "packages/core/src/Button.tsx",
+  extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
   // Token paths this component is expected to consume, keyed by the CSS
   // property they should end up styling. check-parity greps the compiled
   // CSS for the corresponding --lat-* variable to confirm no drift.

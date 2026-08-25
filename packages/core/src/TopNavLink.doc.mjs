@@ -11,6 +11,7 @@ export default {
     "Don't set active on a link with no corresponding open panel (e.g. Pricing) — active only styles the label color, it doesn't open anything itself; TopNav is what wires active/onClick to its own menu state.",
   ],
   swizzlePath: "packages/core/src/TopNavLink.tsx",
+  extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
   // Previously: Active=No's Label was raw unbound "Inter Regular" in
   // Figma (a real bug, not reproduced in the original port). Fixed at
   // the source — both Active=No and Active=Yes now share the same real

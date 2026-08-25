@@ -12,6 +12,7 @@ export default {
     "Don't try to swap the leading icon — it's fixed to corner-down-right by design, unlike NavItem.",
   ],
   swizzlePath: "packages/core/src/NavSubItem.tsx",
+  extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
   figmaTokens: {
     "padding (vertical)": "spacing.6",
     "padding (horizontal) / gap": "spacing.10",

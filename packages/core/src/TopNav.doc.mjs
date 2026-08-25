@@ -16,6 +16,7 @@ export default {
     "Don't render Pricing with a chevron/menu — it's a plain link, unlike Product/Download.",
   ],
   swizzlePath: "packages/core/src/TopNav.tsx",
+  extends: null,
   figmaTokens: {
     "bar padding (vertical)": "spacing.8",
     "bar padding (horizontal)": "spacing.16",

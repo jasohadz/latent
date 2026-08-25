@@ -13,6 +13,7 @@ export default {
     "The send button's active (non-empty value) color isn't a documented Figma state — it's an app-requested affordance reusing color.action.primary.default, not a verified spec value.",
   ],
   swizzlePath: "packages/core/src/ChatInput.tsx",
+  extends: null,
   figmaTokens: {
     "container padding": "spacing.2",
     "container gap": "spacing.8",

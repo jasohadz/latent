@@ -16,6 +16,7 @@ export default {
     "Don't set iconOnly without a meaningful `label` — with iconOnly there's no visible text, and label becomes the button's only accessible name (via aria-label).",
   ],
   swizzlePath: "packages/core/src/NavItem.tsx",
+  extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
   figmaTokens: {
     "padding (vertical)": "spacing.8",
     "padding (horizontal) / gap": "spacing.10",

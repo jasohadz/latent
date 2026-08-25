@@ -12,6 +12,7 @@ export default {
     "Don't set showIcon without also passing `icon` — the icon badge only renders when both are true/present, so showIcon alone leaves an empty gap.",
   ],
   swizzlePath: "packages/core/src/Stat.tsx",
+  extends: null,
   figmaTokens: {
     "container padding": "spacing.32",
     "container gap": "spacing.8",

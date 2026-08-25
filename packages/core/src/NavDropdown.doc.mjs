@@ -15,6 +15,7 @@ export default {
     "Don't manage the trigger's chevron direction yourself — it's derived automatically from `expanded` (chevron-down collapsed, chevron-up expanded).",
   ],
   swizzlePath: "packages/core/src/NavDropdown.tsx",
+  extends: null,
   // Only 2 entries by design, not a gap: NavDropdown renders real NavItem/
   // NavSubItem instances for the trigger and sub-rows, so their own padding/
   // color/typography tokens already live in NavItem.doc.mjs/NavSubItem.doc.mjs

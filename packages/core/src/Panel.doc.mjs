@@ -8,6 +8,7 @@ export default {
     "Don't hardcode a shadow value — add or reuse a --lat-elevation-* custom property instead.",
   ],
   swizzlePath: "packages/core/src/Panel.tsx",
+  extends: "React.HTMLAttributes<HTMLDivElement>",
   // Matches the surface recipe used by Side Nav and Top Nav's dropdown
   // panel in Figma (color/surface/raised + color/border/subtle +
   // radius/card), differing only in elevation tier (lg, for stronger

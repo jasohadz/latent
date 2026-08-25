@@ -16,6 +16,7 @@ export default {
     "Don't build the nav list as a data-array prop — compose real NavItem/NavDropdown children directly, matching Figma's own instance-based structure.",
   ],
   swizzlePath: "packages/core/src/SideNav.tsx",
+  extends: null,
   figmaTokens: {
     "panel background": "color.surface.raised",
     "panel border": "color.border.subtle",

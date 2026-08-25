@@ -13,6 +13,7 @@ export default {
     "Don't pass badgeLabel with layout=\"standard\" and expect it to show — the Badge only renders when layout=\"featured\".",
   ],
   swizzlePath: "packages/core/src/MegaMenuItem.tsx",
+  extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
   figmaTokens: {
     "padding/gap": "spacing.12",
     "border-radius": "radius.lg",

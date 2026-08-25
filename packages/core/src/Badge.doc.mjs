@@ -12,6 +12,7 @@ export default {
     "Don't hardcode colors — each variant already maps to its own semantic background/text token pair; add a new variant rather than overriding via className.",
   ],
   swizzlePath: "packages/core/src/Badge.tsx",
+  extends: "React.HTMLAttributes<HTMLSpanElement>",
   figmaTokens: {
     "gap": "spacing.4",
     "border-radius": "radius.full",

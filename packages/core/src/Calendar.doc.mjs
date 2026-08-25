@@ -20,6 +20,7 @@ export default {
     "Don't hardcode colors/spacing in overrides; add or reuse a --lat-* custom property instead.",
   ],
   swizzlePath: "packages/core/src/Calendar.tsx",
+  extends: null,
   // The Calendar Day states in Figma (Default/Hover/Active/Hidden/Disabled/
   // Range/Range Disabled) map to CSS pseudo-classes and modifier classes
   // here rather than separate components — see Calendar.css.

@@ -12,6 +12,7 @@ export default {
     "Don't pass position=\"trailing\" and expect a chevron — trailing intentionally has no chevron, only leading/none do.",
   ],
   swizzlePath: "packages/core/src/BadgeGroup.tsx",
+  extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
   figmaTokens: {
     "container padding": "spacing.4",
     "container gap": "spacing.8",

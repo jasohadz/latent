@@ -94,6 +94,9 @@ async function cmdDocs(name, json) {
   for (const p of doc.props) {
     console.log(`  ${p.name}: ${p.type} (default: ${p.default})\n    ${p.description}`);
   }
+  if (doc.extends) {
+    console.log(`\nAlso accepts: ${doc.extends} (passed through via {...rest}, not itemized above).`);
+  }
   console.log(`\nExample:\n  ${doc.example}`);
 }
 
@@ -334,10 +337,18 @@ async function checkDocSchema() {
       continue;
     }
 
-    for (const field of ["name", "summary", "props", "example", "doNot", "swizzlePath", "figmaTokens"]) {
+    for (const field of ["name", "summary", "props", "example", "doNot", "swizzlePath", "extends", "figmaTokens"]) {
       if (!(field in doc)) {
         violations.push({ kind: "doc-schema", file, component: name, field, reason: `missing required top-level field "${field}"` });
       }
+    }
+
+    // extends is required but its value is allowed to be null (most
+    // components don't extend an HTML attributes interface) — the key
+    // must still be present so "no passthrough" reads as a deliberate
+    // fact, not an omission nobody got around to.
+    if ("extends" in doc && doc.extends !== null && (typeof doc.extends !== "string" || doc.extends.length === 0)) {
+      violations.push({ kind: "doc-schema", file, component: name, field: "extends", reason: "extends must be null, or the literal TS `extends X` clause from the component's Props interface" });
     }
 
     if (doc.summary !== undefined && (typeof doc.summary !== "string" || doc.summary.length < 10)) {

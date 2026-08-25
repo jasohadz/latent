@@ -11,6 +11,7 @@ export default {
     "Don't use ToggleMultiple for exactly 2 options — use Toggle instead (same recipe, narrower/simpler API).",
   ],
   swizzlePath: "packages/core/src/ToggleMultiple.tsx",
+  extends: null,
   figmaTokens: {
     "track background": "color.background.muted",
     "track padding/gap": "spacing.4",

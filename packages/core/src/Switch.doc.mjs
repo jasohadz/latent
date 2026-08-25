@@ -12,6 +12,7 @@ export default {
     "Don't hardcode the thumb travel distance in a consumer override — it's derived from the track/thumb/padding sizes here; change those instead.",
   ],
   swizzlePath: "packages/core/src/Switch.tsx",
+  extends: null,
   figmaTokens: {
     "track background (off)": "color.background.muted",
     "track background (on)": "color.action.primary.default",

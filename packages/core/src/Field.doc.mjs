@@ -11,6 +11,7 @@ export default {
     "Don't set Field's own value/state independent of the nested TextField — there's no separate value axis at this level, per Figma's own note.",
   ],
   swizzlePath: "packages/core/src/Field.tsx",
+  extends: "TextFieldProps",
   figmaTokens: {
     "field gap": "spacing.4",
     "label color": "color.text.secondary",

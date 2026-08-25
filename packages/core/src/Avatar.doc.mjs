@@ -15,6 +15,7 @@ export default {
     "Don't hardcode colors/sizes — add or reuse a --lat-* custom property instead.",
   ],
   swizzlePath: "packages/core/src/Avatar.tsx",
+  extends: "React.HTMLAttributes<HTMLSpanElement>",
   figmaTokens: {
     "background": "color.background.muted",
     "text/icon color": "color.text.secondary",

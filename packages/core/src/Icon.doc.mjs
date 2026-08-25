@@ -12,6 +12,7 @@ export default {
     "Don't guess an icon name — check the Icons foundations page or STYLES.md-adjacent icon list; an unmatched name silently renders nothing (with a dev-mode console warning).",
   ],
   swizzlePath: "packages/core/src/Icon.tsx",
+  extends: "React.SVGAttributes<SVGSVGElement>",
   // lucide-react is a runtime dependency of this component (see root
   // package.json) — unlike Button, which has zero external dependencies.
   // Anyone who swizzles Icon.tsx out needs lucide-react installed too.

@@ -12,6 +12,7 @@ export default {
     "Don't reach for Testimonial if you need an icon or button instead of a quote+person — use Card, which has boolean properties for exactly that.",
   ],
   swizzlePath: "packages/core/src/Testimonial.tsx",
+  extends: null,
   figmaTokens: {
     "container padding": "spacing.32",
     "container gap": "spacing.24",

@@ -14,6 +14,7 @@ export default {
     "Don't drop the disclaimer text via a wrapper override — it's a fixed part of this component's structure, not optional per Figma.",
   ],
   swizzlePath: "packages/core/src/SubscribeField.tsx",
+  extends: null,
   // This component's radius/full submit-button precedent is what Search's
   // own circular submit button was built to match (see Search.doc.mjs).
   figmaTokens: {

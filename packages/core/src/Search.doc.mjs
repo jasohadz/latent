@@ -15,6 +15,7 @@ export default {
     "Don't expect a leading icon inside the field — Figma's Search component has a leading-icon boolean property, but it's off in all 16 current variants, so it isn't built. Revisit if a variant ever turns it on.",
   ],
   swizzlePath: "packages/core/src/Search.tsx",
+  extends: null,
   // Submit is a real Button instance (variant="primary" iconOnly), not a
   // bespoke element — Button.tsx gained a true icon-only mode 2026-07-30
   // (see Button.doc.mjs), superseding the earlier gap noted here (still

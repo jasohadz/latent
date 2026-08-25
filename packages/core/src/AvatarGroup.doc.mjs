@@ -11,6 +11,7 @@ export default {
     "Don't render the overflow count as an <Avatar initial=\"+2\"> — Avatar's single-character constraint would clip it; AvatarGroup's overflow chip is a separate, matching-styled element on purpose.",
   ],
   swizzlePath: "packages/core/src/AvatarGroup.tsx",
+  extends: null,
   figmaTokens: {
     "spaced gap": "spacing.4",
     "overflow width/height": "sizing.avatar.md",

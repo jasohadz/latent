@@ -21,6 +21,7 @@ export default {
     "Don't expect exact 1:1 parity on the progressive blur — Figma uses 5 fixed bands (2–30px blur, 6%–62% tint); this is a CSS approximation of the same technique, not a pixel-identical port.",
   ],
   swizzlePath: "packages/core/src/Card.tsx",
+  extends: null,
   // CTA reuses the real Button component, but Figma's CTA uses
   // appearance=outline (blue border, link-colored text) which still has no
   // equivalent in code's Button (variants are primary/secondary/ghost,

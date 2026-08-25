@@ -13,6 +13,7 @@ export default {
     "Don't render AccordionItem as a standalone list component — it's one row; map over your data and render one instance per row, tracking which id is open yourself.",
   ],
   swizzlePath: "packages/core/src/AccordionItem.tsx",
+  extends: null,
   figmaTokens: {
     "container padding/gap": "spacing.16",
     "container background": "color.background.default",

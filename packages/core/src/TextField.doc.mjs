@@ -11,6 +11,7 @@ export default {
     "Don't hardcode the placeholder text via a className override — pass a `placeholder` prop like any native input.",
   ],
   swizzlePath: "packages/core/src/TextField.tsx",
+  extends: "React.InputHTMLAttributes<HTMLInputElement>",
   figmaTokens: {
     "padding": "spacing.8",
     "border-radius": "radius.lg",

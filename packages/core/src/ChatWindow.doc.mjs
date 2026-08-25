@@ -10,6 +10,7 @@ export default {
     "Don't pass raw strings/JSX as children — only real MessageBubble instances are the documented content model; anything else skips MessageBubble's own sender-based alignment/color tokens.",
   ],
   swizzlePath: "packages/core/src/ChatWindow.tsx",
+  extends: null,
   // Only "fills" and the slot's own itemSpacing were captured as bound
   // variables on this node — outer padding wasn't directly verified (no
   // bound paddingLeft/Top/etc showed up in the fetch), so spacing.16 here

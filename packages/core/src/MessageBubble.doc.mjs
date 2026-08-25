@@ -10,6 +10,7 @@ export default {
     "Don't render MessageBubble outside ChatWindow's message slot — its row alignment (assistant left, user right) assumes ChatWindow's full-width flex container.",
   ],
   swizzlePath: "packages/core/src/MessageBubble.tsx",
+  extends: null,
   // Text color for the assistant bubble (color/text/on-brand, white) is
   // inferred from its blue color/action/primary/default fill matching
   // Button's primary variant — not independently re-verified against the

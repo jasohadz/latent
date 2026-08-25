@@ -11,6 +11,7 @@ export default {
     "Don't resize below readable height — the 100px fixed height matches Figma; use CSS `resize` (already set to vertical) rather than a much shorter override.",
   ],
   swizzlePath: "packages/core/src/TextArea.tsx",
+  extends: "React.TextareaHTMLAttributes<HTMLTextAreaElement>",
   figmaTokens: {
     "padding": "spacing.8",
     "border-radius": "radius.lg",
