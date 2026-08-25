@@ -43,9 +43,13 @@ themselves:
 
 1. Review the CI check on the `figma-sync` branch, or run the same thing
    locally: `node packages/cli/bin/latent.mjs verify --json`.
-2. Reconcile whatever drift it reports into the actual token files by hand
-   — investigate which side is actually wrong before just copying Figma's
-   value over (see `CLAUDE.md`).
+2. Reconcile whatever drift it reports into the actual token files —
+   investigate which side is actually wrong before just copying Figma's
+   value over (see `CLAUDE.md`). Once you've decided Figma's side is
+   right, `node packages/cli/bin/latent.mjs apply-drift --write` writes
+   the reconciliation for you instead of hand-typing it — dry-run without
+   `--write`, and it never deletes a code-only token/style on its own
+   (that direction of drift still needs a manual decision either way).
 3. Commit. The pre-commit hook (`.githooks/`, installed via step 1's
    `npm install`) re-runs the relevant checks automatically and blocks the
    commit if the files you just wrote are inconsistent with each other — a
