@@ -28,7 +28,7 @@ phases depend on earlier ones being solid, especially the token schema.
 8. Once a component's Figma spec is stable, run `check-parity <name>` to confirm the shipped CSS matches it — all 30 components are wired to semantic paths and pass.
 9. ~~(Later) automate steps 6-7 as a script or CI job instead of running by hand~~ — done 2026-08-20: `packages/figma-plugin/` (the "Latent Sync" Figma plugin) pulls variables/styles from the open Figma file and pushes `figma-export.live.json`/`styles-export.live.json` to a `figma-sync` GitHub branch directly, no manual export/paste step. Every push triggers `.github/workflows/latent-sync-check.yml`, which runs `verify` (sync figma + check-styles + check-parity for every component + check-docs, one command — see `CLAUDE.md`) automatically. Reconciling any drift it reports is still a human step by design — see `packages/figma-plugin/README.md`.
 
-## Phase 3 — Agent-readiness layer (mostly done)
+## Phase 3 — Agent-readiness layer (done)
 
 10. Every component ships a `.doc.mjs` — keep doing this for every new one, no exceptions
 11. CLI supports `list`, `docs`, `swizzle`, `sync figma`, `check-parity`, `check-styles`, `check-docs`, `verify`, `apply-drift`, `manifest`, `index`, `ask --json` — add `init` and `upgrade` once there's a second consuming project. `verify` (added 2026-08-20) runs the other four checks in one call — it's what `.github/workflows/latent-sync-check.yml` runs after every Latent Sync plugin push, and what a human should reach for at the terminal too.
