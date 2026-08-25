@@ -69,7 +69,7 @@ const COMMANDS = {
   },
   manifest: { args: [], flags: ["--json"], responseTypes: ["manifest"] },
   index: { args: [], flags: ["--json"], responseTypes: ["index-result", "error"] },
-  ask: { args: ["<question>"], flags: ["--json", "--check", "--monitor"], responseTypes: ["ask-result", "error"] },
+  ask: { args: ["<question>"], flags: ["--json", "--check", "--monitor", "--cite"], responseTypes: ["ask-result", "error"] },
 };
 
 const ERROR_CODES = {
@@ -553,7 +553,7 @@ async function cmdIndex(json) {
   }, json);
 }
 
-async function cmdAsk(question, json, checkComponent, monitor) {
+async function cmdAsk(question, json, checkComponent, monitor, cite) {
   if (!question) return print(err("ERR_MISSING_ARG", { arg: "question" }), json);
 
   let mon = null;
@@ -611,9 +611,11 @@ async function cmdAsk(question, json, checkComponent, monitor) {
 
   // Folds a failed check straight into the same context, so the model
   // explains against the real declared contract instead of guessing.
+  let parityBlock = null;
   if (checkComponent) {
     const parity = await computeCheckParity(checkComponent);
-    retrievedContext += `\n\n---\n\ncheck-parity result for ${checkComponent}:\n${JSON.stringify(parity, null, 2)}`;
+    parityBlock = `check-parity result for ${checkComponent}:\n${JSON.stringify(parity, null, 2)}`;
+    retrievedContext += `\n\n---\n\n${parityBlock}`;
     if (mon) {
       mon.emit("check-parity", {
         component: checkComponent,
@@ -637,32 +639,117 @@ async function cmdAsk(question, json, checkComponent, monitor) {
   const llamaContext = await chatModel.createContext();
   const session = new LlamaChatSession({ contextSequence: llamaContext.getSequence() });
 
-  const prompt = `Answer using ONLY the context below. If the answer isn't in it, say so clearly.\n\nContext:\n${retrievedContext}\n\nQuestion: ${effectiveQuestion}`;
-  if (process.env.LATENT_DEBUG_PROMPT) console.error("=== FULL PROMPT ===\n" + prompt + "\n=== END PROMPT (length: " + prompt.length + ") ===");
-  if (mon) mon.emit("prompt-ready", { length: prompt.length });
-
-  // Streams to stderr as it generates so a human watching the terminal sees
-  // the answer appear live, token by token, rather than staring at a blank
-  // screen until the single final JSON blob prints to stdout. Kept off
-  // stdout deliberately — --json consumers still get one clean JSON object
-  // there, uninterrupted by partial text. The monitor gets the same stream
-  // over SSE, one `token` event per chunk.
-  if (!json) process.stderr.write("\n");
-  const answer = await session.prompt(prompt, {
-    onTextChunk: (text) => {
-      if (!json) process.stderr.write(text);
-      if (mon) mon.emit("token", { text });
-    },
-  });
-  if (!json) process.stderr.write("\n\n");
-
   const sources = allChunks.map((item) => item.metadata);
-  if (mon) {
-    mon.emit("done", { answer, sources });
-    console.error(`Monitor still running at ${mon.url} — Ctrl+C to stop.`);
+  let answer;
+  let claims;
+
+  if (cite) {
+    // Grammar-constrained generation forces syntactically valid JSON — per
+    // node-llama-cpp's own docs this "reduces," not eliminates, hallucination:
+    // it guarantees the *shape* of the output, not the truth of its content.
+    // The actual anti-hallucination step is what happens after generation —
+    // every claim's "quote" is checked as a real substring of the numbered
+    // source it claims to come from. The model can still assert something
+    // false in "text", but it can no longer get away with inventing a
+    // citation for it: the quote either exists in that source or the claim
+    // is marked unverified, visibly, instead of silently trusted.
+    const sourceTexts = [...allChunks.map((item) => item.metadata.text), ...(parityBlock ? [parityBlock] : [])];
+    const numberedSources = sourceTexts.map((text, i) => `Source ${i}:\n${text}`).join("\n\n");
+
+    // minItems/maxItems + telling the model the expected count in the
+    // prompt are both required — node-llama-cpp's own grammar docs warn
+    // that using minItems/maxItems without also stating the expectation in
+    // the prompt "may lead to hallucinations." Confirmed the failure mode
+    // directly: without both, the model reliably emitted a syntactically
+    // valid but empty `{"claims": []}` — the grammar guarantees valid JSON,
+    // not that the model tries to fill it in.
+    const citePrompt = `Answer the question using ONLY the numbered sources below. Break your answer into individual factual claims — provide between 1 and 5 claims, at least one. For each claim, give:\n- "text": the claim, in your own words\n- "quote": an exact substring copied verbatim from the source it comes from — do not paraphrase the quote\n- "source": the number of the source the quote came from\n\nSources:\n${numberedSources}\n\nQuestion: ${effectiveQuestion}`;
+    if (process.env.LATENT_DEBUG_PROMPT) console.error("=== FULL PROMPT (cite) ===\n" + citePrompt + "\n=== END PROMPT (length: " + citePrompt.length + ") ===");
+    if (mon) mon.emit("prompt-ready", { length: citePrompt.length });
+
+    const llama = await getLlamaInstance();
+    const grammar = await llama.createGrammarForJsonSchema({
+      type: "object",
+      properties: {
+        claims: {
+          type: "array",
+          minItems: 1,
+          maxItems: 5,
+          items: {
+            type: "object",
+            properties: {
+              text: { type: "string" },
+              quote: { type: "string" },
+              source: { type: "integer" },
+            },
+          },
+        },
+      },
+    });
+
+    const raw = await session.prompt(citePrompt, { grammar });
+    const parsed = grammar.parse(raw);
+
+    // Case-insensitive: the model tends to capitalize a quoted fragment as
+    // if it were a sentence start ("Three sizes") even when the source has
+    // it mid-sentence, lowercase ("three sizes") — confirmed this produces
+    // false-negative "unverified" claims on genuinely real quotes if the
+    // comparison is case-sensitive. Still requires the actual substring
+    // content to be real; only case is forgiven, not the quote itself.
+    // Empty/near-empty quote is a real loophole, not a hypothetical: caught
+    // it directly — a claim with quote: "" was coming back `verified: true`,
+    // because "".includes("") (or any trivially short substring) is always
+    // true in JS. That's fail-open exactly where this needs to fail closed —
+    // no real quote means "can't verify," not "verified." Requiring a few
+    // real characters also blocks near-empty quotes ("a", "is") from
+    // trivially matching almost any source.
+    const normalize = (s) => String(s ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+    claims = (parsed.claims ?? []).map((c) => {
+      const src = sourceTexts[c.source];
+      const normalizedQuote = normalize(c.quote);
+      const verified = typeof src === "string" && normalizedQuote.length >= 4 && normalize(src).includes(normalizedQuote);
+      return { ...c, verified };
+    });
+
+    answer = claims
+      .map((c) => (c.verified ? c.text : `${c.text} [UNVERIFIED — no matching source text found]`))
+      .join(" ");
+
+    if (!json) {
+      process.stderr.write("\n");
+      for (const c of claims) {
+        process.stderr.write(`${c.verified ? "✓" : "✗"} ${c.text}\n    quote (source ${c.source}): "${c.quote}"\n`);
+      }
+      process.stderr.write("\n");
+    }
+    if (mon) mon.emit("done", { answer, sources, claims });
+  } else {
+    const prompt = `Answer using ONLY the context below. If the answer isn't in it, say so clearly.\n\nContext:\n${retrievedContext}\n\nQuestion: ${effectiveQuestion}`;
+    if (process.env.LATENT_DEBUG_PROMPT) console.error("=== FULL PROMPT ===\n" + prompt + "\n=== END PROMPT (length: " + prompt.length + ") ===");
+    if (mon) mon.emit("prompt-ready", { length: prompt.length });
+
+    // Streams to stderr as it generates so a human watching the terminal
+    // sees the answer appear live, token by token, rather than staring at a
+    // blank screen until the single final JSON blob prints to stdout. Kept
+    // off stdout deliberately — --json consumers still get one clean JSON
+    // object there, uninterrupted by partial text. The monitor gets the
+    // same stream over SSE, one `token` event per chunk. Not used for
+    // --cite: streaming raw grammar-constrained JSON char by char reads as
+    // garbled JSON, not prose, so that path waits for the full result instead.
+    if (!json) process.stderr.write("\n");
+    answer = await session.prompt(prompt, {
+      onTextChunk: (text) => {
+        if (!json) process.stderr.write(text);
+        if (mon) mon.emit("token", { text });
+      },
+    });
+    if (!json) process.stderr.write("\n\n");
+    if (mon) mon.emit("done", { answer, sources });
   }
 
-  print({ type: "ask-result", question, answer, sources }, json);
+  if (mon) console.error(`Monitor still running at ${mon.url} — Ctrl+C to stop.`);
+
+  print({ type: "ask-result", question, answer, sources, ...(claims ? { claims } : {}) }, json);
 }
 
 // Runs every drift check this repo has in one call — sync figma, check-styles,
@@ -917,7 +1004,8 @@ async function main() {
       const checkFlagIdx = rest.indexOf("--check");
       const checkComponent = checkFlagIdx >= 0 ? rest[checkFlagIdx + 1] : undefined;
       const monitor = rest.includes("--monitor");
-      return cmdAsk(positional[0], json, checkComponent, monitor);
+      const cite = rest.includes("--cite");
+      return cmdAsk(positional[0], json, checkComponent, monitor, cite);
     }
     default:
       print(err("ERR_UNKNOWN_COMMAND", { requested: cmd }));

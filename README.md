@@ -74,7 +74,11 @@ CLI-native operation with the same fail-loudly discipline as everything else:
   `--check <Component>` to have it explain a failing `check-parity` result
   against that component's real declared contract instead of guessing.
   Pass `--monitor` to watch the whole pipeline — retrieval, the check
-  result, the answer generating — visually, live, in a browser tab.
+  result, the answer generating — visually, live, in a browser tab. Pass
+  `--cite` when you don't want to just trust the prose: the model must
+  back every claim with a verbatim quote from a specific source, each
+  mechanically checked afterward — ✓ if real, ✗ if not (including an
+  empty or missing quote, which no longer counts as verified).
 
 The sample export at `packages/tokens/figma-export.sample.json` has
 exactly 3 intentional drift cases (one missing-in-code, one value
