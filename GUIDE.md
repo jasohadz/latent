@@ -34,6 +34,16 @@ phases depend on earlier ones being solid, especially the token schema.
 11. CLI supports `list`, `docs`, `swizzle`, `sync figma`, `check-parity`, `check-styles`, `check-docs`, `verify`, `manifest --json` — add `init` and `upgrade` once there's a second consuming project. `verify` (added 2026-08-20) runs the other four checks in one call — it's what `.github/workflows/latent-sync-check.yml` runs after every Latent Sync plugin push, and what a human should reach for at the terminal too.
 12. Error codes are typed and append-only (`ERR_UNKNOWN_COMPONENT`, etc.) — never remove or repurpose a code once shipped
 
+### Ask Latent (optional, local)
+
+Latent ships a local, offline Q&A layer over its own component contracts and docs — `latent index` / `latent ask`, backed by `node-llama-cpp` (no separate app to install) and a `vectra` file index. No external service, no API key.
+
+1. `npm install` — already part of normal repo setup, pulls `vectra` and `node-llama-cpp`
+2. `node packages/cli/bin/latent.mjs index --json` — first run downloads the local models into `.latent-models/` (gitignored, a few GB, one-time); every run after is instant
+3. `node packages/cli/bin/latent.mjs ask "what variants does Button have"`
+
+The knowledge index (`.latent-index/`) is committed to the repo and kept fresh by the pre-commit hook once your local models are set up — see `.githooks/pre-commit`'s "Knowledge index" section. Use `--check <Component>` to have `ask` explain a failing `check-parity` result against the component's real declared contract instead of guessing.
+
 ## Phase 4 — Templates & polish (next up)
 
 13. Build 2-3 content-only page templates (dashboard, settings, form) composing existing components into a shared layout primitive with header/content/panel slots — this is the current gap: the component library is deep (30 components across atoms, composites, nav, and chat) but nothing yet demonstrates them assembled into a real page.

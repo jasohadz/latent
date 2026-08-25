@@ -1,13 +1,17 @@
 {
   "name": "latent-monorepo",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "ds": "node packages/cli/bin/latent.mjs",
     "generate-sample-fixture": "node packages/tokens/generate-sample-fixture.mjs",
     "postinstall": "git config core.hooksPath .githooks"
   },
   "dependencies": {
-    "lucide-react": "^1.24.0"
+    "lucide-react": "^1.24.0",
+    "node-llama-cpp": "^3.20.0",
+    "vectra": "^0.15.0"
   }
 }

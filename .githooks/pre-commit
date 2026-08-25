@@ -136,13 +136,30 @@ if [ -n "$DOCS_TOUCHED" ]; then
   fi
 fi
 
+# --- 4. Knowledge index ---
+# Refreshes .latent-index/ (committed) for `latent ask` when component
+# contracts or root docs change. Best-effort, never blocking: skips quietly
+# if the local models under .latent-models/ (gitignored) haven't been
+# downloaded yet on this machine — a routine commit shouldn't trigger a
+# multi-gigabyte download. Run `latent index` once yourself to set them up;
+# after that this keeps the index in step automatically.
+INDEX_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/core/src/.*\.doc\.mjs$|^(GUIDE|README|HOW-TO|STYLES|TOKEN-SCHEMA-V2|VARIABLE-SCOPES|NAMING-CONVENTIONS|DESIGNER-CHECKLIST|CONTRIBUTING|CLAUDE)\.md$')
+if [ -n "$INDEX_TOUCHED" ]; then
+  if [ -d .latent-models ]; then
+    echo "latent: contract/doc files changed — refreshing knowledge index..."
+    node packages/cli/bin/latent.mjs index --json >/dev/null 2>&1 && git add .latent-index
+  else
+    echo "latent: contract/doc files changed but local models aren't set up yet — skipping index refresh (run 'latent index' once to set up)."
+  fi
+fi
+
 if [ "$FAIL" = "1" ]; then
   echo ""
   echo "Commit blocked. Fix the drift reported above before committing."
   exit 1
 fi
 
-if [ -n "$TOKENS_TOUCHED" ] || [ -n "$COMPONENTS_TOUCHED" ] || [ -n "$DOCS_TOUCHED" ]; then
+if [ -n "$TOKENS_TOUCHED" ] || [ -n "$COMPONENTS_TOUCHED" ] || [ -n "$DOCS_TOUCHED" ] || [ -n "$INDEX_TOUCHED" ]; then
   echo "latent: all checks passed."
 fi
 exit 0

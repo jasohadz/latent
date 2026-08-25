@@ -6,12 +6,30 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { flattenTokens, tokenPathToCssVar, tokensEqual, isTerminalModeMap } from "../../tokens/flatten.mjs";
+import { LocalIndex } from "vectra";
+import { getLlama, resolveModelFile, LlamaChatSession } from "node-llama-cpp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CORE_SRC = path.resolve(__dirname, "../../core/src");
 const REPO_ROOT = path.resolve(__dirname, "../../..");
 
 const TOKENS_DIR = path.resolve(__dirname, "../../tokens");
+
+const INDEX_PATH = path.join(REPO_ROOT, ".latent-index");   // committed — small, text-based
+const MODELS_DIR = path.join(REPO_ROOT, ".latent-models");  // gitignored — model weights are GBs, not a text artifact
+
+// Verify current repo/quant tags on huggingface.co before relying on these —
+// GGUF conversions get re-uploaded/renamed over time.
+const CHAT_MODEL_URI = "hf:bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M";
+const EMBED_MODEL_URI = "hf:second-state/All-MiniLM-L6-v2-Embedding-GGUF:Q8_0";
+
+// Repo-root docs worth indexing alongside component contracts for `latent ask`.
+const DOC_FILES = [
+  "GUIDE.md", "README.md", "HOW-TO.md", "STYLES.md",
+  "TOKEN-SCHEMA-V2.md", "VARIABLE-SCOPES.md",
+  "NAMING-CONVENTIONS.md", "DESIGNER-CHECKLIST.md",
+  "CONTRIBUTING.md", "CLAUDE.md",
+];
 
 // Known-stale facts that have appeared in prose before and could again —
 // append-only, same discipline as ERROR_CODES. allowNear exempts a line
@@ -50,6 +68,8 @@ const COMMANDS = {
     responseTypes: ["apply-drift-result"],
   },
   manifest: { args: [], flags: ["--json"], responseTypes: ["manifest"] },
+  index: { args: [], flags: ["--json"], responseTypes: ["index-result", "error"] },
+  ask: { args: ["<question>"], flags: ["--json", "--check"], responseTypes: ["ask-result", "error"] },
 };
 
 const ERROR_CODES = {
@@ -58,6 +78,8 @@ const ERROR_CODES = {
   ERR_MISSING_ARG: "A required positional argument was omitted.",
   ERR_FILE_NOT_FOUND: "The referenced file does not exist on disk.",
   ERR_NO_FIGMA_SPEC: "Component has no figmaTokens mapping defined in its doc file.",
+  ERR_NO_INDEX: "No knowledge index found — run `latent index` first.",
+  ERR_MODEL_DOWNLOAD_FAILED: "Could not download the local model on first run — check network access and try again.",
 };
 
 function err(code, extra = {}) {
@@ -394,6 +416,175 @@ async function cmdCheckDocs(json) {
   if (result.violations.length > 0) process.exitCode = 1;
 }
 
+// --- latent ask: local RAG over component contracts + repo docs ---
+//
+// Runs entirely in-process via node-llama-cpp — no separate app/service.
+// resolveModelFile() downloads a model into MODELS_DIR the first time it's
+// requested and reuses the cached file on every call after, so the only
+// "setup" a contributor ever does is running `latent index` once.
+
+let llamaInstance;
+async function getLlamaInstance() {
+  if (!llamaInstance) llamaInstance = await getLlama();
+  return llamaInstance;
+}
+
+// Cached per URI: without this, embedding ~170 chunks during `latent index`
+// reloaded the GGUF file from disk 170 times (caught during testing — the
+// embed model is small enough that it still finished, but the same
+// unguarded loadModel() call would be a real problem against the ~2GB chat
+// model if it were ever called per-chunk instead of once per `ask`).
+const modelCache = new Map();
+async function loadModel(modelUri) {
+  if (modelCache.has(modelUri)) return modelCache.get(modelUri);
+  const llama = await getLlamaInstance();
+  const modelPath = await resolveModelFile(modelUri, MODELS_DIR);
+  const model = await llama.loadModel({ modelPath });
+  modelCache.set(modelUri, model);
+  return model;
+}
+
+let embeddingContextCache;
+async function embedText(text) {
+  const model = await loadModel(EMBED_MODEL_URI);
+  if (!embeddingContextCache) embeddingContextCache = await model.createEmbeddingContext();
+  const { vector } = await embeddingContextCache.getEmbeddingFor(text);
+  return vector;
+}
+
+// MiniLM-family embedding models train at a small context window (confirmed
+// 512 tokens for EMBED_MODEL_URI — small-context is the norm for this whole
+// model class, not a one-off config mistake). Several repo docs (CLAUDE.md,
+// STYLES.md, DESIGNER-CHECKLIST.md) are multiple KB and blow past that as a
+// single chunk, which throws rather than degrading — so nothing gets
+// embedText'd without going through this first. Paragraph-aware, falls back
+// to a hard character split only if a single paragraph itself is oversized.
+function chunkTextForEmbedding(text, maxChars = 1000) {
+  const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const chunks = [];
+  let buf = "";
+  for (const para of paragraphs) {
+    const candidate = buf ? `${buf}\n\n${para}` : para;
+    if (candidate.length <= maxChars) {
+      buf = candidate;
+      continue;
+    }
+    if (buf) chunks.push(buf);
+    if (para.length <= maxChars) {
+      buf = para;
+    } else {
+      for (let i = 0; i < para.length; i += maxChars) chunks.push(para.slice(i, i + maxChars));
+      buf = "";
+    }
+  }
+  if (buf) chunks.push(buf);
+  return chunks.length > 0 ? chunks : [text];
+}
+
+// One chunk per component, built from the same fields CLAUDE.md documents
+// as mandatory (see checkDocSchema above) — props, doNot, swizzlePath,
+// figmaTokens, example — so the index can't say anything the contract
+// itself doesn't already say.
+function docChunkText(doc) {
+  const props = (doc.props ?? [])
+    .map((p) => `${p.name}: ${p.type} (default: ${p.default}) — ${p.description}`)
+    .join("\n");
+  const tokens = doc.figmaTokens
+    ? Object.entries(doc.figmaTokens).map(([k, v]) => `${k} -> ${v}`).join("\n")
+    : "(none declared)";
+  return [
+    `Component: ${doc.name}`,
+    `Summary: ${doc.summary}`,
+    `Props:\n${props}`,
+    `Do not:\n${(doc.doNot ?? []).join("\n")}`,
+    `Swizzle path: ${doc.swizzlePath}`,
+    `Figma tokens:\n${tokens}`,
+    `Example:\n${doc.example}`,
+  ].join("\n\n");
+}
+
+async function cmdIndex(json) {
+  const index = new LocalIndex(INDEX_PATH);
+  // upsertItem only replaces an existing entry when given a stable `id` —
+  // without one it always generates a fresh uuid, i.e. it always inserts,
+  // never updates (caught via duplicate entries in `ask` results during
+  // testing). cmdIndex already rebuilds from every component/doc on every
+  // call, so the correct fix is a clean rebuild each time, not manual id
+  // bookkeeping — otherwise re-running `latent index` (as the pre-commit
+  // hook does automatically) would silently double the index on every commit.
+  if (await index.isIndexCreated()) await index.deleteIndex();
+  await index.createIndex();
+
+  let contractCount = 0;
+  let contractChunkCount = 0;
+  for (const name of discoverComponents()) {
+    const doc = await loadDoc(name);
+    if (!doc) continue;
+    const pieces = chunkTextForEmbedding(docChunkText(doc));
+    for (let i = 0; i < pieces.length; i++) {
+      const vector = await embedText(pieces[i]);
+      await index.upsertItem({ vector, metadata: { type: "contract", component: name, chunk: i, chunkCount: pieces.length, text: pieces[i] } });
+      contractChunkCount++;
+    }
+    contractCount++;
+  }
+
+  let docCount = 0;
+  let docChunkCount = 0;
+  for (const rel of DOC_FILES) {
+    const full = path.join(REPO_ROOT, rel);
+    if (!existsSync(full)) continue;
+    const pieces = chunkTextForEmbedding(readFileSync(full, "utf-8"));
+    for (let i = 0; i < pieces.length; i++) {
+      const vector = await embedText(pieces[i]);
+      await index.upsertItem({ vector, metadata: { type: "doc", path: rel, chunk: i, chunkCount: pieces.length, text: pieces[i] } });
+      docChunkCount++;
+    }
+    docCount++;
+  }
+
+  print({
+    type: "index-result",
+    contractsIndexed: contractCount,
+    contractChunks: contractChunkCount,
+    docsIndexed: docCount,
+    docChunks: docChunkCount,
+    indexPath: INDEX_PATH,
+  }, json);
+}
+
+async function cmdAsk(question, json, checkComponent) {
+  if (!question) return print(err("ERR_MISSING_ARG", { arg: "question" }), json);
+
+  const index = new LocalIndex(INDEX_PATH);
+  if (!(await index.isIndexCreated())) return print(err("ERR_NO_INDEX"), json);
+
+  const qVector = await embedText(question);
+  // vectra's real signature is (vector, query, topK, filter?, isBm25?) — query
+  // is a required string (used for BM25/hybrid search when isBm25 is set, but
+  // still must be passed even for pure-vector search). Passing topK where
+  // query belongs silently returns zero results (topK ends up NaN) rather
+  // than throwing — caught this in testing via an empty `sources` array.
+  const results = await index.queryItems(qVector, question, 4);
+  let retrievedContext = results.map((r) => r.item.metadata.text).join("\n\n---\n\n");
+
+  // Folds a failed check straight into the same context, so the model
+  // explains against the real declared contract instead of guessing.
+  if (checkComponent) {
+    const parity = await computeCheckParity(checkComponent);
+    retrievedContext += `\n\n---\n\ncheck-parity result for ${checkComponent}:\n${JSON.stringify(parity, null, 2)}`;
+  }
+
+  const chatModel = await loadModel(CHAT_MODEL_URI);
+  const llamaContext = await chatModel.createContext();
+  const session = new LlamaChatSession({ contextSequence: llamaContext.getSequence() });
+
+  const prompt = `Answer using ONLY the context below. If the answer isn't in it, say so clearly.\n\nContext:\n${retrievedContext}\n\nQuestion: ${question}`;
+  const answer = await session.prompt(prompt);
+
+  print({ type: "ask-result", question, answer, sources: results.map((r) => r.item.metadata) }, json);
+}
+
 // Runs every drift check this repo has in one call — sync figma, check-styles,
 // check-parity (every component, honoring the same "ERR_NO_FIGMA_SPEC warns,
 // doesn't block" exception the pre-commit hook documents), and check-docs.
@@ -640,6 +831,13 @@ async function main() {
     }
     case "manifest":
       return cmdManifest(json);
+    case "index":
+      return cmdIndex(json);
+    case "ask": {
+      const checkFlagIdx = rest.indexOf("--check");
+      const checkComponent = checkFlagIdx >= 0 ? rest[checkFlagIdx + 1] : undefined;
+      return cmdAsk(positional[0], json, checkComponent);
+    }
     default:
       print(err("ERR_UNKNOWN_COMMAND", { requested: cmd }));
       process.exitCode = 1;

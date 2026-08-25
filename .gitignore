@@ -4,3 +4,4 @@ dist/
 swizzled/
 packages/chat-app/
 brand assets/
+.latent-models/
