@@ -710,7 +710,14 @@ async function cmdAsk(question, json, checkComponent, monitor, cite) {
     // markdown files); `type: "contract"` chunks are plain generated text
     // with no markdown syntax, so this never mattered for the earlier
     // Button-only tests.
-    const normalize = (s) => String(s ?? "").replace(/[*_]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+    // Also strips backticks and every quote-mark variant (straight and
+    // curly, single and double) — caught a third false negative directly:
+    // the source had backtick code-spans (`PowerShell`), and the model's
+    // quote didn't reproduce backticks at all, instead re-rendering that
+    // text wrapped in curly smart quotes ('PowerShell') — its own styling
+    // choice, not a copy error, but exact substring matching has no
+    // tolerance for either the punctuation swap or straight-vs-curly.
+    const normalize = (s) => String(s ?? "").replace(/[*_`'‘’"“”]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
     claims = (parsed.claims ?? []).map((c) => {
       const src = sourceTexts[c.source];
       const normalizedQuote = normalize(c.quote);

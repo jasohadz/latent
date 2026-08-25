@@ -70,10 +70,7 @@ without needing Figma access at all.
 
 For a faster, conversational alternative to reading `.doc.mjs` files
 directly — "what variants does Button have," "why is check-parity failing
-on this component" — `node packages/cli/bin/latent.mjs ask "<question>"`
-answers from the same contract files via a local, offline model (no API
-key, nothing sent over the network once set up). See `GUIDE.md`'s "Ask
-Latent" section for setup and `CLAUDE.md` for how it actually works.
+on this component" — see step 6 below.
 
 ## 5. Editing or adding components
 
@@ -103,6 +100,18 @@ would mean a CSS scanner (flag hex colors / raw px outside `var()`,
 independent of what's declared) — not built yet; flagging it here rather
 than implying the current check is exhaustive.
 
+## 6. Set up the local Q&A assistant (optional)
+
+Latent ships a local, offline "ask it a question" layer over every component's contract and this repo's own docs — no API key, no account, nothing sent over the network once it's set up. It runs entirely on your machine via `node-llama-cpp` (an npm dependency, not a separate app to install) and a committed `vectra` search index.
+
+1. `npm install` — already done in step 1, this is what pulled in the two packages above.
+2. `node packages/cli/bin/latent.mjs index --json` — the *first* time you run this, it downloads two small AI models to your machine (a few GB total, one-time, automatic — see `GUIDE.md`'s "Ask Latent" section for exactly what happens). Every run after this is instant.
+3. `node packages/cli/bin/latent.mjs ask "what variants does Button have"` — answers, streaming live to your terminal, sourced only from this repo's real `.doc.mjs` files and docs.
+
+From there: `--check <Component>` explains a failing `check-parity` result against that component's real declared contract instead of you reading raw JSON; `--monitor` opens a live visual page in your browser instead of a terminal; `--cite` forces the model to back every claim with a verifiable quote instead of trusting free prose. Full depth on all of this — including two rounds of real bugs found by actually running it, not just reading the code — lives in `CLAUDE.md`'s "Key mechanics" and `GUIDE.md`'s "Ask Latent" section.
+
+If you're setting this up for someone who isn't comfortable in a terminal at all, skip ahead to **"Using the Q&A assistant if you've never used a terminal"** at the very bottom of this doc — it starts from "what is a terminal."
+
 ## The gap: nothing detects "Figma changed and nobody re-synced"
 
 Be direct with yourself about this one. The pre-commit hook, `verify` (and
@@ -125,3 +134,119 @@ Figma?" as a manual discipline, the same way you'd remember to run tests
 before pushing on a repo with no CI. The plugin + CI catch you forgetting
 to finish step 3 once you've started it; nothing catches you skipping step
 3 entirely.
+
+## Using the Q&A assistant if you've never used a terminal
+
+Everything above assumes you're comfortable with git, npm, and a command
+line. If you're not — a designer or PM who just wants to ask Latent
+questions like "what variants does Button have," without touching any of
+the workflow above — this section starts from zero. Nothing here can break
+anything: you're only ever asking questions, never changing files.
+
+**What you're setting up:** a small program that runs on your own computer
+and can answer questions about Latent's components by actually reading
+their real definitions — not a chatbot that might make things up, and not
+a website. It costs nothing, needs no account or sign-up, and once it's
+set up, it works without an internet connection. Nothing you type is sent
+anywhere.
+
+### Step 1: Open a terminal
+
+A terminal is just a window where you type commands instead of clicking
+things — it's already installed on your computer, you're just opening it
+for the first time.
+
+- **Windows:** click the Start menu, type `PowerShell`, and open
+  "Windows PowerShell."
+- **Mac:** press `Cmd + Space`, type `Terminal`, and press Enter.
+
+A plain, mostly-empty window will open with some text and a blinking
+cursor. That's it — that's the terminal.
+
+### Step 2: Go to the Latent folder
+
+Type `cd ` (with a space after it — don't press Enter yet), then drag the
+Latent folder from your file explorer/Finder straight into the terminal
+window. The folder's path will appear automatically after `cd `. Now press
+Enter. If it worked, nothing dramatic happens — the terminal just goes to
+a new line, ready for the next command. That's normal; commands in a
+terminal usually don't celebrate success, only report problems.
+
+### Step 3: One-time setup
+
+Copy this line exactly, paste it into the terminal (right-click to paste,
+or `Ctrl+V` / `Cmd+V`), and press Enter:
+
+```
+npm install
+```
+
+You'll see a bunch of text scroll by — that's normal, it's downloading the
+free, open-source pieces this needs. It can take a minute or two. When it
+stops and you see your cursor again, it's done. Don't worry about reading
+any of the text that scrolled by.
+
+### Step 4: Build the search index (also one-time)
+
+Paste this and press Enter:
+
+```
+node packages/cli/bin/latent.mjs index --json
+```
+
+**The first time only**, this also downloads two small AI models to your
+computer — a few gigabytes, so it can take a few minutes depending on your
+internet speed. This is the only step that needs an internet connection at
+all, and only this one time. You'll see more scrolling text, possibly
+including lines that look alarming (mentioning "error," "GPU," or
+"tokenizer") — as long as the command finishes and returns you to a normal
+prompt, those are known, harmless warnings, not something gone wrong.
+Every run after this one is instant, since nothing needs downloading again.
+
+### Step 5: Ask a question
+
+Paste this, but change the question inside the quotes to whatever you
+actually want to ask:
+
+```
+node packages/cli/bin/latent.mjs ask "what variants does Button have"
+```
+
+Press Enter and wait a few seconds — you'll see the answer appear word by
+word, like it's typing itself out. That's it. Ask anything about any
+component or how Latent's workflow works; run the same command again with
+a different question any time.
+
+### Step 6 (optional): Watch it work in a browser instead
+
+If you'd rather see something more visual than a terminal — a real page
+that shows what's being looked up before the answer appears — add
+`--monitor` to the end of the command:
+
+```
+node packages/cli/bin/latent.mjs ask "what variants does Button have" --monitor
+```
+
+The terminal will print a line like `Monitor running at
+http://localhost:4791` and then pause. **Wait until you see that exact
+line before opening anything** — the most common mix-up here is opening
+the browser link too early or after the terminal command has already
+finished, which shows "This site can't be reached" simply because nothing
+is running yet to answer it. Once you see that line, open
+`http://localhost:4791` in Chrome (or paste it into any browser's address
+bar) and it'll pick up right where it paused.
+
+### If something goes wrong
+
+- **"This site can't be reached"** on the monitor page almost always means
+  the terminal command isn't currently running and paused — re-run step 6
+  and wait for the exact `Monitor running at...` line before opening the
+  browser.
+- **Scary-looking red or yellow text** mentioning GPU/Vulkan or a
+  tokenizer warning is expected and doesn't mean it failed — it only
+  failed if the command never finishes or the terminal shows the word
+  `Error` followed by the whole thing stopping.
+- **Still stuck?** Copy the last 10-15 lines of text from the terminal and
+  send them to whoever set this repo up, or ask Claude Code (or any AI
+  coding assistant) pointed at this repo to read `CLAUDE.md` and help —
+  that file has the full technical explanation of how this all works.
