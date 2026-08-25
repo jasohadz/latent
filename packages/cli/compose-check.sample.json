@@ -1,0 +1,46 @@
+{
+  "_comment": "Sample composition for exercising compose-check. Has exactly 3 intentional violations, same discipline as packages/tokens/figma-export.sample.json: root.children[2].props.position is an invalid enum value ('center' isn't leading|trailing|none), root.children[3].props.subtitle is a prop Card doesn't declare, root.children[4].component references 'StatCard', which isn't a real component. Everything else in this file is a real, valid composition of Card/Stat/BadgeGroup as they actually exist today — not hand-waved. Static fixture, not auto-generated (unlike figma-export.sample.json) — if a referenced component's real props ever change, running compose-check against this file will surface that mismatch directly.",
+  "component": "Panel",
+  "props": {},
+  "children": [
+    {
+      "component": "Card",
+      "props": {
+        "layout": "content",
+        "showIcon": false,
+        "title": "Active Users",
+        "body": "Real-time count across all workspaces."
+      }
+    },
+    {
+      "component": "Stat",
+      "props": {
+        "showIcon": false,
+        "value": "1,204",
+        "label": "Active Users"
+      }
+    },
+    {
+      "component": "BadgeGroup",
+      "props": {
+        "position": "center",
+        "size": "small",
+        "badgeLabel": "New"
+      }
+    },
+    {
+      "component": "Card",
+      "props": {
+        "layout": "content",
+        "title": "Revenue",
+        "subtitle": "This should not be a valid prop"
+      }
+    },
+    {
+      "component": "StatCard",
+      "props": {
+        "value": "42"
+      }
+    }
+  ]
+}

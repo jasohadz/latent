@@ -79,6 +79,14 @@ CLI-native operation with the same fail-loudly discipline as everything else:
   back every claim with a verbatim quote from a specific source, each
   mechanically checked afterward — ✓ if real, ✗ if not (including an
   empty or missing quote, which no longer counts as verified).
+- **`compose-check <file.json>`** — validates a generated page composition
+  (a tree of `{ component, props, children }`) against the real component
+  catalog, built fresh from every `.doc.mjs`'s declared props on every call
+  — never a second hand-maintained catalog to drift from the real one.
+  Deterministic, no model involved. Try it against the bundled example
+  (3 intentional violations — an invalid enum value, an undeclared prop, a
+  fabricated component name):
+  `node packages/cli/bin/latent.mjs compose-check packages/cli/compose-check.sample.json --json`
 
 The sample export at `packages/tokens/figma-export.sample.json` has
 exactly 3 intentional drift cases (one missing-in-code, one value

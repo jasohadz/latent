@@ -1,5 +1,17 @@
 # Catalog Validation — Design Spec for Phase 4
 
+**Built 2026-08-25**, ahead of Phase 4 starting rather than during it — see
+`compose-check` in `CLAUDE.md`'s architecture section for the real
+mechanics, and `packages/cli/compose-check.sample.json` for a working
+example with 3 planted violations. This doc is kept as-is below as the
+design rationale, not rewritten past tense — everything it describes was
+built to spec, not deviated from. The one open decision it left (hand-
+rolled validator vs. a dependency) was resolved as hand-rolled, for the
+reason the doc itself gives: zero exceptions elsewhere in this repo to
+hand-rolling checks.
+
+---
+
 Design spec for validating agent-generated page compositions against a real
 component catalog, before they're trusted. Written for a future Claude Code
 session to execute once Phase 4 (templates) actually starts — not needed
@@ -128,18 +140,26 @@ sync drift:
 
 ## Execution steps, once Phase 4 actually starts
 
-1. Decide the validator question above.
-2. Build `buildComponentCatalog()` — the string-union-type parser is the
-   only genuinely fiddly part; fall back permissively (accept any value)
-   for prop types it can't confidently parse rather than guessing wrong,
-   consistent with how `checkDocSchema` already treats `extends: null` as
-   a deliberate, valid state rather than an omission.
-3. Add `compose-check` to `COMMANDS`/`ERROR_CODES`/the dispatch `switch` in
-   `latent.mjs`, following the existing conventions exactly.
-4. Write a sample composition fixture with a few intentional violations —
-   same pattern as `packages/tokens/figma-export.sample.json`'s "exactly 3
-   intentional drift cases" — so `compose-check` has something concrete to
-   exercise, and so a later refactor can tell if it silently regressed.
-5. Wire it into the actual Phase 4 template-building workflow once that
-   work starts: an agent's proposed composition gets `compose-check`'d
-   before its JSX is generated from it, not after.
+1. ~~Decide the validator question above.~~ — done: hand-rolled, consistent
+   with every other check in this repo.
+2. ~~Build `buildComponentCatalog()`~~ — done, `packages/cli/bin/latent.mjs`.
+   The string-union-type parser (`parsePropType()`) turned out to be exactly
+   as fiddly as expected and no more; falls back to unconstrained (`"any"`)
+   for anything it can't confidently parse, same call `checkDocSchema`
+   already makes treating `extends: null` as deliberate rather than an
+   omission.
+3. ~~Add `compose-check` to `COMMANDS`/`ERROR_CODES`/the dispatch `switch`~~
+   — done, following the existing conventions exactly (new error code
+   `ERR_INVALID_COMPOSITION_JSON`, appended, not repurposing one).
+4. ~~Write a sample composition fixture with a few intentional
+   violations~~ — done: `packages/cli/compose-check.sample.json`, a real
+   composition of `Card`/`Stat`/`BadgeGroup`/`Panel` as they actually
+   exist, with exactly 3 planted violations (invalid enum value, undeclared
+   prop, fabricated component name). Verified directly: `compose-check`
+   against it reports exactly those 3, nothing else — no false positives on
+   the valid nodes, no false negatives on the planted ones.
+5. **Still open, actually needs Phase 4 to exist first:** wire it into the
+   real template-building workflow — an agent's proposed composition gets
+   `compose-check`'d before its JSX is generated from it, not after. Static
+   fixture (step 4) demonstrates the mechanism works; it isn't itself that
+   integration.

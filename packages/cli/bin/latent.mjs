@@ -70,6 +70,7 @@ const COMMANDS = {
   manifest: { args: [], flags: ["--json"], responseTypes: ["manifest"] },
   index: { args: [], flags: ["--json"], responseTypes: ["index-result", "error"] },
   ask: { args: ["<question>"], flags: ["--json", "--check", "--monitor", "--cite"], responseTypes: ["ask-result", "error"] },
+  "compose-check": { args: ["<file.json>"], flags: ["--json"], responseTypes: ["compose-check-result", "error"] },
 };
 
 const ERROR_CODES = {
@@ -80,6 +81,7 @@ const ERROR_CODES = {
   ERR_NO_FIGMA_SPEC: "Component has no figmaTokens mapping defined in its doc file.",
   ERR_NO_INDEX: "No knowledge index found — run `latent index` first.",
   ERR_MODEL_DOWNLOAD_FAILED: "Could not download the local model on first run — check network access and try again.",
+  ERR_INVALID_COMPOSITION_JSON: "The composition file is not valid JSON.",
 };
 
 function err(code, extra = {}) {
@@ -950,6 +952,126 @@ async function cmdApplyDrift(json, write, force, tokensFile, stylesFile) {
   if (result.error) process.exitCode = 1;
 }
 
+// --- compose-check: validates a generated page composition against the ---
+// --- real component catalog. See CATALOG-VALIDATION.md for the design. ---
+//
+// Deterministic — no model, no index, nothing from `ask`. Same category as
+// check-parity: the catalog is generated from .doc.mjs at validation time,
+// never hand-maintained separately, for the same reason sync figma/
+// check-parity/check-docs all exist — a second source of truth for the
+// same facts is exactly the drift this repo has spent effort preventing
+// everywhere else.
+
+// .doc.mjs's `type` field is a loose TS-like string, not JSON Schema
+// ('"primary" | "secondary" | "ghost"', "boolean", "React.ReactNode",
+// "(value: string) => void"). Parses the two constrainable shapes
+// (scalars, string-literal unions); everything else — function types,
+// React.ReactNode, generics — falls back to unconstrained ("any") rather
+// than guessing wrong, same call checkDocSchema already makes treating
+// `extends: null` as a deliberate valid state instead of an omission.
+function parsePropType(typeStr) {
+  const trimmed = String(typeStr ?? "").trim();
+  if (trimmed === "boolean") return { kind: "boolean" };
+  if (trimmed === "string") return { kind: "string" };
+  if (trimmed === "number") return { kind: "number" };
+  if (/^"[^"]*"(\s*\|\s*"[^"]*")*$/.test(trimmed)) {
+    const values = [...trimmed.matchAll(/"([^"]*)"/g)].map((m) => m[1]);
+    return { kind: "enum", values };
+  }
+  return { kind: "any" };
+}
+
+async function buildComponentCatalog() {
+  const catalog = {};
+  for (const name of discoverComponents()) {
+    const doc = await loadDoc(name);
+    if (!doc) continue;
+    const props = {};
+    for (const p of doc.props ?? []) {
+      props[p.name] = parsePropType(p.type);
+    }
+    catalog[name] = { props };
+  }
+  return catalog;
+}
+
+// Recursive tree walker. A CompositionNode is { component, props?, children? }
+// — components nest (a React.ReactNode/function prop represents nesting,
+// not a scalar to validate, see parsePropType above), so this validates the
+// whole tree, not one flat object. Collects every violation instead of
+// stopping at the first, same as check-parity reporting every mismatched
+// token in one pass rather than one at a time.
+function validateComposition(node, catalog, path, errors) {
+  if (node === null || typeof node !== "object" || Array.isArray(node)) {
+    errors.push({ path, message: "expected a composition node object" });
+    return;
+  }
+  const { component, props, children } = node;
+  if (typeof component !== "string" || !catalog[component]) {
+    errors.push({ path: `${path}.component`, message: `"${component}" is not a real component` });
+    return; // nothing further here can be validated against an unknown component's schema
+  }
+  const schema = catalog[component];
+  if (props !== undefined) {
+    if (props === null || typeof props !== "object" || Array.isArray(props)) {
+      errors.push({ path: `${path}.props`, message: "props must be an object" });
+    } else {
+      for (const [propName, value] of Object.entries(props)) {
+        const propSchema = schema.props[propName];
+        if (!propSchema) {
+          errors.push({ path: `${path}.props.${propName}`, message: `"${propName}" is not a valid prop for ${component}` });
+          continue;
+        }
+        if (propSchema.kind === "enum" && !propSchema.values.includes(value)) {
+          errors.push({
+            path: `${path}.props.${propName}`,
+            message: `"${value}" is not a valid ${propName} for ${component} (expected: ${propSchema.values.join(" | ")})`,
+          });
+        } else if (propSchema.kind === "boolean" && typeof value !== "boolean") {
+          errors.push({ path: `${path}.props.${propName}`, message: `${propName} must be a boolean for ${component}` });
+        } else if (propSchema.kind === "string" && typeof value !== "string") {
+          errors.push({ path: `${path}.props.${propName}`, message: `${propName} must be a string for ${component}` });
+        } else if (propSchema.kind === "number" && typeof value !== "number") {
+          errors.push({ path: `${path}.props.${propName}`, message: `${propName} must be a number for ${component}` });
+        }
+        // kind "any" (function props, React.ReactNode, generics) — intentionally unconstrained
+      }
+    }
+  }
+  if (children !== undefined) {
+    if (!Array.isArray(children)) {
+      errors.push({ path: `${path}.children`, message: "children must be an array" });
+    } else {
+      children.forEach((child, i) => validateComposition(child, catalog, `${path}.children[${i}]`, errors));
+    }
+  }
+}
+
+async function computeComposeCheck(filePath) {
+  if (!filePath) return err("ERR_MISSING_ARG", { arg: "file" });
+  const resolvedFile = path.resolve(process.cwd(), filePath);
+  if (!existsSync(resolvedFile)) return err("ERR_FILE_NOT_FOUND", { path: resolvedFile });
+
+  let composition;
+  try {
+    composition = JSON.parse(readFileSync(resolvedFile, "utf-8"));
+  } catch (e) {
+    return err("ERR_INVALID_COMPOSITION_JSON", { path: resolvedFile, message: e.message });
+  }
+
+  const catalog = await buildComponentCatalog();
+  const errors = [];
+  validateComposition(composition, catalog, "root", errors);
+
+  return { type: "compose-check-result", status: errors.length === 0 ? "valid" : "invalid", errors };
+}
+
+async function cmdComposeCheck(filePath, json) {
+  const result = await computeComposeCheck(filePath);
+  print(result, json);
+  if (result.type === "error" || result.status !== "valid") process.exitCode = 1;
+}
+
 function cmdManifest(json) {
   const manifest = {
     type: "manifest",
@@ -1012,6 +1134,8 @@ async function main() {
     }
     case "manifest":
       return cmdManifest(json);
+    case "compose-check":
+      return cmdComposeCheck(positional[0], json);
     case "index":
       return cmdIndex(json);
     case "ask": {

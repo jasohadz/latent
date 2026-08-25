@@ -50,7 +50,7 @@ The knowledge index (`.latent-index/`) is committed to the repo and kept fresh b
 
 ## Phase 4 — Templates & polish (next up)
 
-13. Build 2-3 content-only page templates (dashboard, settings, form) composing existing components into a shared layout primitive with header/content/panel slots — this is the current gap: the component library is deep (30 components across atoms, composites, nav, and chat) but nothing yet demonstrates them assembled into a real page. Before an agent starts freely generating these compositions, see `CATALOG-VALIDATION.md` — a design spec (not yet built) for validating a generated composition against the real component catalog `.doc.mjs` files already define, so an invented component or prop fails validation instead of silently shipping.
+13. Build 2-3 content-only page templates (dashboard, settings, form) composing existing components into a shared layout primitive with header/content/panel slots — this is the current gap: the component library is deep (30 components across atoms, composites, nav, and chat) but nothing yet demonstrates them assembled into a real page. `compose-check <file.json>` (built 2026-08-25, see `CATALOG-VALIDATION.md`) validates a generated composition against the real component catalog before its JSX gets generated — run it on whatever an agent proposes for each template before trusting it, so an invented component or prop fails validation instead of silently shipping.
 14. Keep templates separate from app-shell/nav components
 15. Publish `packages/core`, `packages/theme-neutral`, `packages/cli` as scoped npm packages once the API stabilizes — not before, since `swizzle` paths and prop names become breaking changes for anyone who's forked
 
