@@ -28,7 +28,7 @@ const DOC_FILES = [
   "GUIDE.md", "README.md", "HOW-TO.md", "STYLES.md",
   "TOKEN-SCHEMA-V2.md", "VARIABLE-SCOPES.md",
   "NAMING-CONVENTIONS.md", "DESIGNER-CHECKLIST.md",
-  "CONTRIBUTING.md", "CLAUDE.md",
+  "CONTRIBUTING.md", "CLAUDE.md", "CATALOG-VALIDATION.md",
 ];
 
 // Known-stale facts that have appeared in prose before and could again —
@@ -703,7 +703,14 @@ async function cmdAsk(question, json, checkComponent, monitor, cite) {
     // no real quote means "can't verify," not "verified." Requiring a few
     // real characters also blocks near-empty quotes ("a", "is") from
     // trivially matching almost any source.
-    const normalize = (s) => String(s ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+    // Strips markdown emphasis (*/_) too — caught a false-negative directly:
+    // a doc source had **bold** around a phrase, the model's quote (correctly)
+    // reproduced only the plain text, and the literal "**" made a real,
+    // exact quote fail to match. Only affects `type: "doc"` sources (root
+    // markdown files); `type: "contract"` chunks are plain generated text
+    // with no markdown syntax, so this never mattered for the earlier
+    // Button-only tests.
+    const normalize = (s) => String(s ?? "").replace(/[*_]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
     claims = (parsed.claims ?? []).map((c) => {
       const src = sourceTexts[c.source];
       const normalizedQuote = normalize(c.quote);
