@@ -2,10 +2,10 @@ export default {
   name: "NavSubItem",
   summary: "The indented row used inside Nav Dropdown's expanded sub-list. Same Selected x State pattern as NavItem, with a fixed leading branch icon and no chevron.",
   props: [
-    { name: "label", type: "string", default: "—" },
-    { name: "selected", type: "boolean", default: "false" },
+    { name: "label", type: "string", default: "—", description: "The row's text." },
+    { name: "selected", type: "boolean", default: "false", description: "Applies the same selected background/label styling as NavItem's selected state." },
     { name: "showIcon", type: "boolean", default: "true", description: "Fixed to a corner-down-right branch icon — not swappable, unlike NavItem's leading icon." },
-    { name: "disabled", type: "boolean", default: "false" },
+    { name: "disabled", type: "boolean", default: "false", description: "Standard HTML disabled." },
   ],
   example: `<NavSubItem label="Tutorials" onClick={handleClick} />`,
   doNot: [

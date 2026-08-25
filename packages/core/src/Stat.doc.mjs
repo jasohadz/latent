@@ -2,13 +2,15 @@ export default {
   name: "Stat",
   summary: "A compact highlight card for a single number or metric with a supporting label. For landing pages and dashboards.",
   props: [
-    { name: "showIcon", type: "boolean", default: "true" },
+    { name: "showIcon", type: "boolean", default: "true", description: "Toggles the icon badge, when an icon is passed via `icon`." },
     { name: "icon", type: "React.ReactNode", default: "undefined", description: "e.g. <Icon name=\"users\" />, shown inside the icon badge when showIcon is true." },
     { name: "value", type: "string", default: "—", description: 'The big number/metric, e.g. "2,400+".' },
     { name: "label", type: "string", default: "—", description: "Supporting caption below the value." },
   ],
   example: `<Stat icon={<Icon name="users" />} value="2,400+" label="Teams building with Latent" />`,
-  doNot: [],
+  doNot: [
+    "Don't set showIcon without also passing `icon` — the icon badge only renders when both are true/present, so showIcon alone leaves an empty gap.",
+  ],
   swizzlePath: "packages/core/src/Stat.tsx",
   figmaTokens: {
     "container padding": "spacing.32",

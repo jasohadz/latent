@@ -2,7 +2,7 @@ export default {
   name: "Field",
   summary: "A labeled form-field wrapper around a real TextField instance, for standard form layouts.",
   props: [
-    { name: "label", type: "string", default: "—" },
+    { name: "label", type: "string", default: "—", description: "The field's visible label, rendered above the nested TextField." },
     { name: "helperText", type: "string", default: "undefined", description: "Shown below the input. Gets a leading alert icon and danger color when `error` is true." },
     { name: "...rest", type: "TextFieldProps", default: "—", description: "All TextField props (appearance, error, value, onChange, disabled, etc.) pass through to the nested TextField." },
   ],

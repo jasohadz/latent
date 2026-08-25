@@ -2,9 +2,9 @@ export default {
   name: "Testimonial",
   summary: "A quote card pairing a customer statement with a real Avatar instance, name, and role. For social-proof sections.",
   props: [
-    { name: "quote", type: "string", default: "—" },
-    { name: "name", type: "string", default: "—" },
-    { name: "role", type: "string", default: "—" },
+    { name: "quote", type: "string", default: "—", description: "The customer statement." },
+    { name: "name", type: "string", default: "—", description: "The quoted person's name." },
+    { name: "role", type: "string", default: "—", description: "The quoted person's title/company, shown below name." },
     { name: "avatarInitial", type: "string", default: "name.charAt(0)", description: "Passed to Avatar's initial prop. Defaults to the first character of `name`." },
   ],
   example: `<Testimonial quote="Latent made it trivial to keep our design and code in sync." name="Jordan Reyes" role="Design Systems Lead" />`,

@@ -2,12 +2,14 @@ export default {
   name: "TopNavLink",
   summary: "The atomic link used inside TopNav's bar for Product, Download, and Pricing.",
   props: [
-    { name: "label", type: "string", default: "—" },
-    { name: "active", type: "boolean", default: "false" },
-    { name: "showChevron", type: "boolean", default: "true" },
+    { name: "label", type: "string", default: "—", description: "The link's text." },
+    { name: "active", type: "boolean", default: "false", description: "Applies the active label color — used by TopNav when its own `menu` matches this link (Product/Download)." },
+    { name: "showChevron", type: "boolean", default: "true", description: "Toggles the trailing chevron. TopNav sets this false for its plain Pricing link, which has no dropdown." },
   ],
   example: `<TopNavLink label="Product" active showChevron onClick={openProductMenu} />`,
-  doNot: [],
+  doNot: [
+    "Don't set active on a link with no corresponding open panel (e.g. Pricing) — active only styles the label color, it doesn't open anything itself; TopNav is what wires active/onClick to its own menu state.",
+  ],
   swizzlePath: "packages/core/src/TopNavLink.tsx",
   // Previously: Active=No's Label was raw unbound "Inter Regular" in
   // Figma (a real bug, not reproduced in the original port). Fixed at

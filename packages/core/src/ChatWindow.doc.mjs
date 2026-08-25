@@ -6,7 +6,9 @@ export default {
     { name: "inputProps", type: "ChatInputProps", default: "—", description: "Passed through to the docked ChatInput instance." },
   ],
   example: `<ChatWindow inputProps={{ value: message, onChange: setMessage, onSubmit: send }}><MessageBubble sender="assistant">Hi!</MessageBubble></ChatWindow>`,
-  doNot: [],
+  doNot: [
+    "Don't pass raw strings/JSX as children — only real MessageBubble instances are the documented content model; anything else skips MessageBubble's own sender-based alignment/color tokens.",
+  ],
   swizzlePath: "packages/core/src/ChatWindow.tsx",
   // Only "fills" and the slot's own itemSpacing were captured as bound
   // variables on this node — outer padding wasn't directly verified (no

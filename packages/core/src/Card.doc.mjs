@@ -4,16 +4,16 @@ export default {
   props: [
     { name: "layout", type: '"content" | "media" | "media-left" | "media-right" | "image-overlay" | "image-overlay-horizontal"', default: "content", description: "content has no media. media puts a full-width image above the content block. media-left/media-right put it beside the block. image-overlay(-horizontal) are full-bleed image cards with a progressive-blur text scrim." },
     { name: "showIcon", type: "boolean", default: "true", description: "Has no effect on the two image-overlay layouts, which have no icon badge." },
-    { name: "showEyebrow", type: "boolean", default: "true" },
-    { name: "showAction", type: "boolean", default: "true" },
+    { name: "showEyebrow", type: "boolean", default: "true", description: "Toggles the small overline label above the title. On image-overlay layouts it renders in the inverse (on-brand) text color instead." },
+    { name: "showAction", type: "boolean", default: "true", description: "Toggles the secondary-variant CTA Button rendered at the end of the content block." },
     { name: "icon", type: "React.ReactNode", default: "undefined", description: "e.g. <Icon name=\"sparkles\" />, shown inside the icon badge." },
-    { name: "eyebrowText", type: "string", default: '"OVERLINE"' },
-    { name: "title", type: "string", default: '"Get started with Latent"' },
-    { name: "body", type: "string", default: "—" },
-    { name: "ctaLabel", type: "string", default: '"Get started"' },
-    { name: "onCtaClick", type: "() => void", default: "undefined" },
+    { name: "eyebrowText", type: "string", default: '"OVERLINE"', description: "The overline label text, shown when showEyebrow is true." },
+    { name: "title", type: "string", default: '"Get started with Latent"', description: "The card's headline." },
+    { name: "body", type: "string", default: "—", description: "The supporting paragraph below the title." },
+    { name: "ctaLabel", type: "string", default: '"Get started"', description: "Label for the CTA Button, shown when showAction is true." },
+    { name: "onCtaClick", type: "() => void", default: "undefined", description: "Fires when the CTA Button is clicked." },
     { name: "imageSrc", type: "string", default: "undefined", description: "Required for media/media-left/media-right/image-overlay* layouts." },
-    { name: "imageAlt", type: "string", default: '""' },
+    { name: "imageAlt", type: "string", default: '""', description: "Alt text for imageSrc. Empty by default, matching Figma's own image layers (decorative, no bound alt text)." },
   ],
   example: `<Card layout="media" imageSrc="/hero.jpg" title="Ship faster" body="..." ctaLabel="Learn more" />`,
   doNot: [
@@ -22,8 +22,9 @@ export default {
   ],
   swizzlePath: "packages/core/src/Card.tsx",
   // CTA reuses the real Button component, but Figma's CTA uses
-  // appearance=outline (blue border, link-colored text) which has no
-  // equivalent in code's Button (only primary/secondary exist) —
+  // appearance=outline (blue border, link-colored text) which still has no
+  // equivalent in code's Button (variants are primary/secondary/ghost,
+  // ghost added 2026-07-30 — none of them is a bordered-outline look) —
   // "secondary" is the closest existing option, not an exact match.
   // Flagged, not fixed here (would mean adding a variant to Button).
   figmaTokens: {

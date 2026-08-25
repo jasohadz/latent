@@ -3,7 +3,7 @@ export default {
   summary: "A clickable label row that optionally pairs with a real Badge instance, for \"what's new\" banners or filter-summary links.",
   props: [
     { name: "position", type: '"leading" | "trailing" | "none"', default: "leading", description: "leading: Badge -> text -> chevron. trailing: text -> Badge (no chevron). none: text -> chevron (no Badge)." },
-    { name: "size", type: '"small" | "large"', default: "small" },
+    { name: "size", type: '"small" | "large"', default: "small", description: "Scales the row's font-size and the nested Badge's own size (small→small, large→medium)." },
     { name: "badgeLabel", type: "string", default: '"New"', description: "Passed to the nested Badge instance (variant is always brand)." },
     { name: "children", type: "React.ReactNode", default: "—", description: "The label text." },
   ],

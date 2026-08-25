@@ -3,13 +3,15 @@ export default {
   summary: "The atomic row used inside TopNav's Product and Download dropdown panels.",
   props: [
     { name: "layout", type: '"standard" | "featured"', default: "standard", description: "featured adds a muted background and a real Badge instance." },
-    { name: "icon", type: "React.ReactNode", default: "undefined" },
-    { name: "title", type: "string", default: "—" },
-    { name: "description", type: "string", default: "—" },
+    { name: "icon", type: "React.ReactNode", default: "undefined", description: "e.g. <Icon name=\"apple\" />, shown leading the title/description column." },
+    { name: "title", type: "string", default: "—", description: "The item's headline." },
+    { name: "description", type: "string", default: "—", description: "The item's supporting line below the title." },
     { name: "badgeLabel", type: "string", default: '"New"', description: "Only rendered when layout=\"featured\"." },
   ],
   example: `<MegaMenuItem layout="featured" icon={<Icon name="apple" />} title="Download for macOS" description="Recommended for most users" badgeLabel="New" />`,
-  doNot: [],
+  doNot: [
+    "Don't pass badgeLabel with layout=\"standard\" and expect it to show — the Badge only renders when layout=\"featured\".",
+  ],
   swizzlePath: "packages/core/src/MegaMenuItem.tsx",
   figmaTokens: {
     "padding/gap": "spacing.12",
