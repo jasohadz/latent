@@ -559,14 +559,30 @@ async function cmdAsk(question, json, checkComponent) {
   const index = new LocalIndex(INDEX_PATH);
   if (!(await index.isIndexCreated())) return print(err("ERR_NO_INDEX"), json);
 
-  const qVector = await embedText(question);
-  // vectra's real signature is (vector, query, topK, filter?, isBm25?) — query
-  // is a required string (used for BM25/hybrid search when isBm25 is set, but
-  // still must be passed even for pure-vector search). Passing topK where
-  // query belongs silently returns zero results (topK ends up NaN) rather
-  // than throwing — caught this in testing via an empty `sources` array.
-  const results = await index.queryItems(qVector, question, 4);
-  let retrievedContext = results.map((r) => r.item.metadata.text).join("\n\n---\n\n");
+  // --check names the component directly — no need to guess it via semantic
+  // search, and mixing in unrelated generic chunks turned out to actively
+  // hurt: with --check, feeding the component's contract *plus* 4 loosely-
+  // related chunks (other components, doc fragments) produced a confused
+  // "the question is not provided" answer from the small chat model, even
+  // though the question was clearly the last line of the prompt — the
+  // model just lost the thread in the extra noise. So --check skips the
+  // generic semantic search entirely and uses only the named component's
+  // own chunks (listItemsByMetadata is an exact match, guaranteed present)
+  // plus the check-parity result. Plain `ask` with no --check still uses
+  // semantic search, since there's no named component to look up directly.
+  let allChunks;
+  if (checkComponent) {
+    allChunks = await index.listItemsByMetadata({ type: "contract", component: checkComponent });
+  } else {
+    const qVector = await embedText(question);
+    // vectra's real signature is (vector, query, topK, filter?, isBm25?) —
+    // query is a required string. Passing topK where query belongs silently
+    // returns zero results (topK ends up NaN) rather than throwing — caught
+    // this in testing via an empty `sources` array.
+    const results = await index.queryItems(qVector, question, 4);
+    allChunks = results.map((r) => r.item);
+  }
+  let retrievedContext = allChunks.map((item) => item.metadata.text).join("\n\n---\n\n");
 
   // Folds a failed check straight into the same context, so the model
   // explains against the real declared contract instead of guessing.
@@ -575,14 +591,25 @@ async function cmdAsk(question, json, checkComponent) {
     retrievedContext += `\n\n---\n\ncheck-parity result for ${checkComponent}:\n${JSON.stringify(parity, null, 2)}`;
   }
 
+  // A vague free-text question ("why is this failing") left the small chat
+  // model unable to connect "this" to Button even with the right JSON in
+  // context — confirmed by testing the same context with an explicit
+  // question naming the component, which got a correct, specific answer.
+  // --check already knows the component; use that to disambiguate instead
+  // of relying on the user to name it themselves.
+  const effectiveQuestion = checkComponent
+    ? `Regarding the "${checkComponent}" component's check-parity result above: ${question}`
+    : question;
+
   const chatModel = await loadModel(CHAT_MODEL_URI);
   const llamaContext = await chatModel.createContext();
   const session = new LlamaChatSession({ contextSequence: llamaContext.getSequence() });
 
-  const prompt = `Answer using ONLY the context below. If the answer isn't in it, say so clearly.\n\nContext:\n${retrievedContext}\n\nQuestion: ${question}`;
+  const prompt = `Answer using ONLY the context below. If the answer isn't in it, say so clearly.\n\nContext:\n${retrievedContext}\n\nQuestion: ${effectiveQuestion}`;
+  if (process.env.LATENT_DEBUG_PROMPT) console.error("=== FULL PROMPT ===\n" + prompt + "\n=== END PROMPT (length: " + prompt.length + ") ===");
   const answer = await session.prompt(prompt);
 
-  print({ type: "ask-result", question, answer, sources: results.map((r) => r.item.metadata) }, json);
+  print({ type: "ask-result", question, answer, sources: allChunks.map((item) => item.metadata) }, json);
 }
 
 // Runs every drift check this repo has in one call — sync figma, check-styles,
