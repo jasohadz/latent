@@ -44,6 +44,8 @@ Latent ships a local, offline Q&A layer over its own component contracts and doc
 
 The knowledge index (`.latent-index/`) is committed to the repo and kept fresh by the pre-commit hook once your local models are set up — see `.githooks/pre-commit`'s "Knowledge index" section. Use `--check <Component>` to have `ask` explain a failing `check-parity` result against the component's real declared contract instead of guessing — this reliably surfaces the actual failing property now (verified against a deliberately broken component during testing), not just a generic non-answer.
 
+**To watch it reason, visually, in real time:** add `--monitor` — `node packages/cli/bin/latent.mjs ask "..." --monitor`. It prints a `http://localhost:4791` URL; open that in a browser and the question stays paused until you do. Once connected, you'll watch each pipeline stage light up live: the question, which chunks got retrieved (and why — exact component lookup vs. semantic search), the `check-parity` result if `--check` was used, and the answer typing itself out token by token. No new dependency — a tiny built-in Node HTTP server, `packages/cli/bin/monitor.mjs`.
+
 ## Phase 4 — Templates & polish (next up)
 
 13. Build 2-3 content-only page templates (dashboard, settings, form) composing existing components into a shared layout primitive with header/content/panel slots — this is the current gap: the component library is deep (30 components across atoms, composites, nav, and chat) but nothing yet demonstrates them assembled into a real page.

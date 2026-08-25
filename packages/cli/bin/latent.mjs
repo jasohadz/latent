@@ -69,7 +69,7 @@ const COMMANDS = {
   },
   manifest: { args: [], flags: ["--json"], responseTypes: ["manifest"] },
   index: { args: [], flags: ["--json"], responseTypes: ["index-result", "error"] },
-  ask: { args: ["<question>"], flags: ["--json", "--check"], responseTypes: ["ask-result", "error"] },
+  ask: { args: ["<question>"], flags: ["--json", "--check", "--monitor"], responseTypes: ["ask-result", "error"] },
 };
 
 const ERROR_CODES = {
@@ -553,8 +553,17 @@ async function cmdIndex(json) {
   }, json);
 }
 
-async function cmdAsk(question, json, checkComponent) {
+async function cmdAsk(question, json, checkComponent, monitor) {
   if (!question) return print(err("ERR_MISSING_ARG", { arg: "question" }), json);
+
+  let mon = null;
+  if (monitor) {
+    const { createMonitor } = await import("./monitor.mjs");
+    mon = await createMonitor({});
+    console.error(`\nMonitor running at ${mon.url} — open it in a browser, then this will continue.`);
+    await mon.waitForClient();
+    mon.emit("start", { question, checkComponent: checkComponent ?? null });
+  }
 
   const index = new LocalIndex(INDEX_PATH);
   if (!(await index.isIndexCreated())) return print(err("ERR_NO_INDEX"), json);
@@ -582,6 +591,22 @@ async function cmdAsk(question, json, checkComponent) {
     const results = await index.queryItems(qVector, question, 4);
     allChunks = results.map((r) => r.item);
   }
+
+  if (mon) {
+    mon.emit("retrieval", {
+      count: allChunks.length,
+      exact: Boolean(checkComponent),
+      chunks: allChunks.map((item) => ({
+        type: item.metadata.type,
+        component: item.metadata.component,
+        path: item.metadata.path,
+        chunk: item.metadata.chunk,
+        chunkCount: item.metadata.chunkCount,
+        snippet: item.metadata.text.length > 220 ? item.metadata.text.slice(0, 220) + "…" : item.metadata.text,
+      })),
+    });
+  }
+
   let retrievedContext = allChunks.map((item) => item.metadata.text).join("\n\n---\n\n");
 
   // Folds a failed check straight into the same context, so the model
@@ -589,6 +614,13 @@ async function cmdAsk(question, json, checkComponent) {
   if (checkComponent) {
     const parity = await computeCheckParity(checkComponent);
     retrievedContext += `\n\n---\n\ncheck-parity result for ${checkComponent}:\n${JSON.stringify(parity, null, 2)}`;
+    if (mon) {
+      mon.emit("check-parity", {
+        component: checkComponent,
+        status: parity.status,
+        failedProperties: (parity.checks ?? []).filter((c) => !c.found).map((c) => c.property),
+      });
+    }
   }
 
   // A vague free-text question ("why is this failing") left the small chat
@@ -607,19 +639,30 @@ async function cmdAsk(question, json, checkComponent) {
 
   const prompt = `Answer using ONLY the context below. If the answer isn't in it, say so clearly.\n\nContext:\n${retrievedContext}\n\nQuestion: ${effectiveQuestion}`;
   if (process.env.LATENT_DEBUG_PROMPT) console.error("=== FULL PROMPT ===\n" + prompt + "\n=== END PROMPT (length: " + prompt.length + ") ===");
+  if (mon) mon.emit("prompt-ready", { length: prompt.length });
 
   // Streams to stderr as it generates so a human watching the terminal sees
   // the answer appear live, token by token, rather than staring at a blank
   // screen until the single final JSON blob prints to stdout. Kept off
   // stdout deliberately — --json consumers still get one clean JSON object
-  // there, uninterrupted by partial text.
+  // there, uninterrupted by partial text. The monitor gets the same stream
+  // over SSE, one `token` event per chunk.
   if (!json) process.stderr.write("\n");
   const answer = await session.prompt(prompt, {
-    onTextChunk: (text) => { if (!json) process.stderr.write(text); },
+    onTextChunk: (text) => {
+      if (!json) process.stderr.write(text);
+      if (mon) mon.emit("token", { text });
+    },
   });
   if (!json) process.stderr.write("\n\n");
 
-  print({ type: "ask-result", question, answer, sources: allChunks.map((item) => item.metadata) }, json);
+  const sources = allChunks.map((item) => item.metadata);
+  if (mon) {
+    mon.emit("done", { answer, sources });
+    console.error(`Monitor still running at ${mon.url} — Ctrl+C to stop.`);
+  }
+
+  print({ type: "ask-result", question, answer, sources }, json);
 }
 
 // Runs every drift check this repo has in one call — sync figma, check-styles,
@@ -873,7 +916,8 @@ async function main() {
     case "ask": {
       const checkFlagIdx = rest.indexOf("--check");
       const checkComponent = checkFlagIdx >= 0 ? rest[checkFlagIdx + 1] : undefined;
-      return cmdAsk(positional[0], json, checkComponent);
+      const monitor = rest.includes("--monitor");
+      return cmdAsk(positional[0], json, checkComponent, monitor);
     }
     default:
       print(err("ERR_UNKNOWN_COMMAND", { requested: cmd }));
