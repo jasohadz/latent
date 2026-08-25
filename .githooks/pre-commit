@@ -18,11 +18,17 @@
 #    nobody declared in figmaTokens — see HOW-TO.md's component-editing
 #    section for that open gap.
 #
-# 3. Docs — blocks if a staged .md file contains a known-stale term
-#    (check-docs, e.g. a Figma collection's old pre-rename name asserted as
-#    current). Append-only blocklist in packages/cli/bin/latent.mjs's
-#    DOC_BLOCKLIST — doesn't catch general staleness, only terms someone's
-#    already added there after finding them wrong once.
+# 3. Docs — blocks on two independent things inside check-docs:
+#    a) a staged .md file contains a known-stale term (e.g. a Figma
+#       collection's old pre-rename name asserted as current). Append-only
+#       blocklist in packages/cli/bin/latent.mjs's DOC_BLOCKLIST — doesn't
+#       catch general staleness, only terms someone's already added there
+#       after finding them wrong once.
+#    b) a staged .doc.mjs no longer matches the shape CLAUDE.md documents as
+#       mandatory (required top-level fields, non-empty doNot/figmaTokens,
+#       every prop has a description) — catches a doc silently missing
+#       fields the way check-parity catches CSS silently drifting from
+#       figmaTokens.
 #
 # `verify` (packages/cli/bin/latent.mjs) runs all of sync figma/check-styles/
 # check-parity/check-docs unconditionally in one call — this hook doesn't
@@ -117,14 +123,14 @@ if [ -n "$COMPONENTS_TOUCHED" ]; then
 fi
 
 # --- 3. Docs ---
-DOCS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '\.md$')
+DOCS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '\.md$|\.doc\.mjs$')
 if [ -n "$DOCS_TOUCHED" ]; then
-  echo "latent: markdown files changed — running check-docs..."
+  echo "latent: markdown or component doc files changed — running check-docs..."
   DOCS_OUT=$(node packages/cli/bin/latent.mjs check-docs --json)
   DOCS_STATUS=$(printf '%s' "$DOCS_OUT" | json_status)
   if [ "$DOCS_STATUS" != "clean" ]; then
     echo ""
-    echo "BLOCKED (check-docs): known-stale term found in a tracked .md file"
+    echo "BLOCKED (check-docs): known-stale term in a tracked .md file, or a .doc.mjs missing required fields"
     echo "$DOCS_OUT"
     FAIL=1
   fi

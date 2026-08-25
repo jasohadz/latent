@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // latent — CLI for the design system. Every command supports --json so an
 // agent gets structured output instead of parsing prose.
-import { readFileSync, readdirSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
-import { flattenTokens, tokenPathToCssVar, tokensEqual } from "../../tokens/flatten.mjs";
+import { flattenTokens, tokenPathToCssVar, tokensEqual, isTerminalModeMap } from "../../tokens/flatten.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CORE_SRC = path.resolve(__dirname, "../../core/src");
@@ -44,6 +44,11 @@ const COMMANDS = {
   "check-styles": { args: [], flags: ["--file", "--json"], responseTypes: ["check-styles-result", "error"] },
   "check-docs": { args: [], flags: ["--json"], responseTypes: ["check-docs-result"] },
   verify: { args: [], flags: ["--json"], responseTypes: ["verify-result"] },
+  "apply-drift": {
+    args: [],
+    flags: ["--json", "--write", "--force", "--tokens-file", "--styles-file"],
+    responseTypes: ["apply-drift-result"],
+  },
   manifest: { args: [], flags: ["--json"], responseTypes: ["manifest"] },
 };
 
@@ -293,7 +298,7 @@ function splitIntoParagraphs(lines) {
   return paragraphs;
 }
 
-function computeCheckDocs() {
+function checkStaleTerms() {
   const lsFiles = execFileSync("git", ["ls-files", "*.md"], { cwd: REPO_ROOT, encoding: "utf-8" });
   const files = lsFiles.split("\n").filter(Boolean);
 
@@ -305,12 +310,66 @@ function computeCheckDocs() {
     for (const para of paragraphs) {
       for (const entry of DOC_BLOCKLIST) {
         if (para.text.includes(entry.term) && !entry.allowNear.test(para.text)) {
-          violations.push({ file: relPath, line: para.startLine + 1, term: entry.term, reason: entry.reason });
+          violations.push({ kind: "stale-term", file: relPath, line: para.startLine + 1, term: entry.term, reason: entry.reason });
         }
       }
     }
   }
+  return violations;
+}
 
+// Enforces the *.doc.mjs shape CLAUDE.md documents as mandatory ("there are
+// no exceptions to shipping one"): every component doc needs the full set
+// of top-level fields, a non-empty doNot and figmaTokens, and every prop
+// needs a description — not just a name/type/default. This was previously
+// only a convention (nothing checked it, so it silently drifted per
+// component); it's now load-bearing the same way check-parity is.
+async function checkDocSchema() {
+  const violations = [];
+  for (const name of discoverComponents()) {
+    const doc = await loadDoc(name);
+    const file = `packages/core/src/${name}.doc.mjs`;
+    if (!doc) {
+      violations.push({ kind: "doc-schema", file, component: name, field: null, reason: "doc.mjs failed to load" });
+      continue;
+    }
+
+    for (const field of ["name", "summary", "props", "example", "doNot", "swizzlePath", "figmaTokens"]) {
+      if (!(field in doc)) {
+        violations.push({ kind: "doc-schema", file, component: name, field, reason: `missing required top-level field "${field}"` });
+      }
+    }
+
+    if (doc.summary !== undefined && (typeof doc.summary !== "string" || doc.summary.length < 10)) {
+      violations.push({ kind: "doc-schema", file, component: name, field: "summary", reason: "summary missing or too short to be useful" });
+    }
+    if (doc.example !== undefined && !doc.example) {
+      violations.push({ kind: "doc-schema", file, component: name, field: "example", reason: "example is empty" });
+    }
+    if (doc.doNot !== undefined && (!Array.isArray(doc.doNot) || doc.doNot.length === 0)) {
+      violations.push({ kind: "doc-schema", file, component: name, field: "doNot", reason: "doNot must be a non-empty array — every component has at least one real constraint or misuse case worth flagging" });
+    }
+    if (doc.figmaTokens !== undefined && (typeof doc.figmaTokens !== "object" || doc.figmaTokens === null || Object.keys(doc.figmaTokens).length === 0)) {
+      violations.push({ kind: "doc-schema", file, component: name, field: "figmaTokens", reason: "figmaTokens must be a non-empty object — opt out by omitting the field entirely (see ERR_NO_FIGMA_SPEC), not by shipping an empty one" });
+    }
+
+    if (Array.isArray(doc.props)) {
+      doc.props.forEach((p, i) => {
+        const label = p?.name ?? `props[${i}]`;
+        if (!p?.name) violations.push({ kind: "doc-schema", file, component: name, field: `props[${i}].name`, reason: "prop is missing a name" });
+        if (!p?.type) violations.push({ kind: "doc-schema", file, component: name, field: `${label}.type`, reason: "prop is missing a type" });
+        if (p?.default === undefined) violations.push({ kind: "doc-schema", file, component: name, field: `${label}.default`, reason: "prop is missing a default" });
+        if (!p?.description) violations.push({ kind: "doc-schema", file, component: name, field: `${label}.description`, reason: "prop is missing a description" });
+      });
+    } else if (doc.props !== undefined) {
+      violations.push({ kind: "doc-schema", file, component: name, field: "props", reason: "props must be an array" });
+    }
+  }
+  return violations;
+}
+
+async function computeCheckDocs() {
+  const violations = [...checkStaleTerms(), ...(await checkDocSchema())];
   return {
     type: "check-docs-result",
     status: violations.length === 0 ? "clean" : "violations-found",
@@ -318,8 +377,8 @@ function computeCheckDocs() {
   };
 }
 
-function cmdCheckDocs(json) {
-  const result = computeCheckDocs();
+async function cmdCheckDocs(json) {
+  const result = await computeCheckDocs();
   print(result, json);
   if (result.violations.length > 0) process.exitCode = 1;
 }
@@ -338,7 +397,7 @@ async function computeVerify() {
     checkParity.push(await computeCheckParity(name));
   }
 
-  const checkDocs = computeCheckDocs();
+  const checkDocs = await computeCheckDocs();
 
   const failed = [];
   if (syncFigma.type === "error" || syncFigma.driftCount > 0) failed.push("sync figma");
@@ -368,6 +427,144 @@ async function cmdVerify(json) {
   const result = await computeVerify();
   print(result, json);
   if (result.status !== "clean") process.exitCode = 1;
+}
+
+function setAtDottedPath(root, dottedPath, value) {
+  const parts = dottedPath.split(".");
+  let node = root;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const key = parts[i];
+    if (typeof node[key] !== "object" || node[key] === null || Array.isArray(node[key])) {
+      node[key] = {};
+    }
+    node = node[key];
+  }
+  node[parts[parts.length - 1]] = value;
+}
+
+function gitDirtyFiles(paths) {
+  const out = execFileSync("git", ["status", "--porcelain", "--", ...paths], { cwd: REPO_ROOT, encoding: "utf-8" });
+  return out
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => line.slice(3));
+}
+
+// Mechanically applies what sync figma/check-styles already report as drift
+// into the real token/style files — additions (missingInCode) and value
+// overwrites (valueMismatches) only. Never deletes (missingInFigma) — that's
+// a human call every time, not automated. --write actually writes; without
+// it, this only reports what *would* change. Never invoked by the plugin or
+// CI — a human runs this deliberately, after already deciding Figma's side
+// is the one that's right (see CLAUDE.md's "investigate before overwriting"
+// discipline — this command doesn't make that judgment call, it just saves
+// the hand-typing once you have).
+async function computeApplyDrift({ tokensFile, stylesFile, write, force }) {
+  const tokensFilePath = tokensFile ?? path.join(TOKENS_DIR, "figma-export.live.json");
+  const stylesFilePath = stylesFile ?? path.join(TOKENS_DIR, "styles-export.live.json");
+
+  const syncResult = await computeSyncFigma(tokensFilePath);
+  const stylesResult = await computeCheckStyles(stylesFilePath);
+
+  const tokenChanges = [];
+  const tokenSkipped = [];
+  const layerData = {};
+
+  if (syncResult.type === "sync-result") {
+    for (const layer of Object.keys(LAYER_FILES)) {
+      layerData[layer] = JSON.parse(readFileSync(path.join(TOKENS_DIR, LAYER_FILES[layer]), "utf-8"));
+    }
+
+    for (const m of syncResult.missingInCode) {
+      const wrapped = isTerminalModeMap(m.figmaValue) ? { value: m.figmaValue } : m.figmaValue;
+      setAtDottedPath(layerData[m.layer], m.token, wrapped);
+      tokenChanges.push({ action: "add", layer: m.layer, token: m.token, value: m.figmaValue });
+    }
+    for (const vm of syncResult.valueMismatches) {
+      const dottedPath = vm.mode ? `${vm.token}.value.${vm.mode}` : vm.token;
+      setAtDottedPath(layerData[vm.layer], dottedPath, vm.figmaValue);
+      tokenChanges.push({ action: "update", layer: vm.layer, token: vm.token, mode: vm.mode, from: vm.codeValue, to: vm.figmaValue });
+    }
+    for (const mf of syncResult.missingInFigma) {
+      tokenSkipped.push({
+        layer: mf.layer,
+        token: mf.token,
+        reason: "would require deleting an existing code token — not automated, handle manually",
+      });
+    }
+  }
+
+  const styleChanges = [];
+  const styleSkipped = [];
+  let stylesData = null;
+
+  if (stylesResult.type === "check-styles-result") {
+    stylesData = JSON.parse(readFileSync(path.join(TOKENS_DIR, "styles.json"), "utf-8"));
+    const figmaRaw = JSON.parse(readFileSync(path.resolve(process.cwd(), stylesFilePath), "utf-8"));
+
+    for (const m of stylesResult.missingInCode) {
+      const fullValue = figmaRaw[m.category]?.[m.style];
+      if (fullValue === undefined) {
+        styleSkipped.push({ category: m.category, style: m.style, reason: "not found in the export file — can't reconstruct the full style object" });
+        continue;
+      }
+      stylesData[m.category] ??= {};
+      stylesData[m.category][m.style] = fullValue;
+      styleChanges.push({ action: "add", category: m.category, style: m.style, value: fullValue });
+    }
+    for (const vm of stylesResult.valueMismatches) {
+      const dottedPath = `${vm.category}.${vm.style}.${vm.field}`;
+      setAtDottedPath(stylesData, dottedPath, vm.figmaValue);
+      styleChanges.push({ action: "update", category: vm.category, style: vm.style, field: vm.field, from: vm.codeValue, to: vm.figmaValue });
+    }
+    for (const mf of stylesResult.missingInFigma) {
+      styleSkipped.push({
+        category: mf.category,
+        style: mf.style,
+        reason: "would require deleting an existing code style — not automated, handle manually",
+      });
+    }
+  }
+
+  const filesToWrite = [];
+  const changedLayers = new Set(tokenChanges.map((c) => c.layer));
+  for (const layer of changedLayers) {
+    filesToWrite.push({ path: path.join(TOKENS_DIR, LAYER_FILES[layer]), data: layerData[layer] });
+  }
+  if (styleChanges.length > 0) {
+    filesToWrite.push({ path: path.join(TOKENS_DIR, "styles.json"), data: stylesData });
+  }
+
+  let writeError = null;
+  let wrote = false;
+  if (write && filesToWrite.length > 0) {
+    const dirty = gitDirtyFiles(filesToWrite.map((f) => f.path));
+    if (dirty.length > 0 && !force) {
+      writeError = `Refusing to write: uncommitted changes already exist in ${dirty.join(", ")}. Commit/stash them first, or pass --force to overwrite anyway.`;
+    } else {
+      for (const f of filesToWrite) {
+        writeFileSync(f.path, JSON.stringify(f.data, null, 2) + "\n");
+      }
+      wrote = true;
+    }
+  }
+
+  return {
+    type: "apply-drift-result",
+    mode: write ? (wrote ? "written" : "blocked") : "dry-run",
+    tokenChanges,
+    tokenSkipped,
+    styleChanges,
+    styleSkipped,
+    filesWritten: wrote ? filesToWrite.map((f) => path.relative(REPO_ROOT, f.path)) : [],
+    error: writeError,
+  };
+}
+
+async function cmdApplyDrift(json, write, force, tokensFile, stylesFile) {
+  const result = await computeApplyDrift({ tokensFile, stylesFile, write, force });
+  print(result, json);
+  if (result.error) process.exitCode = 1;
 }
 
 function cmdManifest(json) {
@@ -421,6 +618,15 @@ async function main() {
       return cmdCheckDocs(json);
     case "verify":
       return cmdVerify(json);
+    case "apply-drift": {
+      const write = rest.includes("--write");
+      const force = rest.includes("--force");
+      const tokensFlagIdx = rest.indexOf("--tokens-file");
+      const tokensFile = tokensFlagIdx >= 0 ? rest[tokensFlagIdx + 1] : undefined;
+      const stylesFlagIdx = rest.indexOf("--styles-file");
+      const stylesFile = stylesFlagIdx >= 0 ? rest[stylesFlagIdx + 1] : undefined;
+      return cmdApplyDrift(json, write, force, tokensFile, stylesFile);
+    }
     case "manifest":
       return cmdManifest(json);
     default:
