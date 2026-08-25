@@ -15,7 +15,7 @@
   height: 40px;
   flex-shrink: 0;
   border: none;
-  border-radius: var(--lat-radius-input);
+  border-radius: var(--lat-radius-slimlg);
   background-color: var(--lat-color-action-secondary-default);
   color: var(--lat-color-icon-default);
   cursor: pointer;
@@ -45,7 +45,7 @@
   height: 40px;
   flex-shrink: 0;
   border: none;
-  border-radius: var(--lat-radius-input);
+  border-radius: var(--lat-radius-slimlg);
   background-color: var(--lat-color-background-inverse);
   color: var(--lat-color-icon-inverse);
   cursor: pointer;

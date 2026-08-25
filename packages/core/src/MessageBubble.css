@@ -10,7 +10,7 @@
 
 .lat-message-bubble {
   padding: var(--lat-spacing-8) var(--lat-spacing-16);
-  border-radius: var(--lat-radius-input);
+  border-radius: var(--lat-radius-slimlg);
   font-family: var(--lat-font-family-sans);
   font-size: var(--lat-font-style-body);
   max-width: 80%;

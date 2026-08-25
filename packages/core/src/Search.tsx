@@ -1,5 +1,6 @@
 import React from "react";
 import { Icon } from "./Icon";
+import { Button } from "./Button";
 import "./Search.css";
 
 export type SearchAppearance = "filled" | "outline";
@@ -16,9 +17,10 @@ export interface SearchProps {
 
 /**
  * Search — a search field with an optional trailing clear button (shown
- * when there's a value) and an attached circular submit button reusing
- * Button's primary color ramp. No leading icon — Figma's Search component
- * has a leading-icon boolean property, but it's off in all 16 variants.
+ * when there's a value) and an attached submit button rendered as a real
+ * Button instance (variant="primary" iconOnly). No leading icon — Figma's
+ * Search component has a leading-icon boolean property, but it's off in
+ * all 16 variants.
  * Built at one size (Density=Default) — a small/condensed tier is a
  * documented gap, not yet built (matches the Figma component's own noted
  * v1 scope). Styling comes entirely from --lat-* custom properties.
@@ -61,15 +63,15 @@ export const Search = React.forwardRef<HTMLInputElement, SearchProps>(
             </button>
           ) : null}
         </div>
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          iconOnly
           className="lat-search__submit"
           aria-label="Submit search"
           disabled={disabled}
           onClick={onSubmit}
-        >
-          <Icon name="search" size="xs" className="lat-search__submit-icon" />
-        </button>
+          icon={<Icon name="search" size="xs" />}
+        />
       </div>
     );
   }
