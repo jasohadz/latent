@@ -16,7 +16,11 @@
 #    — it hasn't opted into parity checking, it isn't drifting from a spec
 #    that doesn't exist. Does NOT catch raw hardcoded values on properties
 #    nobody declared in figmaTokens — see HOW-TO.md's component-editing
-#    section for that open gap.
+#    section for that open gap. On a real failure, points at `latent ask
+#    --check <Component>` for a plain-language explanation — deliberately
+#    not run automatically here: it'd add real per-commit latency (loading
+#    a multi-GB local model) for a non-deterministic narration of a result
+#    check-parity's JSON already gives you instantly and reliably.
 #
 # 3. Docs — blocks on two independent things inside check-docs:
 #    a) a staged .md file contains a known-stale term (e.g. a Figma
@@ -117,6 +121,7 @@ if [ -n "$COMPONENTS_TOUCHED" ]; then
       echo ""
       echo "BLOCKED (check-parity $NAME): compiled CSS no longer matches its declared figmaTokens"
       echo "$PARITY_OUT"
+      echo "For a plain-language explanation: node packages/cli/bin/latent.mjs ask \"why is this failing\" --check $NAME"
       FAIL=1
     fi
   done
