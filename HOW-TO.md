@@ -68,6 +68,13 @@ connection required, and guaranteed self-consistent by the hook. This is
 the payoff: the repo is now a portable source of truth any agent can trust
 without needing Figma access at all.
 
+For a faster, conversational alternative to reading `.doc.mjs` files
+directly — "what variants does Button have," "why is check-parity failing
+on this component" — `node packages/cli/bin/latent.mjs ask "<question>"`
+answers from the same contract files via a local, offline model (no API
+key, nothing sent over the network once set up). See `GUIDE.md`'s "Ask
+Latent" section for setup and `CLAUDE.md` for how it actually works.
+
 ## 5. Editing or adding components
 
 A new component is exactly three files in `packages/core/src/` sharing a

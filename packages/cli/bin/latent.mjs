@@ -607,7 +607,17 @@ async function cmdAsk(question, json, checkComponent) {
 
   const prompt = `Answer using ONLY the context below. If the answer isn't in it, say so clearly.\n\nContext:\n${retrievedContext}\n\nQuestion: ${effectiveQuestion}`;
   if (process.env.LATENT_DEBUG_PROMPT) console.error("=== FULL PROMPT ===\n" + prompt + "\n=== END PROMPT (length: " + prompt.length + ") ===");
-  const answer = await session.prompt(prompt);
+
+  // Streams to stderr as it generates so a human watching the terminal sees
+  // the answer appear live, token by token, rather than staring at a blank
+  // screen until the single final JSON blob prints to stdout. Kept off
+  // stdout deliberately — --json consumers still get one clean JSON object
+  // there, uninterrupted by partial text.
+  if (!json) process.stderr.write("\n");
+  const answer = await session.prompt(prompt, {
+    onTextChunk: (text) => { if (!json) process.stderr.write(text); },
+  });
+  if (!json) process.stderr.write("\n\n");
 
   print({ type: "ask-result", question, answer, sources: allChunks.map((item) => item.metadata) }, json);
 }

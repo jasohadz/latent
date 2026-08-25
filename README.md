@@ -24,6 +24,8 @@ layers and properties should be named so they map predictably to code.
 - `packages/core/src/Button.tsx` + `.css` + `.doc.mjs` — one full component, styled
   entirely via custom properties, with a machine-readable doc file
 - `packages/cli/bin/latent.mjs` — the agent-facing CLI
+- `.latent-index/` — committed, local RAG index over every component's
+  contract and the repo's docs, queried by `latent ask` (see below)
 
 ## Try it
 
@@ -36,6 +38,8 @@ node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.
 node packages/cli/bin/latent.mjs check-parity Button --json
 node packages/cli/bin/latent.mjs check-docs --json
 node packages/cli/bin/latent.mjs verify --json
+node packages/cli/bin/latent.mjs index --json
+node packages/cli/bin/latent.mjs ask "what variants does Button have"
 ```
 
 ## The differentiator: Figma is a first-class citizen, not an afterthought
@@ -62,6 +66,13 @@ CLI-native operation with the same fail-loudly discipline as everything else:
   the live export files, `check-parity` for every component, `check-docs`)
   in one call, one aggregated result. The single command to reach for,
   whether that's you at the terminal or CI.
+- **`ask "<question>"`** — a local, offline Q&A layer over every component's
+  `.doc.mjs` contract and the repo's own docs, backed by `node-llama-cpp`
+  (in-process, no separate app or API key) and a committed `vectra` index
+  (`latent index` to (re)build it — models auto-download on first run,
+  a few GB, one-time). Streams the answer live to your terminal. Pass
+  `--check <Component>` to have it explain a failing `check-parity` result
+  against that component's real declared contract instead of guessing.
 
 The sample export at `packages/tokens/figma-export.sample.json` has
 exactly 3 intentional drift cases (one missing-in-code, one value

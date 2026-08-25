@@ -36,13 +36,13 @@ phases depend on earlier ones being solid, especially the token schema.
 
 ### Ask Latent (optional, local)
 
-Latent ships a local, offline Q&A layer over its own component contracts and docs — `latent index` / `latent ask`, backed by `node-llama-cpp` (no separate app to install) and a `vectra` file index. No external service, no API key.
+Latent ships a local, offline Q&A layer over its own component contracts and docs — `latent index` / `latent ask`, backed by `node-llama-cpp` (no separate app to install) and a `vectra` file index. No external service, no API key. See `CLAUDE.md`'s "Key mechanics" for how it actually works internally (chunking, the committed-index/gitignored-models split, why `--check` does an exact lookup instead of trusting semantic search).
 
 1. `npm install` — already part of normal repo setup, pulls `vectra` and `node-llama-cpp`
-2. `node packages/cli/bin/latent.mjs index --json` — first run downloads the local models into `.latent-models/` (gitignored, a few GB, one-time); every run after is instant
-3. `node packages/cli/bin/latent.mjs ask "what variants does Button have"`
+2. `node packages/cli/bin/latent.mjs index --json` — first run downloads the local models into `.latent-models/` (gitignored, a few GB, one-time); every run after is instant. Currently indexes all 30 components (~80 chunks) and 10 root docs (~85 chunks).
+3. `node packages/cli/bin/latent.mjs ask "what variants does Button have"` — streams the answer live to your terminal as it generates; add `--json` for a single structured result instead (question/answer/sources), no streaming.
 
-The knowledge index (`.latent-index/`) is committed to the repo and kept fresh by the pre-commit hook once your local models are set up — see `.githooks/pre-commit`'s "Knowledge index" section. Use `--check <Component>` to have `ask` explain a failing `check-parity` result against the component's real declared contract instead of guessing.
+The knowledge index (`.latent-index/`) is committed to the repo and kept fresh by the pre-commit hook once your local models are set up — see `.githooks/pre-commit`'s "Knowledge index" section. Use `--check <Component>` to have `ask` explain a failing `check-parity` result against the component's real declared contract instead of guessing — this reliably surfaces the actual failing property now (verified against a deliberately broken component during testing), not just a generic non-answer.
 
 ## Phase 4 — Templates & polish (next up)
 

@@ -42,6 +42,11 @@ Fix any reported drift (`missingInCode`, `missingInFigma`,
 - `swizzlePath` values and prop names are a public contract once a
   component has been swizzled by a consumer — treat changes to them as
   breaking.
+- `index`/`ask` (the local RAG layer, see `CLAUDE.md`) follow the same
+  rules as everything else here — `--json` support, typed append-only
+  error codes. Not part of the PR checklist below, since `index` triggers
+  a one-time multi-GB model download on a machine that doesn't have one
+  yet — don't make that a required gate.
 
 ## Before opening a PR
 
