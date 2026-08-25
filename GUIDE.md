@@ -31,7 +31,7 @@ phases depend on earlier ones being solid, especially the token schema.
 ## Phase 3 — Agent-readiness layer (mostly done)
 
 10. Every component ships a `.doc.mjs` — keep doing this for every new one, no exceptions
-11. CLI supports `list`, `docs`, `swizzle`, `sync figma`, `check-parity`, `check-styles`, `check-docs`, `verify`, `manifest --json` — add `init` and `upgrade` once there's a second consuming project. `verify` (added 2026-08-20) runs the other four checks in one call — it's what `.github/workflows/latent-sync-check.yml` runs after every Latent Sync plugin push, and what a human should reach for at the terminal too.
+11. CLI supports `list`, `docs`, `swizzle`, `sync figma`, `check-parity`, `check-styles`, `check-docs`, `verify`, `apply-drift`, `manifest`, `index`, `ask --json` — add `init` and `upgrade` once there's a second consuming project. `verify` (added 2026-08-20) runs the other four checks in one call — it's what `.github/workflows/latent-sync-check.yml` runs after every Latent Sync plugin push, and what a human should reach for at the terminal too.
 12. Error codes are typed and append-only (`ERR_UNKNOWN_COMPONENT`, etc.) — never remove or repurpose a code once shipped
 
 ### Ask Latent (optional, local)

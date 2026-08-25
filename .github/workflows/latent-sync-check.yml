@@ -25,5 +25,13 @@ jobs:
         with:
           node-version: 20
 
+      # Required as of the `ask`/`index` commands (vectra, node-llama-cpp) —
+      # latent.mjs imports both at the top of the file, so even commands
+      # that never touch them (like verify) fail to load without this step.
+      # `verify` itself doesn't invoke either package's functions, so this
+      # only needs the packages present, not any model downloaded.
+      - name: install dependencies
+        run: npm ci
+
       - name: verify (sync figma + check-styles + check-parity + check-docs)
         run: node packages/cli/bin/latent.mjs verify --json
