@@ -14,7 +14,7 @@
 // so a bare `"value" in node` check isn't enough to recognize the wrapper —
 // a real mode-map's own entries (light/dark, default/condensed, ...) are
 // always terminal scalars, never further-nested objects.
-function isTerminalModeMap(x) {
+export function isTerminalModeMap(x) {
   return (
     x !== null &&
     typeof x === "object" &&
