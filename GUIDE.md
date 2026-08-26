@@ -130,10 +130,14 @@ this. Phase 4 is that hardening pass, not page templates:
       `aria-invalid={error || undefined}` now derives automatically from
       the same `error` prop, so the two can't drift apart. Overridable
       via `...rest` if a caller passes `aria-invalid` explicitly.
-    - **`ChatWindow`** — no `aria-live`/`role="log"` on the message list;
-      new messages are never announced to screen reader users.
-    - **`ChatInput`** — `outline: none` with no replacement focus style —
-      actively worse than simply missing one.
+    - ~~**`ChatWindow`** — no `aria-live`/`role="log"` on the message
+      list~~ **Fixed 2026-08-26** (commit `2832ea3`): the message slot
+      now has `role="log"` + `aria-live="polite"` + `aria-label`.
+    - ~~**`ChatInput`** — `outline: none` with no replacement focus
+      style~~ **Fixed 2026-08-26** (commit `2832ea3`): a token-bound
+      `:focus-visible` style was added. Scoped to the text field only,
+      matching what was flagged — the attach/send icon buttons were
+      never called out and weren't touched.
     - ~~**`Panel`** — sets no `role` at all despite existing specifically
       to host popovers/dropdowns~~ **Re-examined 2026-08-26** (commit
       `4aafde9`): not a code gap — `role` already passes through via
@@ -142,15 +146,22 @@ this. Phase 4 is that hardening pass, not page templates:
       — Panel hosts genuinely different semantic roles depending on the
       consumer, and guessing one would announce interaction support that
       may not exist. Fixed in `Panel.doc.mjs` only, not code.
-    - **`Field`/`SubscribeField`** — no `<label htmlFor>` association to
-      their nested input at all (placeholder-only); `SubscribeField` also
-      has no way to submit via Enter while focused in the field.
-    - **`Button`** — `iconOnly`'s required `aria-label` is enforced only
-      as a dev-mode `console.warn`, nothing stops it shipping without one
-      in production. Separately: `secondary`/`ghost` hover/pressed colors
-      are real in the CSS but were never declared in `figmaTokens` — a
-      real `check-parity` blind spot, it can't check a token that was
-      never declared.
+    - ~~**`Field`/`SubscribeField`** — no `<label htmlFor>` association;
+      `SubscribeField` also has no way to submit via Enter~~ **Fixed
+      2026-08-26** (commit `2832ea3`): `Field` links its label/input via
+      `React.useId()`; `SubscribeField` got a `label` prop (default
+      "Email address") wired to `aria-label` plus an `onKeyDown` handler
+      matching `Search`'s existing Enter-to-submit pattern.
+    - ~~**`Button`** — `iconOnly`'s required `aria-label` is enforced
+      only as a dev-mode `console.warn`~~ **Fixed 2026-08-26** (commit
+      `2832ea3`): `ButtonProps` is now a discriminated union —
+      `iconOnly: true` requires `"aria-label": string` at the type
+      level, a real compile-time guarantee, not just a runtime hint
+      (verified with a throwaway `@ts-expect-error` test). The
+      `console.warn` stays as a runtime safety net for what TS can't
+      catch. Separately fixed: `secondary`/`ghost` hover/pressed colors
+      are now declared in `figmaTokens`, closing the `check-parity`
+      blind spot.
     - ~~**`NavItem`/`NavSubItem`** — `selected` is CSS-only, no
       `aria-current`~~ **Fixed 2026-08-26** (commit `1cc2228`): both set
       `aria-current="page"` when `selected`. One documented imprecision
@@ -159,9 +170,16 @@ this. Phase 4 is that hardening pass, not page templates:
       current page" rather than "is the current page" — a slight
       overclaim, judged the better default over a second prop. See
       `NavItem.doc.mjs`/`NavSubItem.doc.mjs`.
-    - **`NavDropdown`** — no arrow-key nav between items, no
-      Escape-to-close.
-    - **`SideNav`** — root has no `<nav>`/`role="navigation"` landmark.
+    - ~~**`NavDropdown`** — no arrow-key nav between items, no
+      Escape-to-close~~ **Fixed 2026-08-26** (commit `2832ea3`):
+      Up/Down/Home/End move focus between sub-items, Escape collapses
+      and returns focus to the trigger. Deliberately NOT a
+      roving-tabindex composite widget — every `NavSubItem` stays
+      individually Tab-reachable exactly as before, since this sub-list
+      has no `role="menu"` implying the stricter pattern.
+    - ~~**`SideNav`** — root has no `<nav>`/`role="navigation"`
+      landmark~~ **Fixed 2026-08-26** (commit `2832ea3`): added to both
+      the expanded and collapsed return branches.
     - ~~**`AccordionItem`** — header button has no `aria-controls`/`id`
       link to its answer content~~ **Fixed 2026-08-26** (commit
       `1cc2228`): `aria-controls` + `React.useId()`-generated `id`,
@@ -172,13 +190,18 @@ this. Phase 4 is that hardening pass, not page templates:
       container's existing `:focus-within` border-color change is a
       real, already-verified working focus indicator, not the
       worse-than-missing pattern `ChatInput` has.
-    - **`Switch`** — no deliberate focus ring (the browser's unstyled
-      default still shows, since `outline: none` was never set either —
-      it's an accident of omission, not a broken state, but not a
-      designed one).
+    - ~~**`Switch`** — no deliberate focus ring~~ **Fixed 2026-08-26**
+      (commit `2832ea3`): a token-bound `:focus-visible` ring was added,
+      same pattern as `Button`.
     - Worth naming what's already good, not just gaps: **`Search`**
       correctly wires Enter-to-submit and has well-formed `aria-label`s
       on both its icon-only buttons.
+    - **Every bullet above from the original backfill is now resolved**
+      — fixed in code except `Panel`'s role, which was re-examined and
+      found to be a doc gap rather than a code one (see its bullet
+      above). See the commit hashes above for the trail. Any *new*
+      accessibility gap found from here on is a fresh finding, not a
+      leftover from this pass.
 16. Publish `packages/core`, `packages/theme-neutral`, `packages/cli` as scoped npm packages once the API stabilizes — not before, since `swizzle` paths and prop names become breaking changes for anyone who's forked
 
 ## Where to pick up
@@ -191,17 +214,12 @@ primitive — there isn't an obvious one left to add. Instead:
 - The gitignored-location audit (`packages/chat-app/`, `brand assets/`) is
   done for both known locations — check `.gitignore` for new entries
   before assuming there's nothing left to look at.
-- **The real next body of work**: item 15 above lists real accessibility
-  bugs found by actually reading the component source, not documentation
-  gaps. `Calendar`, `Toggle`/`ToggleMultiple`, the `TopNav` family,
-  `TextField`/`TextArea`, `NavItem`/`NavSubItem`, and `AccordionItem` are
-  fixed, and `Panel` was re-examined and turned out to be a doc gap
-  rather than a code one (2026-08-26, commits `c83b32d`, `f2e4e29`,
-  `3f448f0`, `4aafde9`, `1cc2228`) — 7 items remain: `ChatWindow`,
-  `ChatInput`, `Field`/`SubscribeField`, `Button`, `NavDropdown`,
-  `SideNav`, `Switch`. `SideNav`'s missing landmark is the smallest
-  single-line fix left; `NavDropdown`'s arrow-key-nav/Escape-to-close gap
-  pairs naturally with it since both live in the same nav-family pass.
+- **Item 15's accessibility punch list is now fully closed** (2026-08-26,
+  commits `c83b32d`, `f2e4e29`, `3f448f0`, `4aafde9`, `1cc2228`,
+  `2832ea3`) — every real gap the `states`/`accessibility` backfill found
+  is either fixed in code or (`Panel` only) re-examined and found to be
+  doc-only. Don't re-check these components looking for more work; if you
+  find a *new* gap in one, it's a fresh finding, not a leftover.
 - Known open item, still unresolved, fold in whenever it's actually
   blocking something rather than fixing it speculatively: Button has no
   true icon-only square variant (see the port session notes) — several
