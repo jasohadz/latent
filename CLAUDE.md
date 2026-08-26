@@ -70,8 +70,61 @@ node packages/cli/bin/latent.mjs compose-check <file.json> --json
 
 - All custom properties are namespaced `--lat-*`; dotted token paths map to them via `tokenPathToCssVar` (`color.bg.default` → `--lat-color-bg-default`).
 - Don't hardcode colors/spacing in component CSS — add or reuse a `--lat-*` custom property instead.
-- Keep templates (Phase 4) separate from app-shell/nav components.
 - Don't publish `packages/core`, `packages/theme-neutral`, or `packages/cli` as real npm packages until the API stabilizes (per `GUIDE.md`) — swizzle paths and prop names become breaking changes for anyone who's already forked.
+
+## Building and previewing UI work — read before rendering anything
+
+This repo has no build step for the component library itself, so nothing
+in `packages/core` has ever been rendered by its own tooling — every real
+render happens in some consumer, each of which will independently
+rediscover the same handful of gotchas unless they're written down here
+once. A first Phase 4 template attempt hit exactly this (built end to end,
+rendered once at the very end, and the render was wrong) — reverted, not
+because the approach was unsalvageable, but because it surfaced these
+gaps clearly enough to fix at the source instead of per-consumer.
+
+**Two real Vite/bundler gotchas** (confirmed via `packages/chat-app`'s own
+`vite.config.ts` — gitignored, so this is the tracked copy of that
+knowledge, not a duplicate of something already discoverable):
+- `Icon.tsx`/`Button.tsx` used to read `process.env.NODE_ENV` directly — a
+  Node global Vite doesn't shim automatically, so a raw browser consumer
+  would throw `ReferenceError: process is not defined`. Fixed at the
+  source (both now guard with `typeof process !== "undefined"` first,
+  plus `packages/core/src/global.d.ts` for the type side of the same gap
+  — TypeScript had no declaration for the global at all, a separate issue
+  from the runtime crash) — a consumer no longer needs a `define` shim
+  just to render without crashing. Still worth adding
+  `define: { "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV ?? "development") }`
+  in a Vite config if you actually want the dev-only `console.warn`s to
+  fire — without it they're silently treated as non-production and warn
+  regardless, which is the safe default, not the precise one.
+- `packages/core/src`/`packages/theme-neutral` live outside any consumer
+  package's own root. Vite's dev server refuses to serve files outside its
+  configured root by default — a consumer needs
+  `server: { fs: { allow: [<repo-level ancestor path>] } }`.
+- Also required, already documented above: the Google Fonts `<link>` block
+  and `data-latent-theme="neutral"` (or your theme) on the root element.
+
+**Rules below exist because of that real failure, not hypothetically:**
+- Structural checks (`compose-check`, `tsc`, "the bundler transforms it
+  without error") are necessary but never sufficient signal that UI work
+  is correct — none of them execute in a browser, so none can catch a font
+  never loading, a layout that's visually wrong, or anything else that
+  only shows up on screen. No visual work gets called "done" without an
+  actual rendered look (screenshot or live browser). If that's not
+  available, report the work as blocked, not as a caveated deliverable.
+- Render the smallest possible real thing first, before building anything
+  on top of it — prove the plumbing (fonts, theme, base layout) with a
+  trivial case before investing in a full build.
+- Nothing genuinely load-bearing — a real gotcha, a required setup step, a
+  known fix — gets written only into a gitignored file. `check-docs`, the
+  `ask` index, and a plain `git grep` are all blind to anything outside
+  `git ls-files`; a fact that only exists in a gitignored file is invisible
+  to every mechanism this repo has for surfacing it, agent or human.
+- If visual fidelity to a reference matters, look at the reference —
+  screenshot it, don't just read a text summary of it. A text description
+  of a site's structure is fine for content/section planning; it carries
+  none of the actual visual information needed to design matching CSS.
 
 ## Figma Styles (Text/Effect) — check before building
 

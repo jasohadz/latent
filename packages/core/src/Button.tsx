@@ -31,10 +31,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     { variant = "primary", size = "md", isLoading = false, icon, iconOnly = false, className, children, disabled, ...rest },
     ref
   ) => {
-    if (process.env.NODE_ENV !== "production" && iconOnly && !rest["aria-label"]) {
+    // typeof process check first — this file has no bundler-config
+    // dependency otherwise, and a raw browser environment (no Vite/webpack
+    // `define` shim for process.env) would throw ReferenceError on
+    // `process.env` directly rather than just skipping the dev-only warning.
+    // Confirmed as a real gap, not hypothetical: packages/chat-app's own
+    // vite.config.ts needs an explicit `define` for exactly this.
+    const isProd = typeof process !== "undefined" && process.env?.NODE_ENV === "production";
+    if (!isProd && iconOnly && !rest["aria-label"]) {
       console.warn("Button: iconOnly buttons must have an aria-label — there is no visible text for the accessible name.");
     }
-    if (process.env.NODE_ENV !== "production" && variant === "ghost" && !iconOnly) {
+    if (!isProd && variant === "ghost" && !iconOnly) {
       console.warn("Button: the ghost variant is only defined in Figma for iconOnly buttons — its look with visible text is unverified.");
     }
 

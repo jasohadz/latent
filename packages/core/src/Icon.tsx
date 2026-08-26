@@ -31,7 +31,9 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(
     const LucideIcon = icons[toPascalCase(name) as keyof typeof icons] as LucideIcon | undefined;
 
     if (!LucideIcon) {
-      if (process.env.NODE_ENV !== "production") {
+      // typeof process check first — see the identical note in Button.tsx.
+      const isProd = typeof process !== "undefined" && process.env?.NODE_ENV === "production";
+      if (!isProd) {
         console.warn(`Icon: no Lucide icon named "${name}"`);
       }
       return null;

@@ -19,6 +19,7 @@ export default {
   doNot: [
     "Don't use image-overlay layouts without imageSrc — there's no fallback background, so the progressive-blur scrim would render over nothing.",
     "Don't expect exact 1:1 parity on the progressive blur — Figma uses 5 fixed bands (2–30px blur, 6%–62% tint); this is a CSS approximation of the same technique, not a pixel-identical port.",
+    "Don't assume image-overlay-horizontal fills its container — Figma ships it as a fixed 640x280 standalone instance size, not a responsive one. If it needs to span a full-width row/column, set width explicitly on the instance (e.g. width: 100%) — confirmed as a real gap by a real consumer needing exactly this override, not a hypothetical.",
   ],
   swizzlePath: "packages/core/src/Card.tsx",
   extends: null,
