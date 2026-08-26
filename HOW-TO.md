@@ -72,6 +72,31 @@ For a faster, conversational alternative to reading `.doc.mjs` files
 directly — "what variants does Button have," "why is check-parity failing
 on this component" — see step 6 below.
 
+**Before generating a composition of multiple components** — a page
+section, a template, anything assembling several real components
+together — validate the plan before writing JSX, not after:
+
+```
+node packages/cli/bin/latent.mjs compose-check <file.json> --json
+```
+
+It checks a `{ component, props, children }` tree against the real
+component catalog (built fresh from every `.doc.mjs` on every call, never
+a second hand-maintained catalog) — an invented component name, a made-up
+prop, or an out-of-range enum value fails validation instead of silently
+shipping. See `CLAUDE.md`'s architecture section and `CATALOG-VALIDATION.md`
+for the full design. Deterministic, no model involved — a different tool
+from `ask`, checking a different thing (real component/prop existence, not
+grounded natural-language answers).
+
+**What this does not catch:** whether the generated composition actually
+*renders* correctly — a real webfont loading, a layout looking right on
+screen. Passing `compose-check` (and `tsc`, if you're checking types too)
+proves every reference is real; it proves nothing about what a browser
+actually shows. See `CLAUDE.md`'s "Building and previewing UI work"
+section before treating either as sufficient on its own — confirmed the
+hard way, not hypothetically.
+
 ## 5. Editing or adding components
 
 A new component is exactly three files in `packages/core/src/` sharing a
