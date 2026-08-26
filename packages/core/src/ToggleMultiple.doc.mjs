@@ -16,18 +16,22 @@ export default {
     { name: "selected", description: "Raised surface background, primary text color, semibold weight.", tokens: ["option selected background", "option selected color", "option selected weight"] },
     { name: "unselected", description: "No background, tertiary text color, regular weight.", tokens: ["option unselected color", "option unselected weight"] },
   ],
-  // Same component, same gaps — ToggleMultiple.tsx is Toggle.tsx's exact
-  // recipe generalized to N options, confirmed by reading both sources.
+  // Same component, same fix — ToggleMultiple.tsx is Toggle.tsx's exact
+  // recipe generalized to N options (modulo wraparound instead of a
+  // 2-option ternary), confirmed by reading both sources. Fixed 2026-08-26,
+  // same change and same reasoning as Toggle.doc.mjs — see there.
   accessibility: {
     keyboardInteractions: [
-      { key: "Tab", action: "Moves focus through each option button individually — all options are separately tabbable, regardless of count." },
-      { key: "Enter or Space", action: "Selects the focused option — native <button>, not a custom handler." },
+      { key: "Tab", action: 'Enters/exits the control at exactly one point (the selected option\'s roving tabindex), not once per option, regardless of option count — matches the WAI-ARIA tabs pattern role="tablist"/"tab" already implies.' },
+      { key: "ArrowRight / ArrowLeft", action: "Moves selection to the next/previous option — automatic activation (arrow moves focus AND fires onChange together), matching the APG's \"Tabs with Automatic Activation\" example. Wraps at both ends (End → ArrowRight goes to the first option, and vice versa)." },
+      { key: "Home / End", action: "Jumps to the first/last option." },
+      { key: "Enter or Space", action: "Selects the focused option — native <button> activation, not a custom handler." },
     ],
     ariaAttributes: [
-      { attribute: 'role="tablist" / role="tab" / aria-selected', description: "Same real mismatch as Toggle: the WAI-ARIA tabs pattern these roles imply expects Left/Right arrow-key navigation with a roving tabindex — neither exists here (no onKeyDown for arrow keys, every option independently tabbable). More pronounced with more options, since Tab has to step through every one individually instead of a single tab stop plus arrow keys." },
+      { attribute: 'role="tablist" / role="tab" / aria-selected', description: "Now backed by the keyboard behavior these roles imply — previously present without it. Matters more here than on Toggle since more options meant more Tab stops to step through with nothing to indicate the tabs pattern was only cosmetic." },
     ],
     focusBehaviors: [
-      "No focus-visible styling anywhere in ToggleMultiple.css — confirmed by reading the source. No outline: none either, so the browser's unstyled default outline is what actually shows.",
+      "No custom/token-bound focus ring exists in ToggleMultiple.css — confirmed by reading the source. No outline: none either, so the browser's own unstyled default outline still shows on keyboard focus — same recurring gap as Toggle's/Switch's, an accident of omission, not a deliberate design.",
     ],
   },
   figmaTokens: {

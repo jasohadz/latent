@@ -16,16 +16,21 @@ export default {
     { name: "selected", description: "Raised surface background, primary text color, semibold weight.", tokens: ["option selected background", "option selected color", "option selected weight"] },
     { name: "unselected", description: "No background, tertiary text color, regular weight.", tokens: ["option unselected color", "option unselected weight"] },
   ],
+  // Fixed 2026-08-26 — was a real ARIA-pattern-vs-implementation mismatch
+  // (see git history): role="tablist"/"tab" implies Left/Right arrow-key
+  // navigation with a roving tabindex, and neither existed. Now does.
   accessibility: {
     keyboardInteractions: [
-      { key: "Tab", action: "Moves focus through each option button individually — both buttons are separately tabbable." },
-      { key: "Enter or Space", action: "Selects the focused option — native <button>, not a custom handler." },
+      { key: "Tab", action: 'Enters/exits the control at exactly one point (the selected option\'s roving tabindex), not once per option — matches the WAI-ARIA tabs pattern role="tablist"/"tab" already implies.' },
+      { key: "ArrowRight / ArrowLeft", action: "Moves selection to the other option — automatic activation (arrow moves focus AND fires onChange together, matching the APG's \"Tabs with Automatic Activation\" example), since this is an instant segmented control, not a tabs-with-panel-loading widget. Wraps at both ends." },
+      { key: "Home / End", action: "Jumps to the first/last option." },
+      { key: "Enter or Space", action: "Selects the focused option — native <button> activation, not a custom handler." },
     ],
     ariaAttributes: [
-      { attribute: 'role="tablist" / role="tab" / aria-selected', description: "Real, undocumented mismatch, confirmed by reading Toggle.tsx: the WAI-ARIA tabs pattern these roles imply expects Left/Right arrow-key navigation between tabs with only the active tab in the Tab order (a roving tabindex) — neither exists here. Every option is independently Tab-stoppable and there's no onKeyDown for arrow keys at all. Screen reader users get announced tab semantics without the interaction pattern those semantics promise." },
+      { attribute: 'role="tablist" / role="tab" / aria-selected', description: "Now backed by the keyboard behavior these roles imply — previously present without it, which is worse than no ARIA role at all (announces behavior that doesn't exist)." },
     ],
     focusBehaviors: [
-      "No focus-visible styling anywhere in Toggle.css — confirmed by reading the source, not assumed. Same recurring gap as Switch/Badge's dismiss button: no custom ring, and no outline: none either, so the browser's default outline is what's actually shown, unstyled.",
+      "No custom/token-bound focus ring exists in Toggle.css — confirmed by reading the source. Toggle.css never sets outline: none either, so the browser's own unstyled default outline still shows on keyboard focus (it isn't literally invisible) — same recurring gap as Switch's, an accident of omission, not a deliberate design.",
     ],
   },
   figmaTokens: {
