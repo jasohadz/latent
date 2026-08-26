@@ -70,22 +70,54 @@ export default {
   // The Calendar Day states in Figma (Default/Hover/Active/Hidden/Disabled/
   // Range/Range Disabled) map to CSS pseudo-classes and modifier classes
   // here rather than separate components — see Calendar.css.
+  //
+  // Visual-fidelity pass, 2026-08-26 (separate from the keyboard-nav fix
+  // above) — re-verified the header against a live pull of the real
+  // Figma node (not the original doc text, which had drifted), reported
+  // by a user actually looking at both side by side. Three real, confirmed
+  // mismatches fixed:
+  // - Nav buttons had a border (color.border.brand) and radius.input;
+  //   the real Figma instance (a Button appearance=outline/size=small/
+  //   icon-only=yes reuse) has no border at all and uses radius.slimlg —
+  //   Button's own already-documented icon-only-small recipe
+  //   (Button.doc.mjs), which Calendar's hand-rolled CSS had never
+  //   actually matched.
+  // - The month/year <select> font-size/line-height were bound to
+  //   typography.input.value.font-size/line-height.sm, which resolves to
+  //   16px in default density — the real Figma Label is bound to
+  //   font.style.body-small (a stable 14px), the same token pair
+  //   TextField/TextArea already use correctly for their own text.
+  // - The selects had no real chevron icon at all — just the browser's
+  //   own native <select> arrow (different shape/size/color per browser,
+  //   no controlled spacing). Figma's Month/Year Field has a real Icon
+  //   instance with a spacing.4 gap after the label. Fixed by wrapping
+  //   each <select> (appearance: none, native arrow suppressed) with a
+  //   real, decorative (aria-hidden) Icon positioned via CSS — see
+  //   .lat-calendar__select-wrapper/__select-chevron in Calendar.css.
   figmaTokens: {
     "container padding/gap": "spacing.16",
     "container background": "color.background.default",
     "container border": "color.border.subtle",
     "container border-radius": "radius.card",
     "header gap / select-group gap": "spacing.8",
-    "nav-button padding": "spacing.8",
-    "nav-button border": "color.border.brand",
-    "nav-button border-radius": "radius.input",
+    // No "nav-button border" entry — fixed 2026-08-26, see accessibility/
+    // states notes below: the real Figma instance (a Button
+    // appearance=outline/size=small/icon-only=yes reuse) has no
+    // border/stroke at all, confirmed by reading the live node directly,
+    // not the original (wrong) doc text.
+    "nav-button padding (vertical)": "spacing.6",
+    "nav-button border-radius": "radius.slimlg",
     "nav-button hover background": "color.action.secondary.hover",
     "nav-button icon color": "color.icon.default",
-    "select padding (horizontal)": "spacing.8",
+    "select padding (left)": "spacing.8",
+    // Right side reserves space for the chevron icon (icon width + gap +
+    // edge inset) — see .lat-calendar__select-chevron in Calendar.css.
+    "select padding (right)": "spacing.24",
     "select border": "color.border.default",
     "select border-radius": "radius.input",
-    "select font-size": "typography.input.value.font-size.sm",
-    "select line-height": "typography.input.value.line-height.sm",
+    "select font-size": "font-style.body-small",
+    "select line-height": "font-line-height.200-normal",
+    "select chevron color": "color.icon.default",
     "body/grid gap": "spacing.4",
     "weekday text color": "color.text.tertiary",
     "weekday font-size": "font-size.200",

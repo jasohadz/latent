@@ -20,9 +20,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--lat-spacing-8);
-  border: 1px solid var(--lat-color-border-brand);
-  border-radius: var(--lat-radius-input);
+  padding: var(--lat-spacing-6) 0;
+  border: none;
+  border-radius: var(--lat-radius-slimlg);
   background: transparent;
   color: var(--lat-color-icon-default);
   cursor: pointer;
@@ -41,15 +41,37 @@
   gap: var(--lat-spacing-8);
 }
 
+.lat-calendar__select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .lat-calendar__select {
-  padding: var(--lat-spacing-4) var(--lat-spacing-8);
+  padding: var(--lat-spacing-4) var(--lat-spacing-24) var(--lat-spacing-4) var(--lat-spacing-8);
   border: 1px solid var(--lat-color-border-default);
   border-radius: var(--lat-radius-input);
   background-color: var(--lat-color-background-default);
   color: var(--lat-color-text-primary);
   font-family: var(--lat-font-family-sans);
-  font-size: var(--lat-typography-input-value-font-size-sm);
-  line-height: var(--lat-typography-input-value-line-height-sm);
+  font-size: var(--lat-font-style-body-small);
+  line-height: var(--lat-font-line-height-200-normal);
+  /* Suppresses the browser's own default dropdown arrow so the real
+     chevron Icon (positioned via .lat-calendar__select-chevron below) is
+     the only one shown — Figma's Month/Year Field has a real Icon
+     instance here, not a native browser control's arrow. */
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.lat-calendar__select-chevron {
+  position: absolute;
+  right: var(--lat-spacing-8);
+  color: var(--lat-color-icon-default);
+  /* Decorative — the real <select> beneath already carries the accessible
+     name/value; a redundant icon shouldn't be announced separately. */
+  pointer-events: none;
 }
 
 .lat-calendar__body {

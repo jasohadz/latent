@@ -190,26 +190,44 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
             <Icon name="chevron-left" size="xs" weight="light" />
           </button>
           <div className="lat-calendar__select-group">
-            <select
-              className="lat-calendar__select"
-              aria-label="Month"
-              value={month}
-              onChange={(e) => onMonthChange?.(Number(e.target.value))}
-            >
-              {MONTH_NAMES.map((name, i) => (
-                <option key={name} value={i}>{name}</option>
-              ))}
-            </select>
-            <select
-              className="lat-calendar__select lat-calendar__select--year"
-              aria-label="Year"
-              value={year}
-              onChange={(e) => onYearChange?.(Number(e.target.value))}
-            >
-              {years.map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
+            <span className="lat-calendar__select-wrapper">
+              <select
+                className="lat-calendar__select"
+                aria-label="Month"
+                value={month}
+                onChange={(e) => onMonthChange?.(Number(e.target.value))}
+              >
+                {MONTH_NAMES.map((name, i) => (
+                  <option key={name} value={i}>{name}</option>
+                ))}
+              </select>
+              <Icon
+                name="chevron-down"
+                size="xs"
+                weight="light"
+                className="lat-calendar__select-chevron"
+                aria-hidden="true"
+              />
+            </span>
+            <span className="lat-calendar__select-wrapper">
+              <select
+                className="lat-calendar__select lat-calendar__select--year"
+                aria-label="Year"
+                value={year}
+                onChange={(e) => onYearChange?.(Number(e.target.value))}
+              >
+                {years.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+              <Icon
+                name="chevron-down"
+                size="xs"
+                weight="light"
+                className="lat-calendar__select-chevron"
+                aria-hidden="true"
+              />
+            </span>
           </div>
           <button
             type="button"
