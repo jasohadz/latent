@@ -31,7 +31,10 @@
   padding: 0;
   color: var(--lat-color-text-primary);
   font-family: var(--lat-font-family-sans);
-  font-size: var(--lat-font-size-300);
+  /* Same Breakpoint-token-not-yet-ported situation as .lat-accordion-item__answer
+     below — Figma's real title binds font/style/body (Breakpoint), using
+     the equivalent Semantic value (font-style.body, same 16px) here. */
+  font-size: var(--lat-font-style-body);
   font-weight: var(--lat-font-weight-600);
   cursor: pointer;
   text-align: left;

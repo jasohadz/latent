@@ -31,6 +31,12 @@ export default {
       "Real :focus-visible outline confirmed in NavSubItem.css, bound to color.border.focus.",
     ],
   },
+  // "focus ring width" is skipped below (figmaTokensSkipLiveCheck):
+  // confirmed correct (2px, matching sizing.border.default exactly) via
+  // the live node read that fixed this token 2026-08-26 — but Figma
+  // leaves the Focused variant's stroke weight as an unbound literal, not
+  // a Variable, same as NavItem.
+  figmaTokensSkipLiveCheck: ["focus ring width"],
   figmaTokens: {
     "padding (vertical)": "spacing.6",
     "padding (horizontal) / gap": "spacing.10",
@@ -38,7 +44,11 @@ export default {
     "hover background": "color.action.secondary.hover",
     "pressed background": "color.action.secondary.pressed",
     "focus ring color": "color.border.focus",
-    "focus ring width": "sizing.border.thin",
+    // Fixed 2026-08-26: was sizing.border.thin (1px) — a real, visible
+    // size bug, same as NavItem. Figma's real Focused variant has a 2px
+    // stroke weight, confirmed by reading the live node directly;
+    // sizing.border.default matches exactly.
+    "focus ring width": "sizing.border.default",
     "icon color": "color.icon.default",
     "label color": "color.text.secondary",
     "label font-family": "font-family.sans",

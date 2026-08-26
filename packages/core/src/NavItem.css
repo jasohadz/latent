@@ -30,7 +30,7 @@
   outline: none;
 }
 .lat-nav-item:focus-visible {
-  outline: var(--lat-sizing-border-thin) solid var(--lat-color-border-focus);
+  outline: var(--lat-sizing-border-default) solid var(--lat-color-border-focus);
   outline-offset: 2px;
 }
 .lat-nav-item:disabled {

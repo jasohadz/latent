@@ -13,7 +13,7 @@
 }
 
 .lat-avatar-group__avatars--spaced {
-  gap: var(--lat-spacing-4);
+  gap: var(--lat-spacing-8);
 }
 
 .lat-avatar-group__overflow {

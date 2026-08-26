@@ -224,31 +224,43 @@ this. Phase 4 is that hardening pass, not page templates:
     code-only additions or real bindings this coarse check can't see.
     Calendar's and Button's mismatches are fixed (commits `9252eec`,
     `f9a3885`). The tool's first full run (same commit as its build)
-    surfaced 16 more components with open findings, not yet individually
-    re-verified and fixed the same way — real candidates, not
-    pre-triaged:
-    - `AccordionItem` — title font-size
-    - `AvatarGroup` — spaced-variant gap
-    - `BadgeGroup` — large-size text font-size
-    - `Calendar` — container border, nav-button hover background, select
-      padding (right), weekday/day font-size, day hover background, day
-      disabled text color, focus ring color/width (beyond the already-
-      skipped offset)
-    - `Card` — body font-size, overlay CTA hover background/text
-    - `ChatInput` — field font-family/font-size, send active background
-    - `MegaMenuItem` — padding/gap, title font-size
-    - `MessageBubble` — user-sender background/text color
-    - `NavItem`/`NavSubItem` — focus ring width
-    - `Search` — focus ring width, input font-size
-    - `Stat` — icon badge padding, value font-size/weight, label font-size
-    - `Switch` — supporting-text font-size
-    - `Toggle`/`ToggleMultiple` — option font-size, unselected weight
-    - `TopNav` — bar padding/gap, panel padding
-    Run `node packages/cli/bin/latent.mjs check-component-bindings
-    <Component> --json` on any of these for the exact claimed-vs-missing
-    list; re-verifying each means pulling the live Figma node the way the
-    Calendar/Button fixes did (Desktop Bridge + `figma_execute`), not
-    guessing from the token name alone.
+    surfaced 16 more components with open findings. **All 16 are now
+    resolved** (2026-08-26, follow-up commit after `a1c2712`) — each was
+    individually re-verified against a live Figma pull, the same rigor as
+    the original Calendar/Button fixes, never guessed or blanket-skipped.
+    Real bugs fixed in code:
+    - `AccordionItem` — title font-size was `font-size.300`, real Figma
+      binding is `font-style.body` (same pattern as its own answer text).
+    - `AvatarGroup` — spaced-variant gap was `spacing.4`, real Figma
+      `itemSpacing` is 8.
+    - `NavItem`/`NavSubItem` — focus ring width was `sizing.border.thin`
+      (1px), real Figma Focused-state `strokeWeight` is 2px.
+    - `Toggle`/`ToggleMultiple` — option font-size was `font-size.300`
+      (16px), real Figma binding is `font-style.body-small` (14px) — a
+      genuinely visible size bug.
+    - `MegaMenuItem` — padding/gap was `spacing.12`, real Figma value is
+      10 (`spacing.10`).
+    - `TopNav` — bar padding was uniformly `spacing.16`, real Figma value
+      is asymmetric (right/bottom `spacing.8`, left `spacing.12`); panel
+      padding was `spacing.12`, real value is `spacing.8`.
+    - `Switch` — supporting-text font-size was `font-size.200`, real
+      binding is `font-style.body-small`.
+    Confirmed-correct, not bugs — resolved via `figmaTokensSkipLiveCheck`
+    entries (value already right, but Figma leaves the property unbound,
+    or the evidence lives in a different component's usage than the one
+    being checked — see each `.doc.mjs`'s inline comment for the specific
+    reason): `BadgeGroup` (large-size text font-size), `Card` (body
+    font-size, overlay CTA hover), `ChatInput` (field font/send-active
+    background), `MessageBubble` (user-sender background/text color —
+    verified via ChatWindow's real alternating-instance usage, since
+    MessageBubble's own standalone component only has one static
+    example), `NavItem`/`NavSubItem` (focus ring width, once corrected to
+    2px), `Search` (focus ring width, input font-size), `Stat` (icon
+    badge padding, value font-size/weight, label font-size), `Calendar`
+    (nav-button hover background, day hover background, day disabled
+    text color, focus ring color/width, beyond the already-skipped
+    offset). Confirmed clean via `check-component-bindings` on all 16
+    plus a full `verify --json` run reporting `status: clean`.
 17. Publish `packages/core`, `packages/theme-neutral`, `packages/cli` as scoped npm packages once the API stabilizes — not before, since `swizzle` paths and prop names become breaking changes for anyone who's forked
 
 ## Where to pick up
@@ -270,15 +282,20 @@ isn't. Instead:
   is either fixed in code or (`Panel` only) re-examined and found to be
   doc-only. Don't re-check these components looking for more work; if you
   find a *new* gap in one, it's a fresh finding, not a leftover.
-- **The real next body of work is item 16's list** — 16 components with
-  genuine, not-yet-triaged `check-component-bindings` findings. Unlike
-  item 15, this list is *not* pre-verified — each one needs an actual live
-  Figma pull (Desktop Bridge + `figma_execute`, same as the Calendar/Button
-  fixes) before deciding whether it's a real bug, a legitimate
-  `figmaTokensSkipLiveCheck` case, or a false positive the normalization
-  heuristics still miss. Don't skip-list one just to make `verify` pass —
-  that's exactly the "fix the checker's mood, not the reason it's angry"
-  shortcut this whole feature was built to stop happening silently.
+- **Item 16's `check-component-bindings` punch list is now fully closed**
+  (2026-08-26) — all 16 flagged components individually re-verified
+  against live Figma data, same rigor as the original Calendar/Button
+  fixes. `verify --json` reports `status: clean`. Don't re-check these
+  components looking for more work; if you find a *new*
+  `check-component-bindings` finding in one, it's a fresh drift, not a
+  leftover from this pass. If a future `check-component-bindings` finding
+  ever needs resolving again: it's not pre-verified by definition — pull
+  the live Figma node (Desktop Bridge + `figma_execute`) before deciding
+  whether it's a real bug, a legitimate `figmaTokensSkipLiveCheck` case,
+  or a normalization false positive. Never skip-list one just to make
+  `verify` pass — that's exactly the "fix the checker's mood, not the
+  reason it's angry" shortcut this whole feature was built to stop
+  happening silently.
 - Known open item, still unresolved, fold in whenever it's actually
   blocking something rather than fixing it speculatively: Button has no
   true icon-only square variant (see the port session notes) — several

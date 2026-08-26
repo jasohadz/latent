@@ -46,7 +46,11 @@ export default {
     "header/answer gap": "spacing.8",
     "title color": "color.text.primary",
     "title font-family": "font-family.sans",
-    "title font-size": "font-size.300",
+    // Fixed 2026-08-26: was font-size.300 — same wrong-token-same-value
+    // pattern the "answer font-size" entry below already documented and
+    // got right (Figma binds font/style/body, a Breakpoint-collection
+    // token, confirmed by reading the live title text node directly).
+    "title font-size": "font-style.body",
     "title font-weight": "font-weight.600",
     "chevron color": "color.icon.default",
     "answer text color": "color.text.primary",

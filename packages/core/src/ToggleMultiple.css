@@ -13,7 +13,7 @@
   background: transparent;
   color: var(--lat-color-text-tertiary);
   font-family: var(--lat-font-family-sans);
-  font-size: var(--lat-font-size-300);
+  font-size: var(--lat-font-style-body-small);
   font-weight: var(--lat-font-weight-400);
   cursor: pointer;
 }

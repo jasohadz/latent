@@ -23,6 +23,14 @@ export default {
       "BadgeGroup.css sets no :focus/:focus-visible rule of its own — confirmed by reading the source. The browser's default focus outline applies unmodified, unlike Switch (no focus styling at all, a real gap) or AccordionItem (a custom :focus-within border). Worth knowing this is relying on the platform default, not a deliberate design choice either way.",
     ],
   },
+  // "text font-size (large)" is skipped below (figmaTokensSkipLiveCheck):
+  // already correct — Figma's real text node binds font-size/body
+  // (Breakpoint), which resolves to the same primitive as our declared
+  // font-style.body (Semantic) at desktop, same pattern as Calendar's
+  // weekday font-size. Flagged only because "style" vs "size" is a real
+  // word difference the normalization this check does can't bridge (it
+  // strips separators/case and a typography/font- prefix, not synonyms).
+  figmaTokensSkipLiveCheck: ["text font-size (large)"],
   figmaTokens: {
     "container padding": "spacing.4",
     "container gap": "spacing.8",

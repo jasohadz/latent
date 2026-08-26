@@ -48,6 +48,16 @@ export default {
   // Button's own figmaTokens map — check-parity greps Search.css alone, so
   // duplicating them here would just assert against a file that no longer
   // declares them.
+  // "focus ring width" is skipped below (figmaTokensSkipLiveCheck):
+  // confirmed correct (1px, matching sizing.border.thin exactly) but
+  // Figma has this as an unbound literal on the focused state, not a
+  // Variable — nothing for check-component-bindings to find regardless
+  // of correctness.
+  // "input font-size": Figma's real text node binds font-size/body
+  // (Breakpoint) — resolves to the same primitive as our declared
+  // font-style.body (Semantic) at desktop. Same deliberate-simplification
+  // pattern as Calendar's weekday font-size.
+  figmaTokensSkipLiveCheck: ["focus ring width", "input font-size"],
   figmaTokens: {
     "container padding": "spacing.4",
     "container gap": "spacing.8",

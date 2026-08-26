@@ -11,11 +11,23 @@ export default {
   ],
   swizzlePath: "packages/core/src/MessageBubble.tsx",
   extends: null,
-  // Text color for the assistant bubble (color/text/on-brand, white) is
-  // inferred from its blue color/action/primary/default fill matching
-  // Button's primary variant — not independently re-verified against the
-  // exact Figma text node due to a transient connection timeout during
-  // the original port session (2026-07-29). Still unverified.
+  // Verified 2026-08-26 (resolves the "still unverified" flag left from
+  // 2026-07-29's transient connection timeout): MessageBubble's own
+  // standalone component instance only shows one static example (blue/
+  // on-brand), so check-component-bindings correctly can't see "user"
+  // evidence there. Confirmed instead via ChatWindow's real usage — its
+  // example conversation instantiates 5 MessageBubbles alternating
+  // assistant/user/assistant/user/assistant, matching an alternating
+  // textFillVar of color/text/on-brand, color/text/primary, on-brand,
+  // primary, on-brand exactly. Drilled into the second (color/text/
+  // primary) bubble's own child tree: its ".Message Item" background
+  // fill binds color/background/default, and its text fill binds
+  // color/text/primary — both match what's already declared below. The
+  // assistant/user assignment was correct all along, not backwards.
+  // check-component-bindings still can't see this on its own (the
+  // evidence lives in ChatWindow's usage, not MessageBubble's own
+  // component tree), hence the skip list below.
+  figmaTokensSkipLiveCheck: ["user background", "user text color"],
   figmaTokens: {
     "bubble padding (vertical)": "spacing.8",
     "bubble padding (horizontal)": "spacing.16",

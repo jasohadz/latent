@@ -34,6 +34,11 @@ export default {
       "No custom/token-bound focus ring exists in ToggleMultiple.css — confirmed by reading the source. No outline: none either, so the browser's own unstyled default outline still shows on keyboard focus — same recurring gap as Toggle's/Switch's, an accident of omission, not a deliberate design.",
     ],
   },
+  // "option unselected weight" is skipped below (figmaTokensSkipLiveCheck):
+  // confirmed correct (400, matching font-weight.400 exactly) but Figma
+  // has this as an unbound literal on the text node, not a Variable —
+  // nothing for check-component-bindings to find regardless of correctness.
+  figmaTokensSkipLiveCheck: ["option unselected weight"],
   figmaTokens: {
     "track background": "color.background.muted",
     "track padding/gap": "spacing.4",
@@ -41,7 +46,11 @@ export default {
     "option padding (vertical)": "spacing.8",
     "option padding (horizontal)": "spacing.24",
     "option border-radius": "radius.full",
-    "option font-size": "font-size.300",
+    // Fixed 2026-08-26: was font-size.300 (16px) — a real, visible size
+    // bug, not just a wrong-token-same-value case. Figma's real option
+    // text is 14px, bound to font-style.body-small (confirmed by reading
+    // the live text nodes directly, all 5 options).
+    "option font-size": "font-style.body-small",
     "option unselected weight": "font-weight.400",
     "option unselected color": "color.text.tertiary",
     "option selected background": "color.surface.raised",
