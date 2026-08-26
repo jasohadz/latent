@@ -48,7 +48,7 @@ export const SideNav = React.forwardRef<HTMLDivElement, SideNavProps>(
 
     if (collapsed) {
       return (
-        <div ref={ref} className={classes}>
+        <div ref={ref} className={classes} role="navigation" aria-label="Main navigation">
           <div className="lat-side-nav__header lat-side-nav__header--collapsed">
             {showToggleIcon ? (
               <button type="button" className="lat-side-nav__toggle" aria-label="Expand" onClick={onToggleCollapse}>
@@ -68,7 +68,7 @@ export const SideNav = React.forwardRef<HTMLDivElement, SideNavProps>(
     }
 
     return (
-      <div ref={ref} className={classes}>
+      <div ref={ref} className={classes} role="navigation" aria-label="Main navigation">
         <div className="lat-side-nav__header">
           {logo}
           <span className="lat-side-nav__brand">{brand}</span>

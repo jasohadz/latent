@@ -18,7 +18,9 @@ export const ChatWindow = React.forwardRef<HTMLDivElement, ChatWindowProps>(
   ({ children, inputProps, className }, ref) => {
     return (
       <div ref={ref} className={["lat-chat-window", className].filter(Boolean).join(" ")}>
-        <div className="lat-chat-window__slot">{children}</div>
+        <div className="lat-chat-window__slot" role="log" aria-live="polite" aria-label="Chat messages">
+          {children}
+        </div>
         <ChatInput {...inputProps} />
       </div>
     );

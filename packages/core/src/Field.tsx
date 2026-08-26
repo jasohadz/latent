@@ -15,11 +15,13 @@ export interface FieldProps extends TextFieldProps {
  * state. Styling comes entirely from --lat-* custom properties.
  */
 export const Field = React.forwardRef<HTMLInputElement, FieldProps>(
-  ({ label, helperText, error, className, ...rest }, ref) => {
+  ({ label, helperText, error, id, className, ...rest }, ref) => {
+    const generatedId = React.useId();
+    const fieldId = id ?? generatedId;
     return (
       <div className={["lat-field", className].filter(Boolean).join(" ")}>
-        <label className="lat-field__label">{label}</label>
-        <TextField ref={ref} error={error} {...rest} />
+        <label className="lat-field__label" htmlFor={fieldId}>{label}</label>
+        <TextField ref={ref} id={fieldId} error={error} {...rest} />
         {helperText ? (
           <span className={["lat-field__helper", error ? "lat-field__helper--error" : ""].filter(Boolean).join(" ")}>
             {error ? <Icon name="circle-alert" size="xs" className="lat-field__helper-icon" /> : null}

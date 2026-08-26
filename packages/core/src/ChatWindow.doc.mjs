@@ -14,11 +14,12 @@ export default {
   // No states — single component, no variants, no interactive states of
   // its own (confirmed by reading the .tsx: a plain layout wrapper around
   // a message slot and a docked ChatInput).
+  // Fixed 2026-08-26.
   accessibility: {
     ariaAttributes: [
       {
-        attribute: "(none present)",
-        description: "The message slot (.lat-chat-window__slot, the scrolling container children/MessageBubble instances stack into) has no role=\"log\" and no aria-live region — confirmed by reading the .tsx and .css. New messages arriving are not announced to screen reader users. Real, undocumented gap, not a deliberate decision — flagged here rather than papered over.",
+        attribute: 'role="log" / aria-live="polite" / aria-label="Chat messages" (message slot)',
+        description: 'The message slot (.lat-chat-window__slot, the scrolling container children/MessageBubble instances stack into) now announces new messages to screen reader users as they\'re added. role="log" is the semantically correct role for this exact case (a stream of messages where new ones append and old ones remain relevant) — it implies aria-live="polite"/aria-atomic="false" on its own per the ARIA spec, but aria-live="polite" is set explicitly too for older/inconsistent AT support, matching common real-world practice rather than relying on implicit role semantics alone.',
       },
     ],
   },

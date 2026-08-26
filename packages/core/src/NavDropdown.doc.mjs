@@ -24,13 +24,19 @@ export default {
     { name: "collapsed", description: "Sub-list not rendered; trigger's chevron points down.", tokens: [] },
     { name: "expanded", description: "Sub-list renders with sub-list gap/indent; trigger's chevron points up.", tokens: ["sub-list gap", "sub-list indent"] },
   ],
+  // Fixed 2026-08-26 (paired with SideNav's landmark fix in the same
+  // nav-family pass — see SideNav.doc.mjs).
   accessibility: {
+    keyboardInteractions: [
+      { key: "ArrowDown / ArrowUp", action: "Moves focus to the next/previous sub-item, wrapping at both ends. From the trigger itself, ArrowDown enters the sub-list at the first item and ArrowUp at the last. Only active while expanded." },
+      { key: "Home / End", action: "Moves focus to the first/last sub-item. Only active while expanded." },
+      { key: "Escape", action: "Collapses the dropdown and returns focus to the trigger. Only active while expanded." },
+    ],
     ariaAttributes: [
       { attribute: "aria-expanded", description: "Set on the trigger NavItem, reflecting the expanded prop directly — a real disclosure-pattern attribute, confirmed in the source." },
     ],
     focusBehaviors: [
-      "Gap, confirmed by reading the source: no arrow-key navigation between sub-items exists — each NavSubItem is a plain button in a list with no roving tabindex or keydown handling, so keyboard users tab through every sub-item individually rather than using Up/Down like a conventional menu.",
-      "Gap, confirmed by reading the source: no Escape-to-collapse handling exists — closing an expanded dropdown by keyboard means re-activating the trigger, not the more conventional Escape key.",
+      "Deliberately NOT a roving-tabindex composite widget, unlike Toggle/Calendar: every NavSubItem stays individually Tab-reachable exactly as before this fix — arrow keys are an added convenience on top of, not a replacement for, normal Tab order. This sub-list has no role=\"menu\"/\"listbox\" implying the stricter pattern, and adding one without full menu semantics (typeahead, etc.) would overclaim, the same mistake Toggle's unimplemented ARIA-tabs roles made before that fix.",
     ],
   },
   // Only 2 entries by design, not a gap: NavDropdown renders real NavItem/

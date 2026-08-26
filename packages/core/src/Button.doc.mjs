@@ -7,7 +7,7 @@ export default {
     { name: "isLoading", type: "boolean", default: "false", description: "Disables the button, sets aria-busy, and swaps content for a 3-dot bounce spinner (matches the Figma LoadingSpinner prototype). Children remain in the DOM for the accessible name, just visually hidden — unless iconOnly is also true, in which case there are no children to hide and the aria-label alone carries the accessible name." },
     { name: "disabled", type: "boolean", default: "false", description: "Standard HTML disabled." },
     { name: "icon", type: "React.ReactNode", default: "undefined", description: "Trailing icon when iconOnly is false (e.g. <Icon name=\"chevron-right\" size=\"xs\" />, rendered after children, aria-hidden). The button's only content when iconOnly is true — size/weight are forced to Figma's xs/light regardless of what's passed to <Icon>." },
-    { name: "iconOnly", type: "boolean", default: "false", description: "Renders a square icon-only trigger (Figma's Button \"icon only\" variant). Pass the icon via icon, omit children, and always pass aria-label — with iconOnly there's no visible text to derive an accessible name from." },
+    { name: "iconOnly", type: "boolean", default: "false", description: "Renders a square icon-only trigger (Figma's Button \"icon only\" variant). Pass the icon via icon, omit children. Fixed 2026-08-26: iconOnly is now a discriminated union with aria-label, not a plain boolean — pass true and TypeScript requires aria-label at the same call site, it's not just a documented convention." },
   ],
   example: `<Button variant="primary" size="md" icon={<Icon name="chevron-right" size="xs" />} onClick={handleSave}>Save</Button>`,
   doNot: [
@@ -17,13 +17,18 @@ export default {
     "Don't use the ghost variant with visible text (children) — Figma only defines it for iconOnly.",
   ],
   swizzlePath: "packages/core/src/Button.tsx",
+  // The literal exported ButtonProps is now a discriminated union
+  // (see the iconOnly/aria-label fix above), not a single interface with
+  // an extends clause — but every branch is built from an internal
+  // ButtonBaseProps that does extend this, so the real HTML-attribute
+  // passthrough contract described by this field is still accurate.
   extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
   // Verified against the real .tsx/.css, not inferred from props alone.
   states: [
     { name: "primary default", description: "Primary variant, resting state.", tokens: ["background (primary default)"] },
     { name: "primary hover", description: "Primary variant, :not(:disabled):hover.", tokens: ["background (primary hover)"] },
     { name: "primary pressed", description: "Primary variant, :not(:disabled):active.", tokens: ["background (primary pressed)"] },
-    { name: "secondary/ghost hover + active", description: "Both use color.action.secondary.hover/pressed in the real CSS, but neither is declared in figmaTokens below — a real gap: check-parity can't verify these against a spec that doesn't name them (see CLAUDE.md's note that check-parity only checks declared tokens).", tokens: [] },
+    { name: "secondary/ghost hover + active", description: "Both use color.action.secondary.hover/pressed in the real CSS — fixed 2026-08-26, now declared in figmaTokens below so check-parity actually covers them (previously it couldn't verify a token it didn't know to look for; see CLAUDE.md's note on that blind spot).", tokens: ["background (secondary/ghost hover)", "background (secondary/ghost pressed)"] },
     { name: "disabled (any variant)", description: "Background/text/border all switch to their disabled tokens; ghost's disabled state instead stays fully transparent (background/border unset, not disabled-colored) per its own CSS rule.", tokens: ["background (disabled)", "text (disabled)", "border (disabled)"] },
     { name: "loading", description: "Disables the button and swaps content for a 3-dot bounce spinner. Text buttons keep children in the DOM, visually hidden, for the accessible name; iconOnly buttons have no children to hide.", tokens: ["spinner dot resting color", "spinner dot active color", "spinner dot size"] },
     { name: "focus-visible", description: "Visible outline ring, keyboard-triggered only (:focus-visible, not :focus).", tokens: ["border color (focus ring)", "border width (focus ring)", "focus ring offset"] },
@@ -34,7 +39,7 @@ export default {
     ],
     ariaAttributes: [
       { attribute: "aria-busy", description: "Set automatically while isLoading is true." },
-      { attribute: "aria-label", description: "Required when iconOnly is true, since there's no visible text for the accessible name. Enforced only as a dev-mode console.warn in Button.tsx — not a hard runtime requirement, and not enforced at the TypeScript level either. A real gap: nothing actually prevents an iconOnly button shipping without one in production." },
+      { attribute: "aria-label", description: 'Required when iconOnly is true. Fixed 2026-08-26: ButtonProps is now a discriminated union — `{ iconOnly: true; "aria-label": string }` vs. `{ iconOnly?: false }` — so a TypeScript consumer gets a real compile error for `<Button iconOnly icon={...} />` with no aria-label, not just a dev-mode console.warn. The console.warn stays too, as a runtime safety net for what the type system can\'t catch (spread props, plain-JS consumers) — this repo has no non-TS consumer today, but the warn costs nothing to keep.' },
     ],
     focusBehaviors: [
       "Real, visible :focus-visible outline bound to color.border.focus/sizing.border.thin/sizing.focus-ring-offset — confirmed in Button.css. Unlike Switch, which has no focus-ring style at all.",
@@ -51,6 +56,8 @@ export default {
     "background (primary default)": "color.action.primary.default",
     "background (primary hover)": "color.action.primary.hover",
     "background (primary pressed)": "color.action.primary.pressed",
+    "background (secondary/ghost hover)": "color.action.secondary.hover",
+    "background (secondary/ghost pressed)": "color.action.secondary.pressed",
     "background (disabled)": "color.action.secondary.disabled",
     "text (disabled)": "color.text.disabled",
     "border (primary)": "color.border.brand",

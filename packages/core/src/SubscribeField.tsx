@@ -9,6 +9,13 @@ export interface SubscribeFieldProps {
   buttonPosition?: SubscribeFieldButtonPosition;
   placeholder?: string;
   buttonLabel?: string;
+  /**
+   * Accessible name for the input, via aria-label — not rendered visually,
+   * since this component is placeholder-only by design (matching Figma).
+   * Defaults to a sensible label for the documented email-capture use case;
+   * override it if you're reusing this component for something else.
+   */
+  label?: string;
   value?: string;
   onChange?: (value: string) => void;
   onSubmit?: () => void;
@@ -26,6 +33,7 @@ export const SubscribeField = React.forwardRef<HTMLInputElement, SubscribeFieldP
       buttonPosition = "side",
       placeholder = "Enter text",
       buttonLabel = "Subscribe",
+      label = "Email address",
       value,
       onChange,
       onSubmit,
@@ -40,8 +48,10 @@ export const SubscribeField = React.forwardRef<HTMLInputElement, SubscribeFieldP
             ref={ref}
             appearance="filled"
             placeholder={placeholder}
+            aria-label={label}
             value={value}
             onChange={(e) => onChange?.(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && onSubmit?.()}
           />
           <Button variant="primary" onClick={onSubmit}>
             {buttonLabel}

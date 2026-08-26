@@ -28,7 +28,7 @@ export default {
       { attribute: 'aria-label="Send message"', description: "Set on the trailing icon-only button — required since it has no visible text label." },
     ],
     focusBehaviors: [
-      "The text field explicitly sets `outline: none` on :focus in ChatInput.css with no replacement focus style anywhere — confirmed by reading the source. This is a real, more severe accessibility gap than a missing focus ring: it actively removes the browser's native default outline rather than simply lacking a custom one. Flagged here, not fixed — fixing it means adding a real :focus-visible style bound to a token (e.g. color.border.focus, the token Button already uses for its own focus ring), which is implementation work outside this doc pass's scope.",
+      "Fixed 2026-08-26: a real :focus-visible style was added, bound to color.border.focus/sizing.border.thin/sizing.focus-ring-offset — the same tokens Button's own focus ring uses. Previously `outline: none` on :focus had no replacement, actively removing the browser's native default outline rather than simply lacking a custom one — worse than a missing ring, not just equivalent to one. Scoped to the text field only, matching what was actually flagged — the attach/send icon buttons were never called out as a gap and weren't touched.",
     ],
   },
   figmaTokens: {
@@ -46,5 +46,8 @@ export default {
     "send background": "color.background.inverse",
     "send background (active, has value)": "color.action.primary.default",
     "send icon color": "color.icon.inverse",
+    "focus ring color": "color.border.focus",
+    "focus ring width": "sizing.border.thin",
+    "focus ring offset": "sizing.focus-ring-offset",
   },
 };

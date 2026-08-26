@@ -32,7 +32,7 @@ export default {
       { attribute: "aria-checked", description: "Kept in sync with the pressed prop directly." },
     ],
     focusBehaviors: [
-      "No custom/token-bound focus ring exists in Switch.css — confirmed by reading the source. Switch.css never sets outline: none either, so the browser's own unstyled default outline still shows on keyboard focus (it isn't literally invisible) — but that's an accident of not overriding it, not a deliberate token-bound design the way Button's :focus-visible ring (color.border.focus) is. Real, undocumented gap, not a deliberate decision — flagged here rather than papered over.",
+      "Fixed 2026-08-26: token-bound :focus-visible ring added, same pattern as Button/MegaMenuItem/TopNavLink — outline: none on :focus, a real outline on :focus-visible bound to color.border.focus/sizing.border.thin/sizing.focus-ring-offset. Previously relied on the browser's unstyled default outline by accident (Switch.css never set outline: none either), not a deliberate design.",
     ],
   },
   figmaTokens: {
@@ -44,5 +44,8 @@ export default {
     "supporting text color": "color.text.tertiary",
     "supporting text font-size": "font-size.200",
     "supporting text line-height": "font-line-height.200-normal",
+    "focus ring color": "color.border.focus",
+    "focus ring width": "sizing.border.thin",
+    "focus ring offset": "sizing.focus-ring-offset",
   },
 };

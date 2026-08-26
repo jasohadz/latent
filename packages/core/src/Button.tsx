@@ -4,22 +4,36 @@ import "./Button.css";
 export type ButtonVariant = "primary" | "secondary" | "ghost";
 export type ButtonSize = "sm" | "md" | "lg";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonBaseProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
   /** Optional trailing icon, e.g. `<Icon name="chevron-right" size="xs" />`. Omit for no icon. */
   icon?: React.ReactNode;
-  /**
-   * Renders a square, icon-only trigger (Figma's Button "icon only" variant).
-   * Pass the icon via `icon`, omit `children`, and always supply `aria-label`
-   * since no visible text remains for the accessible name. Same fixed size
-   * (36×36) regardless of `size` — Figma's icon-only variant doesn't scale
-   * with it either.
-   */
-  iconOnly?: boolean;
 }
+
+/**
+ * iconOnly is a discriminated union, not a plain optional boolean: when
+ * true, aria-label becomes required at the type level, not just enforced
+ * by a dev-mode console.warn (which a production build silently drops).
+ * This is the standard pattern real component libraries use for exactly
+ * this problem (Radix, Chakra, etc.) — it only helps TypeScript consumers,
+ * but nothing in this repo ships to a non-TS consumer today, and it's a
+ * real compile-time guarantee rather than a runtime hint that can be missed.
+ */
+export type ButtonProps =
+  | (ButtonBaseProps & {
+      /**
+       * Renders a square, icon-only trigger (Figma's Button "icon only"
+       * variant). Pass the icon via `icon`, omit `children`. Same fixed
+       * size (36×36) regardless of `size` — Figma's icon-only variant
+       * doesn't scale with it either.
+       */
+      iconOnly: true;
+      /** Required when iconOnly is true — no visible text remains for the accessible name. */
+      "aria-label": string;
+    })
+  | (ButtonBaseProps & { iconOnly?: false });
 
 /**
  * Button — primitive action trigger. Styling comes entirely from

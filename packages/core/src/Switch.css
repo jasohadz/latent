@@ -17,6 +17,12 @@
   cursor: pointer;
 }
 
+.lat-switch__track:focus { outline: none; }
+.lat-switch__track:focus-visible {
+  outline: var(--lat-sizing-border-thin) solid var(--lat-color-border-focus);
+  outline-offset: var(--lat-sizing-focus-ring-offset);
+}
+
 .lat-switch__track--on {
   background-color: var(--lat-color-action-primary-default);
 }

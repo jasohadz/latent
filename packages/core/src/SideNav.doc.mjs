@@ -24,9 +24,7 @@ export default {
   accessibility: {
     ariaAttributes: [
       { attribute: "aria-label", description: "Set on the toggle button to \"Expand\" or \"Collapse\" depending on current state — confirmed dynamically correct in the source, not a static label." },
-    ],
-    focusBehaviors: [
-      "Gap, confirmed by reading the source: the root element is a plain <div> with no <nav> tag and no role=\"navigation\"/aria-label — a screen reader user browsing by landmark regions won't find this labeled as navigation at all.",
+      { attribute: 'role="navigation" / aria-label="Main navigation" (root)', description: 'Fixed 2026-08-26: added to both the expanded and collapsed return branches (confirmed both were updated, not just one) — same landmark fix TopNav got in the same pass, same reasoning for using the role attribute over swapping to a real <nav> element (avoids changing the forwardRef\'d element type for existing consumers).' },
     ],
   },
   figmaTokens: {
