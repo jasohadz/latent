@@ -1,0 +1,91 @@
+body {
+  margin: 0;
+  background-color: var(--lat-color-background-default);
+  color: var(--lat-color-text-primary);
+  font-family: var(--lat-font-family-sans);
+}
+
+.gallery {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--lat-spacing-24) var(--lat-spacing-16) var(--lat-spacing-24);
+}
+
+.gallery__header {
+  margin-bottom: var(--lat-spacing-24);
+}
+
+.gallery__title {
+  font-size: var(--lat-font-size-500);
+  font-weight: var(--lat-font-weight-700);
+  margin: 0 0 var(--lat-spacing-4) 0;
+}
+
+.gallery__subtitle {
+  color: var(--lat-color-text-tertiary);
+  font-size: var(--lat-font-style-body-small);
+  margin: 0;
+}
+
+.gallery__section {
+  margin-bottom: var(--lat-spacing-24);
+}
+
+.gallery__section-title {
+  font-size: var(--lat-font-size-300);
+  font-weight: var(--lat-font-weight-600);
+  color: var(--lat-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--lat-color-border-subtle);
+  padding-bottom: var(--lat-spacing-8);
+  margin-bottom: var(--lat-spacing-16);
+}
+
+.gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--lat-spacing-16);
+}
+
+.gallery__card {
+  border: 1px solid var(--lat-color-border-subtle);
+  border-radius: var(--lat-radius-card);
+  background-color: var(--lat-color-surface-raised);
+  padding: var(--lat-spacing-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-12);
+  min-width: 0;
+}
+
+.gallery__card--wide {
+  grid-column: 1 / -1;
+}
+
+.gallery__card-name {
+  font-size: var(--lat-font-style-body-small);
+  font-weight: var(--lat-font-weight-600);
+  color: var(--lat-color-text-tertiary);
+}
+
+.gallery__card-body {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--lat-spacing-8);
+  min-height: 40px;
+  /* No generic overflow:auto here on purpose — it was clipping TopNav's
+     dropdown panel, which is position:absolute and extends past the card's
+     own height. Components that genuinely need horizontal scroll (e.g.
+     ToggleMultiple's wide row) opt in via --scroll-x below instead. */
+}
+
+.gallery__card-body--column {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.gallery__card-body--scroll-x {
+  overflow-x: auto;
+}
