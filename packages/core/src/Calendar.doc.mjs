@@ -29,34 +29,42 @@ export default {
     { name: "disabled", description: "Native disabled attribute; dimmed text. Combines with range as a distinct \"range-disabled\" CSS class, though it shares the plain disabled text-color token.", tokens: ["day disabled text color"] },
     { name: "hidden", description: "Adjacent-month padding day — rendered as plain text, not a button at all, non-interactive by construction rather than by a disabled attribute.", tokens: ["day hidden text color"] },
   ],
-  // Real, significant gap found by tracing the actual keyboard behavior,
-  // not assumed from "it's a date picker so it probably has grid nav":
-  // Calendar has NO arrow-key navigation between day cells at all. Every
-  // day is a real <button> (confirmed in Calendar.tsx), so Tab/Shift+Tab
-  // and Enter/Space work per-button natively — but there's no onKeyDown
-  // implementing the WAI-ARIA date-grid pattern (ArrowUp/Down/Left/Right
-  // moving focus between cells), no role="grid"/"row"/"gridcell" on the
-  // container structure (plain divs with a CSS grid class only), and each
-  // day button's only accessible content is the bare day-of-month number
-  // — no aria-label with the full date, no aria-current="date" for today,
-  // no aria-selected for the active day. A keyboard user must Tab through
-  // up to 42 individual day buttons one at a time to reach a given date,
-  // with no indication via a screen reader of which date each button
-  // actually represents beyond the bare number. The header nav
-  // (prev/next/month-select/year-select) is genuinely well-labeled
-  // (aria-label on both nav buttons and both selects) and has a real
-  // :focus-visible ring bound to color.border.focus — this gap is
-  // specific to the day grid, not the whole component.
+  // Fixed 2026-08-26 — was a real, significant gap (see git history for
+  // the original finding). Implements the WAI-ARIA date-grid pattern:
+  // role="grid"/"row"/"gridcell", roving tabindex (one day button is
+  // tabIndex=0 at a time; Tab now enters the grid once instead of
+  // stopping at all 42 cells), Arrow/Home/End moving the roving cursor,
+  // and a full aria-label per day (weekday, month, day, year, not just
+  // the bare number) via Date#toLocaleDateString. aria-selected reflects
+  // selectedDays. There is no "today" concept anywhere in this component
+  // (no isToday logic, no today CSS class, no today prop) — an earlier
+  // version of this doc incorrectly claimed one existed; corrected, not
+  // just left stale, since it would have misled anyone reading it into
+  // expecting aria-current for a feature that was never built.
+  // Deliberate, documented limitation: arrow-key navigation is scoped to
+  // the currently visible month only. It does not cross into the
+  // previous/next month (those cells are non-interactive <span>s, not
+  // real buttons) — reaching a date in an adjacent month still requires
+  // Tab to the month/year controls, changing month, then Tab back into
+  // the grid. Full month-crossing (auto-advancing month + refocusing the
+  // correct day once the new month's props land) is real added
+  // complexity, not attempted here.
   accessibility: {
     keyboardInteractions: [
-      { key: "Tab / Shift+Tab", action: "Moves focus to the next/previous focusable element in DOM order — nav buttons, selects, then every visible day button in row-major order. No arrow-key grid navigation exists." },
-      { key: "Enter or Space (on a day button)", action: "Selects that day — native <button> activation, not a custom handler." },
+      { key: "Tab / Shift+Tab", action: "Moves focus to the next/previous focusable element — nav buttons, selects, then the grid. Enters/exits the day grid at exactly one point (the roving-tabindex cell), not once per day button." },
+      { key: "ArrowLeft / ArrowRight / ArrowUp / ArrowDown", action: "Moves the roving focus cursor one day/week within the visible month, skipping over hidden or disabled cells in that direction. Does not cross into the previous/next month — see the limitation noted above." },
+      { key: "Home / End", action: "Moves to the first/last focusable day in the current row (week)." },
+      { key: "Enter or Space (on the focused day button)", action: "Selects that day — native <button> activation, not a custom handler." },
     ],
     ariaAttributes: [
       { attribute: "aria-label (nav buttons)", description: '"Previous month" / "Next month" — present and correct.' },
       { attribute: "aria-label (selects)", description: '"Month" / "Year" — present and correct on both <select> elements.' },
-      { attribute: "aria-label (day buttons)", description: "Missing — each day button's only accessible name is its bare day-of-month number (e.g. \"15\"), not the full date. A screen reader announces \"15, button\" with no month/year context." },
-      { attribute: "aria-current / aria-selected", description: "Neither is set anywhere — today's date and the selected day(s) are conveyed only visually (background color), not programmatically." },
+      { attribute: "aria-label (grid)", description: 'role="grid" container labeled with the visible month and year, e.g. "January 2026".' },
+      { attribute: "aria-label (day buttons)", description: 'Full date via Date#toLocaleDateString (e.g. "Wednesday, January 15, 2026"), not just the bare day-of-month number.' },
+      { attribute: "aria-selected", description: "Set on day buttons in selectedDays. No aria-current — there's genuinely no \"today\" concept in this component to attach it to (see above)." },
+    ],
+    focusBehaviors: [
+      "Roving tabindex: only the focused day button (or the initial-focus target — the first selectedDays entry if any, else the first real day of the month) has tabIndex=0; every other real day button is tabIndex=-1 so Tab skips them. Clicking a different day with the mouse updates which cell is the roving target too, so a subsequent Tab-out-then-back-in lands on the right cell.",
     ],
   },
   // The Calendar Day states in Figma (Default/Hover/Active/Hidden/Disabled/
