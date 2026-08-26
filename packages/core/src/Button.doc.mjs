@@ -2,7 +2,7 @@ export default {
   name: "Button",
   summary: "Primitive action trigger. Three variants, three sizes, optional loading state, optional icon-only square mode.",
   props: [
-    { name: "variant", type: '"primary" | "secondary" | "ghost"', default: "primary", description: "Visual weight. Use primary for the single main action per view; secondary for everything else. ghost is borderless/transparent — verified in Figma only for iconOnly buttons (e.g. a toolbar trigger); using it with visible text is unverified and warns in dev." },
+    { name: "variant", type: '"primary" | "secondary" | "ghost"', default: "primary", description: "Visual weight. Use primary for the single main action per view; secondary for everything else — fixed 2026-08-26: secondary (Figma's \"outline\" appearance) is a transparent, brand-bordered, link-colored button, not a neutral gray one; see states below. ghost is borderless/transparent — verified in Figma only for iconOnly buttons (e.g. a toolbar trigger); using it with visible text is unverified and warns in dev." },
     { name: "size", type: '"sm" | "md" | "lg"', default: "md", description: "Padding and font-size scale. When iconOnly is true, this instead selects Figma's icon-only spacing tier: sm=spacing-6, md=spacing-8, lg=spacing-12 (radius stays radius.slimlg across all three)." },
     { name: "isLoading", type: "boolean", default: "false", description: "Disables the button, sets aria-busy, and swaps content for a 3-dot bounce spinner (matches the Figma LoadingSpinner prototype). Children remain in the DOM for the accessible name, just visually hidden — unless iconOnly is also true, in which case there are no children to hide and the aria-label alone carries the accessible name." },
     { name: "disabled", type: "boolean", default: "false", description: "Standard HTML disabled." },
@@ -28,8 +28,11 @@ export default {
     { name: "primary default", description: "Primary variant, resting state.", tokens: ["background (primary default)"] },
     { name: "primary hover", description: "Primary variant, :not(:disabled):hover.", tokens: ["background (primary hover)"] },
     { name: "primary pressed", description: "Primary variant, :not(:disabled):active.", tokens: ["background (primary pressed)"] },
-    { name: "secondary/ghost hover + active", description: "Both use color.action.secondary.hover/pressed in the real CSS — fixed 2026-08-26, now declared in figmaTokens below so check-parity actually covers them (previously it couldn't verify a token it didn't know to look for; see CLAUDE.md's note on that blind spot).", tokens: ["background (secondary/ghost hover)", "background (secondary/ghost pressed)"] },
-    { name: "disabled (any variant)", description: "Background/text/border all switch to their disabled tokens; ghost's disabled state instead stays fully transparent (background/border unset, not disabled-colored) per its own CSS rule.", tokens: ["background (disabled)", "text (disabled)", "border (disabled)"] },
+    { name: "secondary default/pressed", description: "Fixed 2026-08-26: always transparent background, brand-colored border, link-colored text — pressed reverts to this exact same look, it has no distinct pressed styling of its own.", tokens: ["text (secondary default/pressed)", "border (secondary default/pressed)"] },
+    { name: "secondary hover", description: "Border swaps to color.border.focus and text to color.text.link-hover — no background change.", tokens: ["text (secondary hover)", "border (secondary hover)"] },
+    { name: "ghost hover + active", description: "Uses color.action.secondary.hover/pressed in the real CSS — declared in figmaTokens below so check-parity actually covers them (previously it couldn't verify a token it didn't know to look for; see CLAUDE.md's note on that blind spot).", tokens: ["background (secondary/ghost hover)", "background (secondary/ghost pressed)"] },
+    { name: "disabled (primary)", description: "Background/text/border all switch to their disabled tokens.", tokens: ["background (disabled)", "text (disabled)", "border (disabled)"] },
+    { name: "disabled (secondary/ghost)", description: "Both stay transparent (no background token) — secondary's border switches to color.border.subtle (fixed 2026-08-26, was previously undeclared/untested), ghost's border/background both stay fully unset per its own CSS rule. Text color (color.text.disabled) is shared with primary via the base .lat-button:disabled rule.", tokens: ["border (secondary disabled)", "text (disabled)"] },
     { name: "loading", description: "Disables the button and swaps content for a 3-dot bounce spinner. Text buttons keep children in the DOM, visually hidden, for the accessible name; iconOnly buttons have no children to hide.", tokens: ["spinner dot resting color", "spinner dot active color", "spinner dot size"] },
     { name: "focus-visible", description: "Visible outline ring, keyboard-triggered only (:focus-visible, not :focus).", tokens: ["border color (focus ring)", "border width (focus ring)", "focus ring offset"] },
   ],
@@ -48,8 +51,24 @@ export default {
   // Token paths this component is expected to consume, keyed by the CSS
   // property they should end up styling. check-parity greps the compiled
   // CSS for the corresponding --lat-* variable to confirm no drift.
+  // Fixed 2026-08-26 — border-radius and the secondary variant's
+  // background/text/border were re-verified against the live Figma node
+  // directly (script-queried the actual boundVariables, not screenshots
+  // or the prior doc text), after a user comparing the rendered gallery
+  // to Figma spotted it looked wrong. Two real, confirmed mismatches:
+  // - border-radius was declared as radius.input for the base .lat-button
+  //   rule (with a separate, then-seemingly-special-case radius.slimlg
+  //   override just for icon-only). Every appearance/size/icon-only
+  //   combination actually binds to radius.slimlg — icon-only was never
+  //   special, the base rule was just wrong for everyone.
+  // - The secondary variant (Figma's "outline" appearance) was styled as
+  //   a neutral gray button (background.default fill, text.primary,
+  //   border.default) — the real component is always transparent with a
+  //   brand-colored border and link-colored text, i.e. a bordered link,
+  //   not a neutral secondary button. See the new secondary-specific
+  //   entries below.
   figmaTokens: {
-    "border-radius": "radius.input",
+    "border-radius": "radius.slimlg",
     "padding (md, all sides)": "spacing.8",
     "font-size (md)": "typography.button.font-size.md",
     "line-height (md)": "typography.button.line-height.md",
@@ -62,6 +81,14 @@ export default {
     "text (disabled)": "color.text.disabled",
     "border (primary)": "color.border.brand",
     "border (disabled)": "color.border.strong",
+    // Secondary is always transparent (no fill token — "transparent" isn't
+    // a --lat-* var, same as ghost's background), so only text/border are
+    // declared here.
+    "text (secondary default/pressed)": "color.text.link",
+    "text (secondary hover)": "color.text.link-hover",
+    "border (secondary default/pressed)": "color.border.brand",
+    "border (secondary hover)": "color.border.focus",
+    "border (secondary disabled)": "color.border.subtle",
     "border color (focus ring)": "color.border.focus",
     "border width (focus ring)": "sizing-border.thin",
     // Not in primitives/semantic/density.json — Figma's Plugin API has no
@@ -76,14 +103,18 @@ export default {
     // Icon-only variant (verified 2026-07-29, re-verified 2026-07-30 after
     // the size-tier padding changed and a "ghost" appearance was added, both
     // in Figma directly — against Button's component set, node 43:21945,
-    // appearance x state x size x "icon only" axis, 90 variants total).
-    "icon-only border-radius": "radius.slimlg",
-    // Constant across all three "size" values and density-mode-independent
+    // appearance x state x size x "icon only" axis, 90 variants total). No
+    // separate "icon-only border-radius" entry anymore (fixed 2026-08-26)
+    // — radius.slimlg is the shared "border-radius" entry above now, not
+    // an icon-only special case; see that entry's comment.
+    //
+    // Padding is still icon-only-specific and density-mode-independent
     // (Default and Condensed both alias the same primitive, border.radius.150
-    // = 6px). Originally ported under a placeholder "6" name (that numeric
-    // entry existed, unused, from a prior session) to avoid adding a
-    // duplicate token; renamed to match Figma's real "slimlg" name once the
-    // Latent Sync plugin's first live pull surfaced it as drift (2026-08-20).
+    // = 6px, for what it's worth on the radius side too). Originally ported
+    // under a placeholder "6" name (that numeric entry existed, unused,
+    // from a prior session) to avoid adding a duplicate token; renamed to
+    // match Figma's real "slimlg" name once the Latent Sync plugin's first
+    // live pull surfaced it as drift (2026-08-20).
     "icon-only padding (sm/small)": "spacing.6",
     "icon-only padding (md/default)": "spacing.8",
     "icon-only padding (lg/xl)": "spacing.12",

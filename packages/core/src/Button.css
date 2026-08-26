@@ -3,7 +3,11 @@
   align-items: center;
   justify-content: center;
   gap: var(--lat-spacing-4);
-  border-radius: var(--lat-radius-input);
+  /* radius.slimlg, not radius.input — confirmed 2026-08-26 against the
+     live Figma node directly (every appearance/size/icon-only combination
+     checked binds topLeftRadius to radius/slimlg, Density collection).
+     Previously wrong for every Button in the app, not just icon-only. */
+  border-radius: var(--lat-radius-slimlg);
   border: 1px solid transparent;
   font-family: var(--lat-font-family-sans);
   font-weight: var(--lat-font-weight-600);
@@ -65,17 +69,14 @@
 .lat-button--md { padding: var(--lat-spacing-8); font-size: var(--lat-typography-button-font-size-md); line-height: var(--lat-typography-button-line-height-md); }
 .lat-button--lg { padding: var(--lat-spacing-8) var(--lat-spacing-24); font-size: var(--lat-font-size-500); line-height: var(--lat-font-line-height-500-normal); }
 
-/* Figma's icon-only variant uses radius/slimlg instead of radius.input,
-   constant across sizes. Padding does vary by size (verified 2026-07-30):
-   sm/md/lg map to Figma's small/default/xl at spacing-6/8/12. Figma's own
-   "small" tier is actually non-square there (its inner icon wrapper is
-   12x16, not 12x12) — not reproduced here; square padding on all sides is
-   assumed correct absent an explicit reason to match that asymmetry.
-   Overrides the size rules above regardless of source order (equal
-   specificity, declared later). */
-.lat-button--icon-only {
-  border-radius: var(--lat-radius-slimlg);
-}
+/* Padding varies by size for icon-only (verified 2026-07-30): sm/md/lg map
+   to Figma's small/default/xl at spacing-6/8/12. Figma's own "small" tier
+   is actually non-square there (its inner icon wrapper is 12x16, not
+   12x12) — not reproduced here; square padding on all sides is assumed
+   correct absent an explicit reason to match that asymmetry. No separate
+   border-radius rule needed here anymore — radius.slimlg is now the base
+   .lat-button radius for every appearance/size, not just icon-only (see
+   the base rule above); it used to be wrongly overridden per-variant. */
 .lat-button--icon-only.lat-button--sm { padding: var(--lat-spacing-6); }
 .lat-button--icon-only.lat-button--md { padding: var(--lat-spacing-8); }
 .lat-button--icon-only.lat-button--lg { padding: var(--lat-spacing-12); }
@@ -123,13 +124,32 @@
   cursor: wait;
 }
 
+/* Fixed 2026-08-26 — was a real, significant mismatch, confirmed against
+   the live Figma node directly (color.border.default/color.text.primary/
+   a filled neutral background, none of which match): the real "outline"
+   appearance (secondary's Figma name) is always transparent, with a
+   brand-colored border and link-colored text — visually a bordered link,
+   not a neutral gray button. Hover swaps the border to color.border.focus
+   and the text to color.text.link-hover (no background change at any
+   state — confirmed pressed reverts to the exact same border/text as
+   default, it doesn't have its own distinct look). */
 .lat-button--secondary {
-  background-color: var(--lat-color-background-default);
-  color: var(--lat-color-text-primary);
-  border-color: var(--lat-color-border-default);
+  background-color: transparent;
+  color: var(--lat-color-text-link);
+  border-color: var(--lat-color-border-brand);
 }
-.lat-button--secondary:not(:disabled):hover { background-color: var(--lat-color-action-secondary-hover); }
-.lat-button--secondary:not(:disabled):active { background-color: var(--lat-color-action-secondary-pressed); }
+.lat-button--secondary:not(:disabled):hover {
+  border-color: var(--lat-color-border-focus);
+  color: var(--lat-color-text-link-hover);
+}
+.lat-button--secondary:not(:disabled):active {
+  border-color: var(--lat-color-border-brand);
+  color: var(--lat-color-text-link);
+}
+.lat-button--secondary:disabled {
+  background-color: transparent;
+  border-color: var(--lat-color-border-subtle);
+}
 
 /* Ghost — borderless/transparent, only defined in Figma for the icon-only
    variant (added 2026-07-30 in response to icon-only buttons all having a
