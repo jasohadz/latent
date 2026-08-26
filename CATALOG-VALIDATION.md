@@ -13,9 +13,14 @@ hand-rolling checks.
 ---
 
 Design spec for validating agent-generated page compositions against a real
-component catalog, before they're trusted. Written for a future Claude Code
-session to execute once Phase 4 (templates) actually starts — not needed
-before then, and nothing here is built yet.
+component catalog, before they're trusted. Originally written for a future
+Claude Code session to execute once Phase 4 (then still "templates")
+actually started — see the header above for what actually happened: built
+ahead of that, and Phase 4 itself later became a hardening pass on Phase 3
+rather than templates. The rest of this doc is preserved as originally
+written (the design rationale doesn't depend on either of those facts), so
+read anything below this point as the target spec that was built to, not a
+live to-do.
 
 ## Why this exists
 

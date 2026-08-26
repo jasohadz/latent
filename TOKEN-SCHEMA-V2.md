@@ -1,5 +1,12 @@
 # Token Schema v2 — Primitives + Semantic + Modes
 
+**Status: done.** This migration (four-file token schema, mode-aware
+`theme.css`, per-mode `sync figma` diffing) was executed and is what
+`packages/tokens/*.json` and `packages/theme-neutral/theme.css` are
+today — see `GUIDE.md` Phase 1/2. Kept as the design-spec record of why
+the schema is shaped this way, not as a pending to-do; the "Execution
+steps" section below describes what was done, not what's left.
+
 Design spec for reconciling `tokens.json` with the real Figma file
 (4 collections, 628 variables). Written for Claude Code to execute —
 this file defines the target shape; Claude Code should pull the live

@@ -19,9 +19,11 @@ Every primitive is exactly three files in `packages/core/src/`, sharing a basena
    - `example` — a realistic usage snippet
    - `doNot` — concrete misuse warnings (see `Button.doc.mjs` for tone/specificity)
    - `swizzlePath` — path to the `.tsx` file, relative to repo root
+   - `extends` — the Props interface's literal TS `extends` clause (e.g. `"React.ButtonHTMLAttributes<HTMLButtonElement>"`), or `null` if there isn't one. Required field, but `null` is a valid value — don't omit it.
    - `figmaTokens` — map of `"<css property description>": "<token.dotted.path>"` for every token the component consumes. This is what `check-parity` verifies against.
+   - `states` and `accessibility` — **optional**, added 2026-08-26. `states`: array of `{ name, description, tokens? }` documenting real visual/interaction states (hover, pressed, error, etc.), `tokens` referencing keys already in this same component's `figmaTokens`. `accessibility`: object with any of `keyboardInteractions`/`ariaAttributes`/`focusBehaviors` (at least one required if the field is present at all). Same opt-out-by-omission rule as `figmaTokens`/`ERR_NO_FIGMA_SPEC` — omit the field entirely if it doesn't apply, don't ship an empty array/object. Write both by actually reading the component's real `.tsx`/`.css`, not by inferring from the prop list — doing that the lazy way is exactly what let real, previously-undocumented accessibility bugs slip through undetected in this repo's own components (see `GUIDE.md` Phase 4 item 15).
 
-No exceptions on the `.doc.mjs` file — it's the only thing that makes `list`, `docs`, `swizzle`, and `check-parity` work for a component.
+No exceptions on `name`/`summary`/`props`/`example`/`doNot`/`swizzlePath`/`extends`/`figmaTokens` — `check-docs`' schema check enforces all eight as required (only `extends` may be `null`). `states`/`accessibility` are the only genuinely optional fields.
 
 `discoverComponents()` scans `packages/core/src` for `*.doc.mjs` files, so adding the three files is enough — no CLI edit needed for `list`/`docs`/`swizzle`/`check-parity` to see the new component.
 
@@ -41,10 +43,13 @@ Run these after any component or token change — all should exit cleanly or fai
 node packages/cli/bin/latent.mjs list --json
 node packages/cli/bin/latent.mjs docs <Component> --json
 node packages/cli/bin/latent.mjs check-parity <Component> --json
+node packages/cli/bin/latent.mjs check-docs --json
 node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.sample.json --json
 node packages/cli/bin/latent.mjs check-styles --file packages/tokens/styles-export.live.json --json
 node packages/cli/bin/latent.mjs manifest --json
 ```
+
+Or run `node packages/cli/bin/latent.mjs verify --json` for the one-command version — `sync figma`/`check-styles` (against the live export files, no `--file` needed) + `check-parity` for every component + `check-docs`, one aggregated pass/fail.
 
 `check-parity` only checks components that declare `figmaTokens` in their `.doc.mjs` — if it reports `ERR_NO_FIGMA_SPEC`, the mapping is missing, not the CSS. The pre-commit hook runs it automatically for any staged component (warns, doesn't block, on `ERR_NO_FIGMA_SPEC`) — but it only verifies *declared* tokens; a raw value on an undeclared property still isn't caught by anything.
 
@@ -76,5 +81,5 @@ if every session that changes the style library updates it in the same pass.
 
 ## Boundaries to respect
 
-- Templates (Phase 4) stay separate from app-shell/nav components — a template composes a shared layout primitive with header/content/panel slots, nothing more.
+- Phase 4 is not templates — a first template attempt (2026-08-25) was reverted after passing every structural check (`compose-check`, `tsc`, a real bundler transform) but still rendering visibly wrong, for a reason none of those checks could catch since none execute in a browser. See `GUIDE.md`'s Phase 4 section and `CLAUDE.md`'s "Building and previewing UI work" rules before attempting any generated page/layout — prove a trivial render first (fonts load, theme applies) before building anything real on top of it.
 - Don't publish `packages/core`, `packages/theme-neutral`, or `packages/cli` as real npm packages until the API stabilizes — once anyone swizzles a component, its `swizzlePath` and prop names are a de facto public contract.

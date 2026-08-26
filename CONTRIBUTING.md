@@ -12,12 +12,20 @@ Every primitive follows the exact same three-file pattern as `Button`
 - `ComponentName.tsx` — the component itself
 - `ComponentName.css` — styled entirely via `--lat-*` custom properties,
   never hardcoded values
-- `ComponentName.doc.mjs` — machine-readable doc: `props`, `example`,
-  `doNot`, `swizzlePath`, and a `figmaTokens` mapping from CSS property to
-  token path
+- `ComponentName.doc.mjs` — machine-readable doc: `name`, `summary`,
+  `props`, `example`, `doNot`, `swizzlePath`, `extends` (the Props
+  interface's literal TS `extends` clause, or `null`), and a
+  `figmaTokens` mapping from CSS property to token path. All eight
+  required — `extends` is the only one allowed to be `null`. Two more
+  fields are optional (added 2026-08-26): `states` and `accessibility` —
+  see `CLAUDE.md`'s architecture section for their shape. Write both
+  by reading the component's real `.tsx`/`.css`, not by inferring from
+  the prop list — that's exactly how this repo caught several real,
+  previously-undocumented accessibility bugs in its own components (see
+  `GUIDE.md` Phase 4 item 15).
 
-No exceptions on the `.doc.mjs` file — it's what makes the CLI and
-`check-parity` work at all.
+No exceptions on the `.doc.mjs` file — it's what makes the CLI,
+`check-parity`, and `check-docs`' schema check work at all.
 
 ## Tokens
 
@@ -59,7 +67,10 @@ node packages/cli/bin/latent.mjs manifest --json
 node packages/cli/bin/latent.mjs swizzle <Component> --dest ./out
 node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.sample.json --json
 node packages/cli/bin/latent.mjs check-parity <Component> --json
+node packages/cli/bin/latent.mjs check-docs --json
 ```
 
 All of these should exit cleanly (or fail with an expected, typed error)
-before you push.
+before you push. Or run `node packages/cli/bin/latent.mjs verify --json`
+instead of the individual `sync figma`/`check-parity`/`check-docs` calls
+above — the one-command version, same aggregated pass/fail CI runs.

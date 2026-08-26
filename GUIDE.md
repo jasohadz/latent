@@ -50,7 +50,7 @@ The knowledge index (`.latent-index/`) is committed to the repo and kept fresh b
 
 **What `--cite`'s ✓ actually guarantees, and what it doesn't** — confirmed with a real example, not a hypothetical: asked whether `Calendar` supports arrow-key navigation, one claim's `text` was *"The absence of arrow key navigation is a design choice, not a technical limitation"* — printed ✓, quote genuinely real, genuinely from the correct source. `Calendar.doc.mjs`'s actual `accessibility` text never says anything about intent — it just states the facts plainly ("No arrow-key grid navigation exists," "Missing," "Neither is set anywhere"). The model attached a fabricated interpretive spin to a real, correctly-cited quote, and verification passed it, because verification only checks that the quote is a real substring of the cited source — it has no way to check whether the surrounding claim honestly follows from that quote. **✓ means "this quote is real and correctly attributed." It does not mean "this sentence is true."** Read the quote yourself, not just the checkmark, whenever the claim is doing more interpretive work than the quote itself supports.
 
-## Phase 4 — not templates; hardening Phase 3 instead
+## Phase 4 — not templates; hardening Phase 3 instead (done, publish gate excepted)
 
 A first template attempt (2026-08-25 — a shared `PageLayout` primitive plus
 a portfolio page, both since reverted) got as far as passing every
@@ -97,10 +97,11 @@ this. Phase 4 is that hardening pass, not page templates:
     `Icon`, `MessageBubble`) were checked and genuinely have neither.
     Every entry verified against real `.tsx`/`.css` source, not inferred
     — which surfaced **real accessibility bugs in the components
-    themselves**, not just documentation gaps. Not fixed as part of this
-    pass (documenting honestly was the goal, not silently patching
-    behavior while claiming to just be writing docs). Worth fixing,
-    roughly in priority order:
+    themselves**, not just documentation gaps. Not fixed as part of the
+    backfill itself (documenting honestly was that pass's goal, not
+    silently patching behavior while claiming to just be writing docs) —
+    fixed in a separate follow-up pass the same day, tracked below in the
+    order they were tackled:
     - ~~**`Calendar`** — zero arrow-key grid navigation~~ **Fixed
       2026-08-26** (commit `c83b32d`): implements the WAI-ARIA date-grid
       pattern (`role="grid"`/`"row"`/`"gridcell"`, roving tabindex,
@@ -206,10 +207,12 @@ this. Phase 4 is that hardening pass, not page templates:
 
 ## Where to pick up
 
-The component-building phase (1-3) is done, and Phase 3 just got a real
-hardening pass (see above) rather than being left alone in favor of
-templates. Don't start the next session by reaching for another isolated
-primitive — there isn't an obvious one left to add. Instead:
+Phases 1-4 are done — Phase 4 turned out to be a real hardening pass on
+Phase 3 (see above), not templates, and every item in it is now closed
+except the deliberately-deferred npm-publish gate (item 16). Don't start
+the next session by reaching for another isolated primitive — there
+isn't an obvious one left to add, and don't re-open the accessibility
+punch list below looking for more work — it's genuinely done. Instead:
 
 - The gitignored-location audit (`packages/chat-app/`, `brand assets/`) is
   done for both known locations — check `.gitignore` for new entries
