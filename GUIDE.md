@@ -114,14 +114,17 @@ this. Phase 4 is that hardening pass, not page templates:
       recipe in both files. Focus-ring gap (see `Switch` below)
       deliberately left as-is, documented not silently fixed. See
       `Toggle.doc.mjs`/`ToggleMultiple.doc.mjs`'s `accessibility` fields.
-    - **The `TopNav` family is systematically weaker than the `SideNav`
-      family** — not isolated one-offs. `MegaMenuItem` is a real
-      clickable `<button>` with zero hover/pressed/focus styling
-      anywhere in its CSS; `TopNavLink` has zero focus-visible styling
-      and no `aria-expanded`/`aria-haspopup` despite controlling a
-      dropdown; `TopNav`'s Product/Download triggers get no
-      `aria-expanded` at all, inconsistent with `NavDropdown` solving the
-      same trigger+panel pattern correctly elsewhere in the same repo.
+    - ~~**The `TopNav` family is systematically weaker than the `SideNav`
+      family**~~ **Fixed 2026-08-26** (commit `3f448f0`): `MegaMenuItem`
+      got real token-bound hover/pressed/focus-visible styling;
+      `TopNavLink` got a focus-visible ring; `TopNav` now passes
+      `aria-expanded`/`aria-haspopup="true"` to its Product/Download
+      triggers (matching `NavDropdown`'s existing correct handling of the
+      same pattern), closes the open panel on Escape, and its root has a
+      `role="navigation"` landmark. Deliberately not done: no focus
+      returns to the trigger on Escape, no arrow-key nav within an open
+      panel. See `TopNav.doc.mjs`/`TopNavLink.doc.mjs`/
+      `MegaMenuItem.doc.mjs`'s `accessibility` fields.
     - **`TextField`/`TextArea`** — `error` changes the border color but
       never sets `aria-invalid`; the error state is visual-only.
     - **`ChatWindow`** — no `aria-live`/`role="log"` on the message list;
@@ -166,12 +169,11 @@ primitive — there isn't an obvious one left to add. Instead:
   before assuming there's nothing left to look at.
 - **The real next body of work**: item 15 above lists real accessibility
   bugs found by actually reading the component source, not documentation
-  gaps. `Calendar` and `Toggle`/`ToggleMultiple` are fixed (2026-08-26,
-  commits `c83b32d` and `f2e4e29`) — 14 items remain. The `TopNav` family
-  weakness is the next highest-value one: it's systemic (three components)
-  rather than an isolated gap, and like the two fixed ones, it's a place
-  where the interface claims behavior (a dropdown trigger) that isn't
-  backed by the ARIA/focus support it needs.
+  gaps. `Calendar`, `Toggle`/`ToggleMultiple`, and the `TopNav` family are
+  fixed (2026-08-26, commits `c83b32d`, `f2e4e29`, `3f448f0`) — 12 items
+  remain. `TextField`/`TextArea`'s missing `aria-invalid` and `Panel`'s
+  missing `role` are both small, contained, single-component fixes worth
+  picking next.
 - Known open item, still unresolved, fold in whenever it's actually
   blocking something rather than fixing it speculatively: Button has no
   true icon-only square variant (see the port session notes) — several
