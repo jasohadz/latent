@@ -11,6 +11,16 @@
   display: inline-flex;
 }
 
+/* Icon.css sets .lat-icon's own color unconditionally (color.icon.default),
+   which otherwise overrides the variant color .lat-badge sets — same fix
+   pattern Button.css already uses (.lat-button .lat-icon) for the same
+   reason. Without this, every Badge's icon renders the same neutral gray
+   regardless of variant instead of matching its own label color. */
+.lat-badge__icon .lat-icon,
+.lat-badge__dismiss .lat-icon {
+  color: inherit;
+}
+
 .lat-badge__dismiss {
   display: inline-flex;
   align-items: center;

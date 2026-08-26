@@ -4,7 +4,7 @@ export default {
   props: [
     { name: "variant", type: '"neutral" | "brand" | "success" | "warning" | "danger"', default: "neutral", description: "Semantic color. neutral uses the same muted fill Avatar's icon badge and Stat's icon badge reuse." },
     { name: "size", type: '"small" | "medium" | "large"', default: "medium", description: "Padding and font-size scale." },
-    { name: "icon", type: "React.ReactNode", default: "undefined", description: "Optional leading icon, e.g. <Icon name=\"sparkles\" />. Its size prop is overridden automatically to match Badge's size." },
+    { name: "icon", type: "React.ReactNode", default: "undefined", description: "Optional leading icon, e.g. <Icon name=\"sparkles\" />. Its size prop is overridden automatically to match Badge's size, and its color now inherits the badge's own variant text color (fixed 2026-08-26 — Icon.css sets a fixed color.icon.default on every instance otherwise, which made every badge's icon the same neutral gray regardless of variant, not matching the label)." },
     { name: "onDismiss", type: "() => void", default: "undefined", description: "When provided, renders a trailing dismiss (x) button that fires this on click." },
   ],
   example: `<Badge variant="brand" size="medium" icon={<Icon name="sparkles" />}>New</Badge>`,
@@ -27,6 +27,11 @@ export default {
       "The dismiss button has no custom/token-bound focus ring in Badge.css — confirmed by reading the source. No outline: none is set either, so the browser's unstyled default outline still shows on keyboard focus; same real, undocumented gap as Switch's track.",
     ],
   },
+  // No separate "icon color" entry below, deliberately: the leading/dismiss
+  // icons inherit color from whichever "text (variant)" token below is
+  // active (color: inherit in Badge.css), not an independent value — those
+  // entries already cover it, a duplicate entry would just assert the same
+  // fact twice under a different name.
   figmaTokens: {
     "gap": "spacing.4",
     "border-radius": "radius.full",
