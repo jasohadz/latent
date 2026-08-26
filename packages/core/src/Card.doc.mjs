@@ -23,12 +23,29 @@ export default {
   ],
   swizzlePath: "packages/core/src/Card.tsx",
   extends: null,
-  // CTA reuses the real Button component, but Figma's CTA uses
-  // appearance=outline (blue border, link-colored text) which still has no
-  // equivalent in code's Button (variants are primary/secondary/ghost,
-  // ghost added 2026-07-30 — none of them is a bordered-outline look) —
-  // "secondary" is the closest existing option, not an exact match.
-  // Flagged, not fixed here (would mean adding a variant to Button).
+  // CTA reuses the real Button component with variant="secondary" — this
+  // used to be flagged as an inexact match to Figma's CTA (appearance=
+  // outline, blue border + link-colored text), since code's secondary was
+  // a neutral gray button at the time. Button's secondary was fixed
+  // 2026-08-26 to actually be Figma's outline look (see Button.doc.mjs) —
+  // it's an exact match now, not an approximation.
+  //
+  // "surface shadow" is skipped below (figmaTokensSkipLiveCheck): elevation.*
+  // is an Effect Style reference, not a Variable — check-component-bindings
+  // only walks bound Variables, so it can never see this; check-styles/
+  // styles.json already covers Effect Styles separately.
+  // "body font-size": Figma's real text node binds font-size/body
+  // (Breakpoint) — resolves to the same primitive as our declared
+  // font-style.body (Semantic) at desktop. Same deliberate-simplification
+  // pattern as Calendar's weekday font-size.
+  // "overlay CTA background/text (hover)": confirmed the CTA instance
+  // placed in Card's Image Overlay variant is state=default, not hover —
+  // Card's canvas has no hover-state CTA instance to check against, the
+  // same "single static instance" limitation Calendar's nav-button-hover
+  // has. Kept as-is (matches Button's own secondary/outline hover recipe:
+  // border→color.border.focus, text→color.text.link-hover) rather than
+  // guess at something different for the overlay context specifically.
+  figmaTokensSkipLiveCheck: ["surface shadow", "body font-size", "overlay CTA background (hover)", "overlay CTA text (hover)"],
   figmaTokens: {
     "surface background": "color.surface.raised",
     "surface border": "color.border.subtle",

@@ -40,14 +40,36 @@ export default {
       { attribute: 'role="navigation" / aria-label="Main navigation" (root)', description: "The root was a bare <div> with no landmark at all — added the role (rather than swapping to a real <nav> element, to avoid changing the forwardRef'd element type for existing consumers)." },
     ],
   },
+  // "panel shadow" is skipped below (figmaTokensSkipLiveCheck): elevation.*
+  // is an Effect Style reference, not a Variable — check-component-bindings
+  // only walks bound Variables and can never see this; check-styles/
+  // styles.json already covers Effect Styles separately.
+  // "bar gap" is skipped below: confirmed correct (24px, matching
+  // spacing.24 exactly) but unbound to any Variable in Figma — nothing
+  // for this check to find regardless of correctness.
+  // "bar padding (left)" also skipped: value corrected 2026-08-26 to
+  // match Figma's real 12px exactly, but Figma itself has this as an
+  // unbound literal, not a Variable — nothing for this check to find
+  // regardless of whether the value is right (it is, now).
+  figmaTokensSkipLiveCheck: ["panel shadow", "bar gap", "bar padding (left)"],
   figmaTokens: {
     "bar padding (vertical)": "spacing.8",
-    "bar padding (horizontal)": "spacing.16",
+    // Fixed 2026-08-26: was a symmetric spacing.16 — the real bar padding
+    // is asymmetric (confirmed by reading the live node directly: top/
+    // right/bottom all spacing.8, left spacing.12), and unbound to any
+    // Variable in Figma at that. Split into left/right entries below to
+    // actually reflect that instead of one misleadingly-named symmetric
+    // "horizontal" value.
+    "bar padding (right)": "spacing.8",
+    "bar padding (left)": "spacing.12",
     "bar gap": "spacing.24",
     "bar border-radius": "radius.lg",
     "bar border": "color.border.subtle",
     "bar background": "color.surface.raised",
-    "panel padding": "spacing.12",
+    // Fixed 2026-08-26: was spacing.12 — the real panel padding is a
+    // uniform spacing.8 on all four sides (confirmed by reading the live
+    // node directly), unbound to any Variable in Figma.
+    "panel padding": "spacing.8",
     "panel background": "color.surface.raised",
     "panel border": "color.border.subtle",
     "panel border-radius": "radius.card",

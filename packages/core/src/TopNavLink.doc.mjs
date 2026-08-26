@@ -34,6 +34,15 @@ export default {
   // the source — both Active=No and Active=Yes now share the same real
   // "Body/Small/SemiBold" text style (Geist SemiBold, font-weight.600);
   // only the fill color differs between states.
+  // Four entries skipped below (figmaTokensSkipLiveCheck) — deliberate
+  // code-only additions, not Figma bindings: Figma's real TopNavLink has
+  // no border-radius or focus ring bound at all (confirmed by the live
+  // pull this check is built on — the link has no box shape in Figma to
+  // begin with). border-radius was added purely so the added focus ring
+  // renders rounded instead of a sharp rectangle around inline text; none
+  // of this is "unverified," it's a documented accessibility fix filling
+  // a gap Figma's own design doesn't have.
+  figmaTokensSkipLiveCheck: ["border-radius", "focus ring color", "focus ring width", "focus ring offset"],
   figmaTokens: {
     "font-family": "font-family.sans",
     "font-size": "font-style.body-small",

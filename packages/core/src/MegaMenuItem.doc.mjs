@@ -30,8 +30,28 @@ export default {
       "Fixed: token-bound hover/pressed backgrounds and a focus-visible ring added (same pattern as Button/TopNavLink) — outline: none on :focus, a real outline on :focus-visible. Previously zero hover, pressed, or focus styling existed anywhere in the file despite being a real, clickable <button>.",
     ],
   },
+  // Five entries skipped below (figmaTokensSkipLiveCheck) — deliberate
+  // code-only additions, not Figma bindings: Figma's real MegaMenuItem
+  // has no hover/pressed background and no focus ring at all (confirmed
+  // by the live pull this check is built on). Fixed 2026-08-26 as a real
+  // accessibility gap (see the TopNav-family pass in GUIDE.md) filling
+  // something Figma's own design never specified, not "unverified."
+  // "title font-size" also skipped: Figma's real text node binds
+  // font-size/body (Breakpoint) — resolves to the same primitive as our
+  // declared font-style.body (Semantic) at desktop. Same deliberate-
+  // simplification pattern as Calendar's weekday font-size.
+  // "padding/gap" also skipped: value corrected 2026-08-26 to match
+  // Figma's real 10px exactly, but Figma itself has this as an unbound
+  // literal, not a Variable — nothing for this check to find regardless
+  // of whether the value is right (it is, now).
+  figmaTokensSkipLiveCheck: ["hover background", "pressed background", "focus ring color", "focus ring width", "focus ring offset", "title font-size", "padding/gap"],
   figmaTokens: {
-    "padding/gap": "spacing.12",
+    // Fixed 2026-08-26: was spacing.12 (12px) — the real Figma value is
+    // an unbound literal 10px (confirmed by reading the live node
+    // directly), which spacing.10 matches exactly. Figma itself never
+    // bound this to any token, so this is a genuine value correction, not
+    // just a different-but-equivalent token name.
+    "padding/gap": "spacing.10",
     "border-radius": "radius.lg",
     "featured background": "color.background.muted",
     "icon color": "color.icon.default",

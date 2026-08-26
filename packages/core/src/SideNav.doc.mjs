@@ -27,6 +27,11 @@ export default {
       { attribute: 'role="navigation" / aria-label="Main navigation" (root)', description: 'Fixed 2026-08-26: added to both the expanded and collapsed return branches (confirmed both were updated, not just one) — same landmark fix TopNav got in the same pass, same reasoning for using the role attribute over swapping to a real <nav> element (avoids changing the forwardRef\'d element type for existing consumers).' },
     ],
   },
+  // "panel shadow" is skipped below (figmaTokensSkipLiveCheck): elevation.*
+  // is an Effect Style reference, not a Variable — check-component-bindings
+  // only walks bound Variables and can never see this; check-styles/
+  // styles.json already covers Effect Styles separately.
+  figmaTokensSkipLiveCheck: ["panel shadow"],
   figmaTokens: {
     "panel background": "color.surface.raised",
     "panel border": "color.border.subtle",

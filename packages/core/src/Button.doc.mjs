@@ -67,6 +67,13 @@ export default {
   //   brand-colored border and link-colored text, i.e. a bordered link,
   //   not a neutral secondary button. See the new secondary-specific
   //   entries below.
+  //
+  // "focus ring offset" is skipped below (figmaTokensSkipLiveCheck): per
+  // the comment on that entry itself, it was never a Figma Variable to
+  // begin with (Figma's Plugin API has no x/y-position variable binding)
+  // — check-component-bindings only walks bound Variables and can never
+  // see a raw measured pixel value like this one.
+  figmaTokensSkipLiveCheck: ["focus ring offset"],
   figmaTokens: {
     "border-radius": "radius.slimlg",
     "padding (md, all sides)": "spacing.8",

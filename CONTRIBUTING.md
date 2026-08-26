@@ -67,10 +67,11 @@ node packages/cli/bin/latent.mjs manifest --json
 node packages/cli/bin/latent.mjs swizzle <Component> --dest ./out
 node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.sample.json --json
 node packages/cli/bin/latent.mjs check-parity <Component> --json
+node packages/cli/bin/latent.mjs check-component-bindings <Component> --json
 node packages/cli/bin/latent.mjs check-docs --json
 ```
 
 All of these should exit cleanly (or fail with an expected, typed error)
 before you push. Or run `node packages/cli/bin/latent.mjs verify --json`
-instead of the individual `sync figma`/`check-parity`/`check-docs` calls
+instead of the individual `sync figma`/`check-parity`/`check-component-bindings`/`check-docs` calls
 above — the one-command version, same aggregated pass/fail CI runs.

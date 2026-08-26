@@ -50,7 +50,7 @@ The knowledge index (`.latent-index/`) is committed to the repo and kept fresh b
 
 **What `--cite`'s ✓ actually guarantees, and what it doesn't** — confirmed with a real example, not a hypothetical: asked whether `Calendar` supports arrow-key navigation, one claim's `text` was *"The absence of arrow key navigation is a design choice, not a technical limitation"* — printed ✓, quote genuinely real, genuinely from the correct source. `Calendar.doc.mjs`'s actual `accessibility` text never says anything about intent — it just states the facts plainly ("No arrow-key grid navigation exists," "Missing," "Neither is set anywhere"). The model attached a fabricated interpretive spin to a real, correctly-cited quote, and verification passed it, because verification only checks that the quote is a real substring of the cited source — it has no way to check whether the surrounding claim honestly follows from that quote. **✓ means "this quote is real and correctly attributed." It does not mean "this sentence is true."** Read the quote yourself, not just the checkmark, whenever the claim is doing more interpretive work than the quote itself supports.
 
-## Phase 4 — not templates; hardening Phase 3 instead (done, publish gate excepted)
+## Phase 4 — not templates; hardening Phase 3 instead (publish gate + 16 open component-bindings findings excepted)
 
 A first template attempt (2026-08-25 — a shared `PageLayout` primitive plus
 a portfolio page, both since reverted) got as far as passing every
@@ -203,16 +203,63 @@ this. Phase 4 is that hardening pass, not page templates:
       above). See the commit hashes above for the trail. Any *new*
       accessibility gap found from here on is a fresh finding, not a
       leftover from this pass.
-16. Publish `packages/core`, `packages/theme-neutral`, `packages/cli` as scoped npm packages once the API stabilizes — not before, since `swizzle` paths and prop names become breaking changes for anyone who's forked
+16. **`check-component-bindings` (built 2026-08-26)** — the accessibility
+    fixes above all had a `figmaTokens` claim to check against, and
+    `check-parity` kept reporting clean for Calendar's and Button's real
+    visual mismatches (wrong nav-button border/radius, wrong select font
+    token, wrong border-radius everywhere, wrong secondary-variant colors
+    everywhere) the whole time. A user comparing the rendered gallery to
+    Figma directly found both, not any mechanical check — because
+    `check-parity` only verifies the CSS against what the `.doc.mjs`
+    *claims*, never whether that claim is actually true against live
+    Figma. `check-component-bindings` closes that: the Latent Sync plugin
+    now also exports `packages/tokens/component-bindings.live.json` (a
+    flat `{ Component: [boundVariableName, ...] }` map from walking each
+    real component's full Figma subtree), and the new command diffs every
+    `figmaTokens` claim against it. Wired into `verify`/the pre-commit
+    hook exactly like `check-parity`. See `CLAUDE.md`'s architecture
+    section for the full mechanics — the normalization heuristics needed
+    (Figma's own variable naming isn't consistently segmented across
+    collections) and the `figmaTokensSkipLiveCheck` opt-out for genuine
+    code-only additions or real bindings this coarse check can't see.
+    Calendar's and Button's mismatches are fixed (commits `9252eec`,
+    `f9a3885`). The tool's first full run (same commit as its build)
+    surfaced 16 more components with open findings, not yet individually
+    re-verified and fixed the same way — real candidates, not
+    pre-triaged:
+    - `AccordionItem` — title font-size
+    - `AvatarGroup` — spaced-variant gap
+    - `BadgeGroup` — large-size text font-size
+    - `Calendar` — container border, nav-button hover background, select
+      padding (right), weekday/day font-size, day hover background, day
+      disabled text color, focus ring color/width (beyond the already-
+      skipped offset)
+    - `Card` — body font-size, overlay CTA hover background/text
+    - `ChatInput` — field font-family/font-size, send active background
+    - `MegaMenuItem` — padding/gap, title font-size
+    - `MessageBubble` — user-sender background/text color
+    - `NavItem`/`NavSubItem` — focus ring width
+    - `Search` — focus ring width, input font-size
+    - `Stat` — icon badge padding, value font-size/weight, label font-size
+    - `Switch` — supporting-text font-size
+    - `Toggle`/`ToggleMultiple` — option font-size, unselected weight
+    - `TopNav` — bar padding/gap, panel padding
+    Run `node packages/cli/bin/latent.mjs check-component-bindings
+    <Component> --json` on any of these for the exact claimed-vs-missing
+    list; re-verifying each means pulling the live Figma node the way the
+    Calendar/Button fixes did (Desktop Bridge + `figma_execute`), not
+    guessing from the token name alone.
+17. Publish `packages/core`, `packages/theme-neutral`, `packages/cli` as scoped npm packages once the API stabilizes — not before, since `swizzle` paths and prop names become breaking changes for anyone who's forked
 
 ## Where to pick up
 
-Phases 1-4 are done — Phase 4 turned out to be a real hardening pass on
-Phase 3 (see above), not templates, and every item in it is now closed
-except the deliberately-deferred npm-publish gate (item 16). Don't start
+Phases 1-4 are done except two open items — Phase 4 turned out to be a
+real hardening pass on Phase 3 (see above), not templates. Don't start
 the next session by reaching for another isolated primitive — there
-isn't an obvious one left to add, and don't re-open the accessibility
-punch list below looking for more work — it's genuinely done. Instead:
+isn't an obvious one left to add, and don't re-open the *accessibility*
+punch list (item 15) looking for more work — it's genuinely done, unlike
+item 16's newer, separate component-bindings punch list below, which
+isn't. Instead:
 
 - The gitignored-location audit (`packages/chat-app/`, `brand assets/`) is
   done for both known locations — check `.gitignore` for new entries
@@ -223,6 +270,15 @@ punch list below looking for more work — it's genuinely done. Instead:
   is either fixed in code or (`Panel` only) re-examined and found to be
   doc-only. Don't re-check these components looking for more work; if you
   find a *new* gap in one, it's a fresh finding, not a leftover.
+- **The real next body of work is item 16's list** — 16 components with
+  genuine, not-yet-triaged `check-component-bindings` findings. Unlike
+  item 15, this list is *not* pre-verified — each one needs an actual live
+  Figma pull (Desktop Bridge + `figma_execute`, same as the Calendar/Button
+  fixes) before deciding whether it's a real bug, a legitimate
+  `figmaTokensSkipLiveCheck` case, or a false positive the normalization
+  heuristics still miss. Don't skip-list one just to make `verify` pass —
+  that's exactly the "fix the checker's mood, not the reason it's angry"
+  shortcut this whole feature was built to stop happening silently.
 - Known open item, still unresolved, fold in whenever it's actually
   blocking something rather than fixing it speculatively: Button has no
   true icon-only square variant (see the port session notes) — several

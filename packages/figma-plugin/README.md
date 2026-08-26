@@ -8,13 +8,18 @@ resolve drift — see "What this doesn't do" below.
 ## What it does
 
 1. Reads local Variable collections and Text/Effect Styles straight from the
-   open Figma file via the Plugin API.
+   open Figma file via the Plugin API, plus (added 2026-08-26) walks each of
+   the 29 real `packages/core/src` components' own Figma subtree (every
+   variant, for a `COMPONENT_SET`) collecting every bound-variable name found
+   on any style property.
 2. Shapes them into the exact JSON `packages/tokens/figma-export.live.json`
    and `packages/tokens/styles-export.live.json` already use — same nesting,
    same `{color.blue.600}`-style alias references for multi-mode layers, same
    `boundVariables` resolution `STYLES.md` documents for the old manual pull
-   script.
-3. Commits both files in one atomic commit to a dedicated branch (default
+   script — plus a third file, `packages/tokens/component-bindings.live.json`,
+   a flat `{ ComponentName: [boundVariableName, ...] }` map with no code-side
+   precedent to mirror (see `check-component-bindings` in `CLAUDE.md`).
+3. Commits all three files in one atomic commit to a dedicated branch (default
    `figma-sync`) via the GitHub REST API, and prints a compare/PR link.
    **Nothing is pushed to `main` automatically.** Every sync force-rebuilds
    the branch fresh off `main`'s current tree, not its own prior tree — so
@@ -25,8 +30,9 @@ resolve drift — see "What this doesn't do" below.
    meant to be preserved across syncs.
 4. That push triggers `.github/workflows/latent-sync-check.yml`, which runs
    `node packages/cli/bin/latent.mjs verify --json` — `sync figma` +
-   `check-styles` + `check-parity` for every component + `check-docs`, one
-   command — against the files the plugin just committed, and reports
+   `check-styles` + `check-parity` + `check-component-bindings` for every
+   component + `check-docs`, one command — against the files the plugin
+   just committed, and reports
    pass/fail as a check on the branch/commit. This only fires when the sync
    branch is the default `figma-sync`; a renamed branch needs `verify` run
    by hand (see "What this doesn't do" below). Run that same `verify`
@@ -72,7 +78,7 @@ no new schema was introduced.
   the way `CLAUDE.md`/`STYLES.md` describe (investigate which side is wrong,
   don't default to "Figma wins" blindly if a value looks off — see the
   `latent-figma-source-of-truth` discipline).
-- **Doesn't run `check-parity` or `check-docs` itself** — `verify` (via CI
+- **Doesn't run `check-parity`, `check-component-bindings`, or `check-docs` itself** — `verify` (via CI
   on push to `figma-sync`, or run by hand) does, but the plugin's own JS
   never touches a component or markdown file, by design (see
   `latent-figma-sync-plugin` memory for why: reimplementing those checks in

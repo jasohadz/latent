@@ -13,6 +13,11 @@ export default {
   ],
   swizzlePath: "packages/core/src/Testimonial.tsx",
   extends: null,
+  // "container shadow" is skipped below (figmaTokensSkipLiveCheck):
+  // elevation.* is an Effect Style reference, not a Variable —
+  // check-component-bindings only walks bound Variables and can never see
+  // this; check-styles/styles.json already covers Effect Styles separately.
+  figmaTokensSkipLiveCheck: ["container shadow"],
   figmaTokens: {
     "container padding": "spacing.32",
     "container gap": "spacing.24",

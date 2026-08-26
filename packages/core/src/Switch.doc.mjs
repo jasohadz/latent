@@ -35,6 +35,14 @@ export default {
       "Fixed 2026-08-26: token-bound :focus-visible ring added, same pattern as Button/MegaMenuItem/TopNavLink — outline: none on :focus, a real outline on :focus-visible bound to color.border.focus/sizing.border.thin/sizing.focus-ring-offset. Previously relied on the browser's unstyled default outline by accident (Switch.css never set outline: none either), not a deliberate design.",
     ],
   },
+  // The three focus-ring entries are skipped below (figmaTokensSkipLiveCheck)
+  // — deliberate code-only additions, not Figma bindings: Figma's real
+  // Switch component has no focus ring at all (confirmed by the live pull
+  // this check is built on), this was an accessibility fix filling a gap
+  // Figma's own design doesn't have. Not "unverified" — verified by
+  // reading the real component and finding the gap, just not verifiable
+  // by this particular mechanical check.
+  figmaTokensSkipLiveCheck: ["focus ring color", "focus ring width", "focus ring offset"],
   figmaTokens: {
     "track background (off)": "color.background.muted",
     "track background (on)": "color.action.primary.default",
@@ -42,7 +50,10 @@ export default {
     "track/thumb border-radius": "radius.full",
     "thumb background": "color.surface.raised",
     "supporting text color": "color.text.tertiary",
-    "supporting text font-size": "font-size.200",
+    // Fixed 2026-08-26: was font-size.200 — resolves to the same 14px
+    // value but isn't the token Figma actually has bound (font/style/
+    // body-small, confirmed by reading the live text node directly).
+    "supporting text font-size": "font-style.body-small",
     "supporting text line-height": "font-line-height.200-normal",
     "focus ring color": "color.border.focus",
     "focus ring width": "sizing.border.thin",

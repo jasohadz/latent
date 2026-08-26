@@ -25,7 +25,7 @@ Every primitive is exactly three files in `packages/core/src/`, sharing a basena
 
 No exceptions on `name`/`summary`/`props`/`example`/`doNot`/`swizzlePath`/`extends`/`figmaTokens` — `check-docs`' schema check enforces all eight as required (only `extends` may be `null`). `states`/`accessibility` are the only genuinely optional fields.
 
-`discoverComponents()` scans `packages/core/src` for `*.doc.mjs` files, so adding the three files is enough — no CLI edit needed for `list`/`docs`/`swizzle`/`check-parity` to see the new component.
+`discoverComponents()` scans `packages/core/src` for `*.doc.mjs` files, so adding the three files is enough — no CLI edit needed for `list`/`docs`/`swizzle`/`check-parity` to see the new component. `check-component-bindings` needs one more step: add the component's PascalCase name to `COMPONENT_NAMES` in `packages/figma-plugin/code.js` (append-only, mirrors the filename) so the plugin's next extraction includes it in `component-bindings.live.json` — until then it reports `no-live-data` for that component, which is informational, not blocking.
 
 ## Editing tokens
 
@@ -43,15 +43,16 @@ Run these after any component or token change — all should exit cleanly or fai
 node packages/cli/bin/latent.mjs list --json
 node packages/cli/bin/latent.mjs docs <Component> --json
 node packages/cli/bin/latent.mjs check-parity <Component> --json
+node packages/cli/bin/latent.mjs check-component-bindings <Component> --json
 node packages/cli/bin/latent.mjs check-docs --json
 node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.sample.json --json
 node packages/cli/bin/latent.mjs check-styles --file packages/tokens/styles-export.live.json --json
 node packages/cli/bin/latent.mjs manifest --json
 ```
 
-Or run `node packages/cli/bin/latent.mjs verify --json` for the one-command version — `sync figma`/`check-styles` (against the live export files, no `--file` needed) + `check-parity` for every component + `check-docs`, one aggregated pass/fail.
+Or run `node packages/cli/bin/latent.mjs verify --json` for the one-command version — `sync figma`/`check-styles` (against the live export files, no `--file` needed) + `check-parity` + `check-component-bindings` for every component + `check-docs`, one aggregated pass/fail.
 
-`check-parity` only checks components that declare `figmaTokens` in their `.doc.mjs` — if it reports `ERR_NO_FIGMA_SPEC`, the mapping is missing, not the CSS. The pre-commit hook runs it automatically for any staged component (warns, doesn't block, on `ERR_NO_FIGMA_SPEC`) — but it only verifies *declared* tokens; a raw value on an undeclared property still isn't caught by anything.
+`check-parity` only checks components that declare `figmaTokens` in their `.doc.mjs` — if it reports `ERR_NO_FIGMA_SPEC`, the mapping is missing, not the CSS. The pre-commit hook runs it automatically for any staged component (warns, doesn't block, on `ERR_NO_FIGMA_SPEC`) — but it only verifies the CSS matches what the `.doc.mjs` *claims*, never whether that claim is actually true against live Figma; a raw value on an undeclared property still isn't caught by anything either. `check-component-bindings` closes the first half of that gap — added 2026-08-26 after `check-parity` alone let real drift (wrong tokens in `Calendar`/`Button`) sit undetected indefinitely — by diffing each `figmaTokens` claim against `packages/tokens/component-bindings.live.json`, a real export of what Figma actually has bound, produced by the Latent Sync plugin. See `CLAUDE.md`'s architecture section for the full mechanics (including the `figmaTokensSkipLiveCheck` opt-out for deliberate code-only additions).
 
 ## Reusing Figma Text/Effect Styles
 

@@ -8,7 +8,10 @@
   display: flex;
   align-items: center;
   gap: var(--lat-spacing-24);
-  padding: var(--lat-spacing-8) var(--lat-spacing-16);
+  /* Asymmetric on purpose (confirmed 2026-08-26 against the live node
+     directly): top/right/bottom are all spacing.8, but left is
+     spacing.12, not a symmetric 8/16 split as previously declared. */
+  padding: var(--lat-spacing-8) var(--lat-spacing-8) var(--lat-spacing-8) var(--lat-spacing-12);
   border-radius: var(--lat-radius-lg);
   border: 1px solid var(--lat-color-border-subtle);
   /* Glass effect: same 72%-opacity + blur technique Card's Image Overlay
@@ -29,7 +32,7 @@
   top: calc(100% + var(--lat-spacing-8));
   left: 0;
   z-index: 20;
-  padding: var(--lat-spacing-12);
+  padding: var(--lat-spacing-8);
   background-color: var(--lat-color-surface-raised);
   border: 1px solid var(--lat-color-border-subtle);
   border-radius: var(--lat-radius-card);

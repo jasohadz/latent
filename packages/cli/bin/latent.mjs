@@ -65,6 +65,7 @@ const COMMANDS = {
   swizzle: { args: ["<name>"], flags: ["--json", "--dest"], responseTypes: ["swizzle-result", "error"] },
   "sync figma": { args: [], flags: ["--file", "--json"], responseTypes: ["sync-result", "error"] },
   "check-parity": { args: ["<name>"], flags: ["--json"], responseTypes: ["parity-result", "error"] },
+  "check-component-bindings": { args: ["<name>"], flags: ["--json"], responseTypes: ["component-bindings-result", "error"] },
   "check-styles": { args: [], flags: ["--file", "--json"], responseTypes: ["check-styles-result", "error"] },
   "check-docs": { args: [], flags: ["--json"], responseTypes: ["check-docs-result"] },
   verify: { args: [], flags: ["--json"], responseTypes: ["verify-result"] },
@@ -307,6 +308,100 @@ async function cmdCheckParity(name, json) {
   if (result.type === "parity-result" && result.status !== "matches") process.exitCode = 1;
 }
 
+// Answers a different question than check-parity: not "does the CSS match
+// what the .doc.mjs claims" (self-consistency — passes even if the claim
+// itself is wrong or stale) but "does the .doc.mjs's claim actually match
+// what Figma has bound right now" (added 2026-08-26, after exactly that
+// gap let real drift sit undetected in Calendar and Button while `verify`
+// reported clean the whole time — see CLAUDE.md's "Component bindings"
+// section for the full story and packages/figma-plugin/code.js's
+// extractComponentBindings for how the live export is produced).
+//
+// Deliberately coarse, not per-property: for each figmaTokens entry (that
+// isn't opted out via figmaTokensSkipLiveCheck), checks whether the claimed
+// token appears *anywhere* in that component's live-extracted binding set
+// — not that it's on the exact same CSS property. A stronger per-property
+// check is a possible future enhancement, not attempted here; this
+// coarser version is what actually would have caught both Calendar's and
+// Button's real mismatches, and is far more resilient to internal Figma
+// node renames than hard-coding an exact node path per property.
+async function computeCheckComponentBindings(name) {
+  if (!name) return err("ERR_MISSING_ARG", { arg: "name" });
+  const doc = await loadDoc(name);
+  if (!doc) return err("ERR_UNKNOWN_COMPONENT", { requested: name });
+  if (!doc.figmaTokens) return err("ERR_NO_FIGMA_SPEC", { requested: name });
+
+  const bindingsPath = path.join(TOKENS_DIR, "component-bindings.live.json");
+  if (!existsSync(bindingsPath)) return err("ERR_FILE_NOT_FOUND", { path: bindingsPath });
+  const allBindings = JSON.parse(readFileSync(bindingsPath, "utf-8"));
+  const liveTokens = allBindings[name];
+  if (!liveTokens) {
+    return {
+      type: "component-bindings-result",
+      component: name,
+      status: "no-live-data",
+      reason: `No entry for "${name}" in component-bindings.live.json — the plugin's last extraction didn't find a matching Figma component (renamed? not yet built?). Not treated as drift.`,
+      checks: [],
+    };
+  }
+  // Figma's own variable names aren't consistently segmented — the same
+  // conceptual word shows up as one hyphenated segment in some collections
+  // and as separate nested segments in others (real examples pulled live:
+  // "font-size/caption" in Breakpoint vs "font/size/200" in Primitives;
+  // "font/line-height/100/normal" vs "typography/line-height/200/normal").
+  // A literal dotted-to-slash conversion of our own token paths can't
+  // reliably predict which form a given real binding uses, so compare
+  // normalized (all separators and case stripped) instead of exact string
+  // equality — confirmed necessary by running this once and finding almost
+  // every text-related token falsely flagged as missing until this was
+  // added, none of them real drift.
+  const normalize = (s) => s.toLowerCase().replace(/[./-]/g, "");
+  const liveNormalized = new Set(liveTokens.map(normalize));
+  // Text nodes frequently bind straight to a Primitives-layer variable
+  // (e.g. "typography/font-family/sans") rather than going through our
+  // Semantic-layer alias ("font-family.sans") — same real value, one
+  // layer of indirection removed. Also index each live token with a
+  // leading "typography/" stripped so a semantic-layer claim still
+  // matches a component that happens to bind the primitive directly.
+  for (const t of liveTokens) {
+    if (t.startsWith("typography/")) liveNormalized.add(normalize(t.slice("typography/".length)));
+  }
+  const skipKeys = new Set(doc.figmaTokensSkipLiveCheck ?? []);
+
+  // Same layering gap as above, other direction: our own semantic paths
+  // sometimes prefix a compound word with "font-" (font-line-height,
+  // font-family, font-size, font-style) where the Primitives-layer
+  // variable a text node binds to directly drops that prefix entirely
+  // (typography/line-height/..., not typography/font-line-height/...).
+  // Try the claim with a leading "font-" stripped as a fallback match —
+  // can only turn a false "missing" into a correct "found," never mask a
+  // real one (the unstripped form is still checked first).
+  const matchesLive = (tokenPath) =>
+    liveNormalized.has(normalize(tokenPath)) || liveNormalized.has(normalize(tokenPath.replace(/^font-/, "")));
+
+  const checks = Object.entries(doc.figmaTokens)
+    .filter(([property]) => !skipKeys.has(property))
+    .map(([property, tokenPath]) => {
+      const figmaName = tokenPath.replace(/\./g, "/");
+      return { property, tokenPath, figmaName, foundInFigma: matchesLive(tokenPath) };
+    });
+  const mismatches = checks.filter((c) => !c.foundInFigma);
+
+  return {
+    type: "component-bindings-result",
+    component: name,
+    status: mismatches.length === 0 ? "matches" : "drift-detected",
+    checks,
+    skipped: [...skipKeys],
+  };
+}
+
+async function cmdCheckComponentBindings(name, json) {
+  const result = await computeCheckComponentBindings(name);
+  print(result, json);
+  if (result.type === "component-bindings-result" && result.status === "drift-detected") process.exitCode = 1;
+}
+
 // Blank-line-separated paragraphs, not lines — markdown source commonly
 // wraps one sentence across multiple lines, so a qualifying phrase like
 // "renamed from" can land on a different source line than the flagged term
@@ -459,6 +554,34 @@ async function checkDocSchema() {
         }
         if (focusBehaviors !== undefined && (!Array.isArray(focusBehaviors) || focusBehaviors.length === 0)) {
           violations.push({ kind: "doc-schema", file, component: name, field: "accessibility.focusBehaviors", reason: "focusBehaviors must be a non-empty array of description strings" });
+        }
+      }
+    }
+
+    // Optional, added 2026-08-26 alongside check-component-bindings — same
+    // opt-out-by-omission discipline. Lists figmaTokens keys that
+    // check-component-bindings should skip, for either of two honest
+    // reasons (say which one applies in a comment next to the key in the
+    // figmaTokens object itself, not just in this array): (1) a deliberate
+    // code-only addition with no Figma precedent — most often an
+    // accessibility fix, e.g. a focus ring Figma's own component doesn't
+    // have; or (2) a real Figma binding that this check's coarse,
+    // single-static-instance walk genuinely can't see — e.g. a :hover
+    // token on a component that's a plain Figma COMPONENT (one static
+    // example) rather than a COMPONENT_SET with every state as its own
+    // variant instance. Neither reason means "unverified" in the sense of
+    // "nobody checked" — it means a human or agent already verified it by
+    // other means (reading the real source, an earlier live pull, a
+    // screenshot) and this mechanical check just can't independently
+    // confirm it. See CLAUDE.md's "Component bindings" section.
+    if (doc.figmaTokensSkipLiveCheck !== undefined) {
+      if (!Array.isArray(doc.figmaTokensSkipLiveCheck) || doc.figmaTokensSkipLiveCheck.length === 0) {
+        violations.push({ kind: "doc-schema", file, component: name, field: "figmaTokensSkipLiveCheck", reason: "figmaTokensSkipLiveCheck must be a non-empty array of figmaTokens keys — opt out by omitting the field entirely, not by shipping an empty one" });
+      } else {
+        for (const key of doc.figmaTokensSkipLiveCheck) {
+          if (!doc.figmaTokens || !(key in doc.figmaTokens)) {
+            violations.push({ kind: "doc-schema", file, component: name, field: "figmaTokensSkipLiveCheck", reason: `"${key}" isn't a key in this component's own figmaTokens — figmaTokensSkipLiveCheck can only reference keys that actually exist there` });
+          }
         }
       }
     }
@@ -851,17 +974,20 @@ async function cmdAsk(question, json, checkComponent, monitor, cite) {
 }
 
 // Runs every drift check this repo has in one call — sync figma, check-styles,
-// check-parity (every component, honoring the same "ERR_NO_FIGMA_SPEC warns,
-// doesn't block" exception the pre-commit hook documents), and check-docs.
-// This is what both .github/workflows/latent-sync-check.yml and a human at
-// the terminal should reach for instead of running each check separately.
+// check-parity + check-component-bindings (every component, honoring the
+// same "ERR_NO_FIGMA_SPEC warns, doesn't block" exception the pre-commit
+// hook documents), and check-docs. This is what both
+// .github/workflows/latent-sync-check.yml and a human at the terminal
+// should reach for instead of running each check separately.
 async function computeVerify() {
   const syncFigma = await computeSyncFigma(path.join(TOKENS_DIR, "figma-export.live.json"));
   const checkStyles = await computeCheckStyles(path.join(TOKENS_DIR, "styles-export.live.json"));
 
   const checkParity = [];
+  const checkComponentBindings = [];
   for (const name of discoverComponents()) {
     checkParity.push(await computeCheckParity(name));
+    checkComponentBindings.push(await computeCheckComponentBindings(name));
   }
 
   const checkDocs = await computeCheckDocs();
@@ -877,6 +1003,18 @@ async function computeVerify() {
       failed.push(`check-parity ${result.component}`);
     }
   }
+  for (const result of checkComponentBindings) {
+    if (result.type === "error") {
+      if (result.code === "ERR_NO_FIGMA_SPEC") continue; // opted out, not drifting
+      failed.push(`check-component-bindings ${result.requested ?? ""}`.trim());
+    } else if (result.status === "drift-detected") {
+      failed.push(`check-component-bindings ${result.component}`);
+    }
+    // "no-live-data" isn't pushed to failed — it means the plugin's last
+    // extraction predates this component (renamed, or genuinely new),
+    // not that a previously-verified claim regressed. Still visible in
+    // the full checkComponentBindings array below, just not gating.
+  }
   if (checkDocs.violations.length > 0) failed.push("check-docs");
 
   return {
@@ -886,6 +1024,7 @@ async function computeVerify() {
     syncFigma,
     checkStyles,
     checkParity,
+    checkComponentBindings,
     checkDocs,
   };
 }
@@ -1226,6 +1365,8 @@ async function main() {
     }
     case "check-parity":
       return cmdCheckParity(positional[0], json);
+    case "check-component-bindings":
+      return cmdCheckComponentBindings(positional[0], json);
     case "check-styles": {
       const fileFlagIdx = rest.indexOf("--file");
       const filePath = fileFlagIdx >= 0 ? rest[fileFlagIdx + 1] : undefined;

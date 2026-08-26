@@ -1,9 +1,9 @@
 .lat-mega-menu-item {
   display: flex;
   align-items: flex-start;
-  gap: var(--lat-spacing-12);
+  gap: var(--lat-spacing-10);
   width: 220px;
-  padding: var(--lat-spacing-12);
+  padding: var(--lat-spacing-10);
   border: none;
   border-radius: var(--lat-radius-lg);
   background: transparent;

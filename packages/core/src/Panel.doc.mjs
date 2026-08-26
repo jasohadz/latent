@@ -4,7 +4,7 @@ export default {
   props: [],
   example: `<Panel><Calendar /></Panel>`,
   doNot: [
-    "Don't put a border/shadow on the child you place inside Panel too — Panel already supplies the single visible edge (see Calendar's own instance, which strips its own border when nested in a Panel).",
+    "Don't put a border/shadow on the child you place inside Panel too — Panel already supplies the single visible edge. (Corrected 2026-08-26: this used to cite Calendar's border as \"stripped when nested in a Panel,\" a plausible-sounding claim that was never actually true — Calendar's real Figma component has no border at all in any context, confirmed by reading its live node directly, and the code never had any Panel-aware conditional border logic either. Calendar just never had a border to strip; Panel's own edge is what you're seeing, same as for any other child.)",
     "Don't hardcode a shadow value — add or reuse a --lat-elevation-* custom property instead.",
   ],
   swizzlePath: "packages/core/src/Panel.tsx",
@@ -35,6 +35,11 @@ export default {
   // panel in Figma (color/surface/raised + color/border/subtle +
   // radius/card), differing only in elevation tier (lg, for stronger
   // floating separation than Card's sm).
+  // "box-shadow" is skipped below (figmaTokensSkipLiveCheck): elevation.*
+  // is an Effect Style reference, not a Variable — check-component-bindings
+  // only walks bound Variables and can never see this; check-styles/
+  // styles.json already covers Effect Styles separately.
+  figmaTokensSkipLiveCheck: ["box-shadow"],
   figmaTokens: {
     background: "color.surface.raised",
     border: "color.border.subtle",

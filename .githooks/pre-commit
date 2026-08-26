@@ -21,6 +21,14 @@
 #    not run automatically here: it'd add real per-commit latency (loading
 #    a multi-GB local model) for a non-deterministic narration of a result
 #    check-parity's JSON already gives you instantly and reliably.
+#    Also runs check-component-bindings alongside check-parity (added
+#    2026-08-26) — answers a different question: not "does the CSS match
+#    the doc's claim" but "does the doc's claim match what Figma actually
+#    has bound right now" (component-bindings.live.json, produced by the
+#    Latent Sync plugin's extraction — see CLAUDE.md). check-parity alone
+#    would happily pass forever if the original claim was simply wrong;
+#    this is what actually catches that. Skipped (not blocking) if that
+#    export file doesn't exist yet, same as sync figma/check-styles below.
 #
 # 3. Docs — blocks on two independent things inside check-docs:
 #    a) a staged .md file contains a known-stale term (e.g. a Figma
@@ -123,6 +131,28 @@ if [ -n "$COMPONENTS_TOUCHED" ]; then
       echo "$PARITY_OUT"
       echo "For a plain-language explanation: node packages/cli/bin/latent.mjs ask \"why is this failing\" --check $NAME"
       FAIL=1
+    fi
+
+    if [ -f packages/tokens/component-bindings.live.json ]; then
+      BINDINGS_OUT=$(node packages/cli/bin/latent.mjs check-component-bindings "$NAME" --json)
+      BINDINGS_CODE=$(printf '%s' "$BINDINGS_OUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const o=JSON.parse(d);console.log(o.type==='error'?o.code:'')}catch(e){console.log('parse-error')}})")
+      if [ "$BINDINGS_CODE" = "ERR_NO_FIGMA_SPEC" ]; then
+        : # already warned above by the check-parity block
+      elif [ -n "$BINDINGS_CODE" ]; then
+        echo ""
+        echo "BLOCKED (check-component-bindings $NAME): $BINDINGS_CODE"
+        echo "$BINDINGS_OUT"
+        FAIL=1
+      else
+        BINDINGS_STATUS=$(printf '%s' "$BINDINGS_OUT" | json_status)
+        if [ "$BINDINGS_STATUS" = "drift-detected" ]; then
+          echo ""
+          echo "BLOCKED (check-component-bindings $NAME): a declared figmaTokens entry doesn't appear anywhere in the live Figma pull for this component"
+          echo "$BINDINGS_OUT"
+          echo "If this is a deliberate code-only addition (e.g. an accessibility fix with no Figma precedent), add its key to figmaTokensCodeOnly in the .doc.mjs instead of fixing the token."
+          FAIL=1
+        fi
+      fi
     fi
   done
 fi

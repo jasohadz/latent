@@ -50,6 +50,6 @@
 
 .lat-switch__supporting-text {
   color: var(--lat-color-text-tertiary);
-  font-size: var(--lat-font-size-200);
+  font-size: var(--lat-font-style-body-small);
   line-height: var(--lat-font-line-height-200-normal);
 }

@@ -4,7 +4,6 @@
   gap: var(--lat-spacing-16);
   padding: var(--lat-spacing-16);
   background-color: var(--lat-color-background-default);
-  border: 1px solid var(--lat-color-border-subtle);
   border-radius: var(--lat-radius-card);
   font-family: var(--lat-font-family-sans);
 }
@@ -104,7 +103,7 @@
   background: transparent;
   color: var(--lat-color-text-primary);
   font-family: var(--lat-font-family-sans);
-  font-size: var(--lat-font-size-200);
+  font-size: var(--lat-font-style-body-small);
   cursor: pointer;
 }
 .lat-calendar__day:hover:not(:disabled) {

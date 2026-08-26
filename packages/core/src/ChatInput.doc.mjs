@@ -31,6 +31,30 @@ export default {
       "Fixed 2026-08-26: a real :focus-visible style was added, bound to color.border.focus/sizing.border.thin/sizing.focus-ring-offset — the same tokens Button's own focus ring uses. Previously `outline: none` on :focus had no replacement, actively removing the browser's native default outline rather than simply lacking a custom one — worse than a missing ring, not just equivalent to one. Scoped to the text field only, matching what was actually flagged — the attach/send icon buttons were never called out as a gap and weren't touched.",
     ],
   },
+  // Three focus-ring entries: deliberate code-only addition, not a Figma
+  // binding — Figma's real ChatInput field has no focus ring bound at all
+  // (confirmed by the live pull this check is built on). Fixed 2026-08-26
+  // to replace a bare outline: none with a real ring, filling a gap
+  // Figma's own design doesn't have.
+  // "field font-family": confirmed the live text node's font family is a
+  // literal "Geist", not bound to any Variable — nothing for this check
+  // to find regardless of correctness.
+  // "field font-size": Figma's real text node binds font-size/body
+  // (Breakpoint) — resolves to the same primitive as our declared
+  // font-style.body (Semantic) at desktop. Same deliberate-simplification
+  // pattern as Calendar's weekday font-size.
+  // "send background (active, has value)": already documented above (see
+  // doNot) as an app-requested affordance with no Figma precedent, not a
+  // gap in verification — Figma's ChatInput component has no "value"-
+  // dependent send-button variant at all to check against.
+  figmaTokensSkipLiveCheck: [
+    "focus ring color",
+    "focus ring width",
+    "focus ring offset",
+    "field font-family",
+    "field font-size",
+    "send background (active, has value)",
+  ],
   figmaTokens: {
     "container padding": "spacing.2",
     "container gap": "spacing.8",

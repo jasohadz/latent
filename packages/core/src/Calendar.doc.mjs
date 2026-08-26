@@ -94,10 +94,56 @@ export default {
   //   each <select> (appearance: none, native arrow suppressed) with a
   //   real, decorative (aria-hidden) Icon positioned via CSS — see
   //   .lat-calendar__select-wrapper/__select-chevron in Calendar.css.
+  // Follow-up re-verification pass, 2026-08-26, resolving what the first
+  // real run of check-component-bindings flagged for this file:
+  // - "container border" removed entirely (real bug, fixed): read the
+  //   live Calendar root node directly — it has zero strokes. Also
+  //   corrected a stale claim this bug had spread to: Panel.doc.mjs used
+  //   to say Calendar "strips its own border when nested in a Panel,"
+  //   implying it normally has one. It never did, in Figma or in code —
+  //   see Panel.doc.mjs's doNot entry for the correction.
+  // - "day font-size" corrected from font-size.200 to font-style.body-small
+  //   (real bug, fixed): confirmed against the live "Calendar Day"
+  //   component set (node 169:1527) directly — same class of bug as the
+  //   select font-size fix earlier, a different declared token that
+  //   happens to resolve to the same 14px value, not the token Figma
+  //   actually has bound.
+  // - "select padding (right)", "weekday font-size": legitimately
+  //   code-derived/simplified, not literal Figma bindings — see their own
+  //   comments above.
+  // - "nav-button hover background": Calendar's canvas only places two
+  //   static Prev/Next instances (both default state) — there's no hover-
+  //   state instance to check, and Button's own generic outline-icon-only-
+  //   hover recipe isn't a safe stand-in since Calendar's nav button
+  //   already diverges from that recipe in its default state (no border,
+  //   where Button's generic default has one). Left the existing CSS
+  //   treatment as-is rather than guess.
+  // - "day hover background", "day disabled text color": actually
+  //   verified correct — confirmed against the live "Calendar Day"
+  //   component set directly (color.background.muted / color.text.disabled,
+  //   exactly as declared) — just not visible via Calendar's own static
+  //   instance walk, which only shows whichever day states are currently
+  //   placed on its one example (no Hover/Disabled instance among them).
+  // - "focus ring color"/"focus ring width"/"focus ring offset": genuine
+  //   code-only additions — the live "Calendar Day" component set's own
+  //   7 variants (Default/Hover/Active/Hidden/Disabled/Range/Range
+  //   Disabled) confirm there's no "Focused" state in Figma at all for
+  //   individual day cells; this grid-level keyboard focus ring was added
+  //   as part of the arrow-key-navigation accessibility fix with no
+  //   Figma precedent to match.
+  figmaTokensSkipLiveCheck: [
+    "select padding (right)",
+    "weekday font-size",
+    "nav-button hover background",
+    "day hover background",
+    "day disabled text color",
+    "focus ring color",
+    "focus ring width",
+    "focus ring offset",
+  ],
   figmaTokens: {
     "container padding/gap": "spacing.16",
     "container background": "color.background.default",
-    "container border": "color.border.subtle",
     "container border-radius": "radius.card",
     "header gap / select-group gap": "spacing.8",
     // No "nav-button border" entry — fixed 2026-08-26, see accessibility/
@@ -122,7 +168,7 @@ export default {
     "weekday text color": "color.text.tertiary",
     "weekday font-size": "font-size.200",
     "day border-radius": "radius.full",
-    "day font-size": "font-size.200",
+    "day font-size": "font-style.body-small",
     "day text color (default)": "color.text.primary",
     "day hover background": "color.background.muted",
     "day active background": "color.action.primary.default",
