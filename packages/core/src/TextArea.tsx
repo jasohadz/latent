@@ -24,7 +24,15 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
       .filter(Boolean)
       .join(" ");
 
-    return <textarea ref={ref} placeholder="Enter text" className={classes} {...rest} />;
+    return (
+      <textarea
+        ref={ref}
+        placeholder="Enter text"
+        className={classes}
+        aria-invalid={error || undefined}
+        {...rest}
+      />
+    );
   }
 );
 

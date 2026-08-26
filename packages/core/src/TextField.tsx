@@ -24,7 +24,16 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
       .filter(Boolean)
       .join(" ");
 
-    return <input ref={ref} type="text" placeholder="Enter text" className={classes} {...rest} />;
+    return (
+      <input
+        ref={ref}
+        type="text"
+        placeholder="Enter text"
+        className={classes}
+        aria-invalid={error || undefined}
+        {...rest}
+      />
+    );
   }
 );
 

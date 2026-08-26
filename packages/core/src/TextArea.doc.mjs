@@ -19,11 +19,12 @@ export default {
     { name: "hover", description: ":hover:not(:disabled) — real CSS pseudo-state.", tokens: ["border (hover)"] },
     { name: "focus", description: "Real CSS :focus (not :focus-visible, deliberately — fires on click too). Border widens and changes color.", tokens: ["border (focus)", "border width (focus/error)"] },
     { name: "disabled", description: "Native :disabled pseudo-state.", tokens: ["border (disabled)"] },
-    { name: "error", description: "Manual boolean prop, not a CSS pseudo-state or native validity check.", tokens: ["border (error)", "border width (focus/error)"] },
+    { name: "error", description: "Manual boolean prop, not a CSS pseudo-state or native validity check. Now also drives aria-invalid — see accessibility below.", tokens: ["border (error)", "border width (focus/error)"] },
   ],
+  // Fixed 2026-08-26, same change and reasoning as TextField.doc.mjs.
   accessibility: {
     ariaAttributes: [
-      { attribute: "aria-invalid", description: "Same real gap as TextField, confirmed by reading TextArea.tsx: error changes the border to the danger color but never sets aria-invalid. Visual-only error indication." },
+      { attribute: "aria-invalid", description: 'Set to "true" whenever error is true, undefined (omitted) otherwise — derived from the same prop that drives the visual danger border. A caller can still override it explicitly via ...rest.' },
     ],
   },
   figmaTokens: {
