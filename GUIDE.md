@@ -125,15 +125,23 @@ this. Phase 4 is that hardening pass, not page templates:
       returns to the trigger on Escape, no arrow-key nav within an open
       panel. See `TopNav.doc.mjs`/`TopNavLink.doc.mjs`/
       `MegaMenuItem.doc.mjs`'s `accessibility` fields.
-    - **`TextField`/`TextArea`** — `error` changes the border color but
-      never sets `aria-invalid`; the error state is visual-only.
+    - ~~**`TextField`/`TextArea`** — `error` changes the border color but
+      never sets `aria-invalid`~~ **Fixed 2026-08-26** (commit `4aafde9`):
+      `aria-invalid={error || undefined}` now derives automatically from
+      the same `error` prop, so the two can't drift apart. Overridable
+      via `...rest` if a caller passes `aria-invalid` explicitly.
     - **`ChatWindow`** — no `aria-live`/`role="log"` on the message list;
       new messages are never announced to screen reader users.
     - **`ChatInput`** — `outline: none` with no replacement focus style —
       actively worse than simply missing one.
-    - **`Panel`** — sets no `role` at all despite existing specifically to
-      host popovers/dropdowns; zero semantics toward its own stated
-      purpose.
+    - ~~**`Panel`** — sets no `role` at all despite existing specifically
+      to host popovers/dropdowns~~ **Re-examined 2026-08-26** (commit
+      `4aafde9`): not a code gap — `role` already passes through via
+      `extends`/`...rest` with zero change needed (`<Panel
+      role="dialog">` already worked). No default was added deliberately
+      — Panel hosts genuinely different semantic roles depending on the
+      consumer, and guessing one would announce interaction support that
+      may not exist. Fixed in `Panel.doc.mjs` only, not code.
     - **`Field`/`SubscribeField`** — no `<label htmlFor>` association to
       their nested input at all (placeholder-only); `SubscribeField` also
       has no way to submit via Enter while focused in the field.
@@ -169,11 +177,13 @@ primitive — there isn't an obvious one left to add. Instead:
   before assuming there's nothing left to look at.
 - **The real next body of work**: item 15 above lists real accessibility
   bugs found by actually reading the component source, not documentation
-  gaps. `Calendar`, `Toggle`/`ToggleMultiple`, and the `TopNav` family are
-  fixed (2026-08-26, commits `c83b32d`, `f2e4e29`, `3f448f0`) — 12 items
-  remain. `TextField`/`TextArea`'s missing `aria-invalid` and `Panel`'s
-  missing `role` are both small, contained, single-component fixes worth
-  picking next.
+  gaps. `Calendar`, `Toggle`/`ToggleMultiple`, the `TopNav` family, and
+  `TextField`/`TextArea` are fixed, and `Panel` was re-examined and turned
+  out to be a doc gap rather than a code one (2026-08-26, commits
+  `c83b32d`, `f2e4e29`, `3f448f0`, `4aafde9`) — 10 items remain.
+  `NavItem`/`NavSubItem`'s missing `aria-current`/`aria-selected` and
+  `AccordionItem`'s missing `aria-controls`/`id` link are both small,
+  contained, single-component fixes worth picking next.
 - Known open item, still unresolved, fold in whenever it's actually
   blocking something rather than fixing it speculatively: Button has no
   true icon-only square variant (see the port session notes) — several
