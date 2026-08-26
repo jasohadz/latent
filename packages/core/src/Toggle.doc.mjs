@@ -12,6 +12,22 @@ export default {
   ],
   swizzlePath: "packages/core/src/Toggle.tsx",
   extends: null,
+  states: [
+    { name: "selected", description: "Raised surface background, primary text color, semibold weight.", tokens: ["option selected background", "option selected color", "option selected weight"] },
+    { name: "unselected", description: "No background, tertiary text color, regular weight.", tokens: ["option unselected color", "option unselected weight"] },
+  ],
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Tab", action: "Moves focus through each option button individually — both buttons are separately tabbable." },
+      { key: "Enter or Space", action: "Selects the focused option — native <button>, not a custom handler." },
+    ],
+    ariaAttributes: [
+      { attribute: 'role="tablist" / role="tab" / aria-selected', description: "Real, undocumented mismatch, confirmed by reading Toggle.tsx: the WAI-ARIA tabs pattern these roles imply expects Left/Right arrow-key navigation between tabs with only the active tab in the Tab order (a roving tabindex) — neither exists here. Every option is independently Tab-stoppable and there's no onKeyDown for arrow keys at all. Screen reader users get announced tab semantics without the interaction pattern those semantics promise." },
+    ],
+    focusBehaviors: [
+      "No focus-visible styling anywhere in Toggle.css — confirmed by reading the source, not assumed. Same recurring gap as Switch/Badge's dismiss button: no custom ring, and no outline: none either, so the browser's default outline is what's actually shown, unstyled.",
+    ],
+  },
   figmaTokens: {
     "track background": "color.background.muted",
     "track padding/gap": "spacing.4",

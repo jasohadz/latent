@@ -15,6 +15,15 @@ export default {
   ],
   swizzlePath: "packages/core/src/SubscribeField.tsx",
   extends: null,
+  // Two real, undocumented gaps found reading the source, not hypothetical.
+  accessibility: {
+    ariaAttributes: [
+      { attribute: "label", description: "There is no <label> for the nested TextField — only placeholder text. This is a known accessibility anti-pattern: placeholder disappears once the user types, isn't announced consistently across screen readers, and typically fails color-contrast requirements. Not a deliberate choice, flagged here rather than papered over." },
+    ],
+    keyboardInteractions: [
+      { key: "Enter (while focused in the input)", action: "Does nothing — there is no <form> wrapping this component and no onKeyDown handler on the TextField, so only clicking the Button fires onSubmit. A keyboard-only user must Tab to the Button rather than pressing Enter, which is the conventional pattern for a type-and-submit field." },
+    ],
+  },
   // This component's radius/full submit-button precedent is what Search's
   // own circular submit button was built to match (see Search.doc.mjs).
   figmaTokens: {

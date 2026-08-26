@@ -12,6 +12,15 @@ export default {
   ],
   swizzlePath: "packages/core/src/TopNavLink.tsx",
   extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
+  states: [
+    { name: "default", description: "Secondary label color.", tokens: ["label color"] },
+    { name: "active", description: "Primary label color — TopNav sets this when its own `menu` matches this link.", tokens: ["active label color"] },
+  ],
+  accessibility: {
+    focusBehaviors: [
+      "Gap, confirmed by reading the source: TopNavLink.css has no focus-visible rule at all (grepped the file directly — nothing), and the component renders a plain <button> with no aria-expanded/aria-haspopup even though (via TopNav) it opens a dropdown panel for Product/Download. A keyboard user gets no visible focus indicator and no signal this button controls an expandable region.",
+    ],
+  },
   // Previously: Active=No's Label was raw unbound "Inter Regular" in
   // Figma (a real bug, not reproduced in the original port). Fixed at
   // the source — both Active=No and Active=Yes now share the same real

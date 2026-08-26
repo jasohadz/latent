@@ -16,6 +16,30 @@ export default {
   ],
   swizzlePath: "packages/core/src/Search.tsx",
   extends: null,
+  states: [
+    { name: "default (outline)", description: "Bordered container, no fill.", tokens: ["container border"] },
+    { name: "filled", description: "Solid muted background, no border.", tokens: ["container background (filled)"] },
+    { name: "hover", description: "Container border darkens (outline appearance only — filled has no hover token of its own).", tokens: ["container border (hover)"] },
+    { name: "focus-within", description: "Container gets a real focus outline bound to color.border.focus, confirmed in Search.css — not a gap, a working implementation.", tokens: ["focus ring color", "focus ring width"] },
+    { name: "disabled", description: "Container background dims; input and submit Button both get the native disabled attribute.", tokens: ["container background (disabled)"] },
+  ],
+  // Genuinely well-implemented, worth documenting positively, not just
+  // hunting for gaps: Enter-to-submit IS wired (onKeyDown on the input),
+  // unlike SubscribeField's real gap of the same shape. Confirmed by
+  // reading the source.
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Enter (while focused in the input)", action: "Fires onSubmit — an explicit onKeyDown handler, not relying on a <form> submit." },
+      { key: "Enter or Space (on the clear or submit button)", action: "Native <button> activation." },
+    ],
+    ariaAttributes: [
+      { attribute: "aria-label (clear button)", description: '"Clear search" — set explicitly, since the clear button has only an icon, no visible text.' },
+      { attribute: "aria-label (submit button)", description: '"Submit search" — same reasoning, the submit Button is iconOnly.' },
+    ],
+    focusBehaviors: [
+      "A minor, non-critical observation, not a bug: the input is type=\"text\" rather than type=\"search\" — native type=\"search\" semantics (some browsers' built-in clear affordance, screen reader announcement as a search field) aren't used, in favor of the custom clear button implemented here instead. A legitimate alternative pattern, not a gap.",
+    ],
+  },
   // Submit is a real Button instance (variant="primary" iconOnly), not a
   // bespoke element — Button.tsx gained a true icon-only mode 2026-07-30
   // (see Button.doc.mjs), superseding the earlier gap noted here (still

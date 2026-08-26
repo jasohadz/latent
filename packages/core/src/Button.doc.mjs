@@ -18,6 +18,28 @@ export default {
   ],
   swizzlePath: "packages/core/src/Button.tsx",
   extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
+  // Verified against the real .tsx/.css, not inferred from props alone.
+  states: [
+    { name: "primary default", description: "Primary variant, resting state.", tokens: ["background (primary default)"] },
+    { name: "primary hover", description: "Primary variant, :not(:disabled):hover.", tokens: ["background (primary hover)"] },
+    { name: "primary pressed", description: "Primary variant, :not(:disabled):active.", tokens: ["background (primary pressed)"] },
+    { name: "secondary/ghost hover + active", description: "Both use color.action.secondary.hover/pressed in the real CSS, but neither is declared in figmaTokens below — a real gap: check-parity can't verify these against a spec that doesn't name them (see CLAUDE.md's note that check-parity only checks declared tokens).", tokens: [] },
+    { name: "disabled (any variant)", description: "Background/text/border all switch to their disabled tokens; ghost's disabled state instead stays fully transparent (background/border unset, not disabled-colored) per its own CSS rule.", tokens: ["background (disabled)", "text (disabled)", "border (disabled)"] },
+    { name: "loading", description: "Disables the button and swaps content for a 3-dot bounce spinner. Text buttons keep children in the DOM, visually hidden, for the accessible name; iconOnly buttons have no children to hide.", tokens: ["spinner dot resting color", "spinner dot active color", "spinner dot size"] },
+    { name: "focus-visible", description: "Visible outline ring, keyboard-triggered only (:focus-visible, not :focus).", tokens: ["border color (focus ring)", "border width (focus ring)", "focus ring offset"] },
+  ],
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Enter or Space", action: "Activates the button — native <button> element, not a custom key handler." },
+    ],
+    ariaAttributes: [
+      { attribute: "aria-busy", description: "Set automatically while isLoading is true." },
+      { attribute: "aria-label", description: "Required when iconOnly is true, since there's no visible text for the accessible name. Enforced only as a dev-mode console.warn in Button.tsx — not a hard runtime requirement, and not enforced at the TypeScript level either. A real gap: nothing actually prevents an iconOnly button shipping without one in production." },
+    ],
+    focusBehaviors: [
+      "Real, visible :focus-visible outline bound to color.border.focus/sizing.border.thin/sizing.focus-ring-offset — confirmed in Button.css. Unlike Switch, which has no focus-ring style at all.",
+    ],
+  },
   // Token paths this component is expected to consume, keyed by the CSS
   // property they should end up styling. check-parity greps the compiled
   // CSS for the corresponding --lat-* variable to confirm no drift.

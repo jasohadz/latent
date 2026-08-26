@@ -12,6 +12,20 @@ export default {
   ],
   swizzlePath: "packages/core/src/TextArea.tsx",
   extends: "React.TextareaHTMLAttributes<HTMLTextAreaElement>",
+  // Same recipe as TextField, confirmed by reading both sources — same
+  // states/accessibility shape applies.
+  states: [
+    { name: "default", description: "Resting border color.", tokens: ["border (default)"] },
+    { name: "hover", description: ":hover:not(:disabled) — real CSS pseudo-state.", tokens: ["border (hover)"] },
+    { name: "focus", description: "Real CSS :focus (not :focus-visible, deliberately — fires on click too). Border widens and changes color.", tokens: ["border (focus)", "border width (focus/error)"] },
+    { name: "disabled", description: "Native :disabled pseudo-state.", tokens: ["border (disabled)"] },
+    { name: "error", description: "Manual boolean prop, not a CSS pseudo-state or native validity check.", tokens: ["border (error)", "border width (focus/error)"] },
+  ],
+  accessibility: {
+    ariaAttributes: [
+      { attribute: "aria-invalid", description: "Same real gap as TextField, confirmed by reading TextArea.tsx: error changes the border to the danger color but never sets aria-invalid. Visual-only error indication." },
+    ],
+  },
   figmaTokens: {
     "padding": "spacing.8",
     "border-radius": "radius.lg",

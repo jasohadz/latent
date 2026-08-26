@@ -14,6 +14,26 @@ export default {
   ],
   swizzlePath: "packages/core/src/AccordionItem.tsx",
   extends: null,
+  // Verified against the real .tsx/.css, not inferred from props alone.
+  states: [
+    { name: "closed", description: "Header row only; answer content unmounted, not just hidden.", tokens: [] },
+    { name: "open", description: "Answer content mounted below the header; chevron rotated 180deg.", tokens: [] },
+    { name: "hover", description: "Container border darkens.", tokens: ["container border (hover)"] },
+    { name: "focus-within", description: "Container border switches to the brand color while the header button has focus — the component's actual focus indicator (see accessibility.focusBehaviors below), not a ring on the button itself.", tokens: ["container border (focus-within)"] },
+    { name: "disabled", description: "Container background/border dim; header button gets the native disabled attribute.", tokens: ["container background (disabled)", "container border (disabled)"] },
+  ],
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Enter or Space", action: "Toggles open/closed — native <button> behavior, not a custom key handler." },
+    ],
+    ariaAttributes: [
+      { attribute: "aria-expanded", description: "Set on the header <button>, reflects the open prop directly." },
+    ],
+    focusBehaviors: [
+      "AccordionItem.css sets `.lat-accordion-item__header:focus { outline: none; }`, removing the native outline — but this is a real, working replacement, not a gap: the parent container uses `:focus-within` to switch its border to color.border.brand, so a visible focus indicator does exist, just on the row's border rather than a traditional ring on the button. Confirmed by reading the CSS, not assumed.",
+      "One real, minor gap: the header button has no aria-controls pointing at the answer content, and the answer <div> has no id/role — a screen reader user gets aria-expanded but no explicit programmatic link to which content the button controls.",
+    ],
+  },
   figmaTokens: {
     "container padding/gap": "spacing.16",
     "container background": "color.background.default",

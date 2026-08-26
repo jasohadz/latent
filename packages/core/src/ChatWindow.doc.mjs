@@ -11,6 +11,17 @@ export default {
   ],
   swizzlePath: "packages/core/src/ChatWindow.tsx",
   extends: null,
+  // No states — single component, no variants, no interactive states of
+  // its own (confirmed by reading the .tsx: a plain layout wrapper around
+  // a message slot and a docked ChatInput).
+  accessibility: {
+    ariaAttributes: [
+      {
+        attribute: "(none present)",
+        description: "The message slot (.lat-chat-window__slot, the scrolling container children/MessageBubble instances stack into) has no role=\"log\" and no aria-live region — confirmed by reading the .tsx and .css. New messages arriving are not announced to screen reader users. Real, undocumented gap, not a deliberate decision — flagged here rather than papered over.",
+      },
+    ],
+  },
   // Only "fills" and the slot's own itemSpacing were captured as bound
   // variables on this node — outer padding wasn't directly verified (no
   // bound paddingLeft/Top/etc showed up in the fetch), so spacing.16 here

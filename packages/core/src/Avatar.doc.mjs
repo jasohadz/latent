@@ -16,6 +16,14 @@ export default {
   ],
   swizzlePath: "packages/core/src/Avatar.tsx",
   extends: "React.HTMLAttributes<HTMLSpanElement>",
+  // No states field: size/shape/content-type are display variants, not an
+  // interactive states axis — Avatar has no hover/focus/pressed/disabled
+  // behavior at all (purely presentational <span>, confirmed in Avatar.tsx).
+  accessibility: {
+    ariaAttributes: [
+      { attribute: 'alt=""', description: "Real default, confirmed in Avatar.tsx — the src/<img> path defaults to empty alt text unless the caller passes real alt content, treating the photo as decorative by default (avoids redundant \"photo of X\" announcements when a name is already shown nearby). The icon variant is separately marked aria-hidden. The initial variant has no ARIA of its own — the character renders as plain visible text, which is naturally accessible without any attribute." },
+    ],
+  },
   figmaTokens: {
     "background": "color.background.muted",
     "text/icon color": "color.text.secondary",

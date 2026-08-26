@@ -14,6 +14,17 @@ export default {
   ],
   swizzlePath: "packages/core/src/MegaMenuItem.tsx",
   extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
+  // No `states` here, by design, not omission: `layout` (standard/
+  // featured) is a display variant already captured as a props enum, not
+  // an interaction state — and confirmed by reading MegaMenuItem.css in
+  // full, there is no hover/pressed/focus rule anywhere in the file at
+  // all (see the accessibility gap below), so there's no real interactive
+  // state to document beyond what the props already say.
+  accessibility: {
+    focusBehaviors: [
+      "Significant gap, confirmed by reading MegaMenuItem.css in full: despite being cursor: pointer and a real <button>, there is zero hover, pressed, or focus-visible styling anywhere in the file — a keyboard or mouse user gets no visual feedback at all that this item is interactive or currently focused.",
+    ],
+  },
   figmaTokens: {
     "padding/gap": "spacing.12",
     "border-radius": "radius.lg",

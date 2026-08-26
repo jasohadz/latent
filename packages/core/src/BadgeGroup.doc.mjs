@@ -13,6 +13,16 @@ export default {
   ],
   swizzlePath: "packages/core/src/BadgeGroup.tsx",
   extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
+  // No `states` field — position/size are the only variation, already
+  // documented as props; no hover/disabled CSS exists to describe.
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Enter or Space", action: "Activates the click handler — native <button> behavior." },
+    ],
+    focusBehaviors: [
+      "BadgeGroup.css sets no :focus/:focus-visible rule of its own — confirmed by reading the source. The browser's default focus outline applies unmodified, unlike Switch (no focus styling at all, a real gap) or AccordionItem (a custom :focus-within border). Worth knowing this is relying on the platform default, not a deliberate design choice either way.",
+    ],
+  },
   figmaTokens: {
     "container padding": "spacing.4",
     "container gap": "spacing.8",

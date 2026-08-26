@@ -13,6 +13,28 @@ export default {
   ],
   swizzlePath: "packages/core/src/Switch.tsx",
   extends: null,
+  // Verified against the real .tsx/.css, not inferred from props alone.
+  states: [
+    { name: "off", description: "Track uses the muted background color; thumb sits at the track's start.", tokens: ["track background (off)"] },
+    { name: "on", description: "Track uses the primary action color; thumb translates to the track's end.", tokens: ["track background (on)"] },
+    { name: "disabled (off)", description: "Track drops to 50% opacity via a plain CSS opacity rule — no dedicated token exists for this specific combination, unlike on+disabled below.", tokens: [] },
+    { name: "disabled (on)", description: "Track uses a distinct dimmed brand color, not just opacity over the on-color — the one state where disabled looks different depending on pressed value.", tokens: ["track background (on + disabled)"] },
+  ],
+  // No keyboardInteractions custom handler exists in the source — Enter/
+  // Space activation is native <button> behavior, not something this
+  // component implements itself, which is exactly why it's reliable.
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Enter or Space", action: "Toggles the switch — inherited for free from rendering role=\"switch\" on a real <button>, not a custom key handler." },
+    ],
+    ariaAttributes: [
+      { attribute: 'role="switch"', description: "Identifies the control as a switch, not a generic button, to assistive tech." },
+      { attribute: "aria-checked", description: "Kept in sync with the pressed prop directly." },
+    ],
+    focusBehaviors: [
+      "No custom/token-bound focus ring exists in Switch.css — confirmed by reading the source. Switch.css never sets outline: none either, so the browser's own unstyled default outline still shows on keyboard focus (it isn't literally invisible) — but that's an accident of not overriding it, not a deliberate token-bound design the way Button's :focus-visible ring (color.border.focus) is. Real, undocumented gap, not a deliberate decision — flagged here rather than papered over.",
+    ],
+  },
   figmaTokens: {
     "track background (off)": "color.background.muted",
     "track background (on)": "color.action.primary.default",

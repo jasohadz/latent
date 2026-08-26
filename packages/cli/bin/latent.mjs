@@ -357,6 +357,9 @@ function checkStaleTerms() {
 // needs a description — not just a name/type/default. This was previously
 // only a convention (nothing checked it, so it silently drifted per
 // component); it's now load-bearing the same way check-parity is.
+// states/accessibility (added 2026-08-26) are optional, not part of the
+// required set above — opt-out-by-omission like figmaTokens, validated
+// below only when present.
 async function checkDocSchema() {
   const violations = [];
   for (const name of discoverComponents()) {
@@ -404,6 +407,60 @@ async function checkDocSchema() {
       });
     } else if (doc.props !== undefined) {
       violations.push({ kind: "doc-schema", file, component: name, field: "props", reason: "props must be an array" });
+    }
+
+    // Both optional, DSDS-inspired (see CATALOG-VALIDATION.md-adjacent
+    // DSDS fit assessment) but hand-rolled, not DSDS-conformant — same
+    // opt-out-by-omission discipline as figmaTokens/ERR_NO_FIGMA_SPEC: a
+    // component with no meaningful state variation or no accessibility
+    // surface omits the field entirely, not an empty array/object. If
+    // present, must be real content, not a placeholder.
+    if (doc.states !== undefined && (!Array.isArray(doc.states) || doc.states.length === 0)) {
+      violations.push({ kind: "doc-schema", file, component: name, field: "states", reason: "states must be a non-empty array — opt out by omitting the field entirely, not by shipping an empty one" });
+    }
+    if (Array.isArray(doc.states)) {
+      doc.states.forEach((s, i) => {
+        const label = s?.name ?? `states[${i}]`;
+        if (!s?.name) violations.push({ kind: "doc-schema", file, component: name, field: `states[${i}].name`, reason: "state is missing a name" });
+        if (!s?.description) violations.push({ kind: "doc-schema", file, component: name, field: `${label}.description`, reason: "state is missing a description" });
+        if (s?.tokens !== undefined && !Array.isArray(s.tokens)) {
+          violations.push({ kind: "doc-schema", file, component: name, field: `${label}.tokens`, reason: "state's tokens, if present, must be an array" });
+        }
+      });
+    }
+
+    if (doc.accessibility !== undefined) {
+      if (typeof doc.accessibility !== "object" || doc.accessibility === null || Array.isArray(doc.accessibility)) {
+        violations.push({ kind: "doc-schema", file, component: name, field: "accessibility", reason: "accessibility must be an object" });
+      } else {
+        const { keyboardInteractions, ariaAttributes, focusBehaviors } = doc.accessibility;
+        if (keyboardInteractions === undefined && ariaAttributes === undefined && focusBehaviors === undefined) {
+          violations.push({ kind: "doc-schema", file, component: name, field: "accessibility", reason: "accessibility must declare at least one of keyboardInteractions/ariaAttributes/focusBehaviors — opt out by omitting the whole field, not by shipping an empty object" });
+        }
+        if (keyboardInteractions !== undefined) {
+          if (!Array.isArray(keyboardInteractions) || keyboardInteractions.length === 0) {
+            violations.push({ kind: "doc-schema", file, component: name, field: "accessibility.keyboardInteractions", reason: "keyboardInteractions must be a non-empty array" });
+          } else {
+            keyboardInteractions.forEach((k, i) => {
+              if (!k?.key) violations.push({ kind: "doc-schema", file, component: name, field: `accessibility.keyboardInteractions[${i}].key`, reason: "keyboard interaction is missing a key" });
+              if (!k?.action) violations.push({ kind: "doc-schema", file, component: name, field: `accessibility.keyboardInteractions[${i}].action`, reason: "keyboard interaction is missing an action" });
+            });
+          }
+        }
+        if (ariaAttributes !== undefined) {
+          if (!Array.isArray(ariaAttributes) || ariaAttributes.length === 0) {
+            violations.push({ kind: "doc-schema", file, component: name, field: "accessibility.ariaAttributes", reason: "ariaAttributes must be a non-empty array" });
+          } else {
+            ariaAttributes.forEach((a, i) => {
+              if (!a?.attribute) violations.push({ kind: "doc-schema", file, component: name, field: `accessibility.ariaAttributes[${i}].attribute`, reason: "aria attribute entry is missing an attribute name" });
+              if (!a?.description) violations.push({ kind: "doc-schema", file, component: name, field: `accessibility.ariaAttributes[${i}].description`, reason: "aria attribute entry is missing a description" });
+            });
+          }
+        }
+        if (focusBehaviors !== undefined && (!Array.isArray(focusBehaviors) || focusBehaviors.length === 0)) {
+          violations.push({ kind: "doc-schema", file, component: name, field: "accessibility.focusBehaviors", reason: "focusBehaviors must be a non-empty array of description strings" });
+        }
+      }
     }
   }
   return violations;
@@ -500,7 +557,7 @@ function docChunkText(doc) {
   const tokens = doc.figmaTokens
     ? Object.entries(doc.figmaTokens).map(([k, v]) => `${k} -> ${v}`).join("\n")
     : "(none declared)";
-  return [
+  const sections = [
     `Component: ${doc.name}`,
     `Summary: ${doc.summary}`,
     `Props:\n${props}`,
@@ -508,7 +565,26 @@ function docChunkText(doc) {
     `Swizzle path: ${doc.swizzlePath}`,
     `Figma tokens:\n${tokens}`,
     `Example:\n${doc.example}`,
-  ].join("\n\n");
+  ];
+  // Both optional — only included when the component actually declares
+  // them, same opt-out-by-omission the fields themselves follow.
+  if (doc.states) {
+    sections.push(`States:\n${doc.states.map((s) => `${s.name} — ${s.description}`).join("\n")}`);
+  }
+  if (doc.accessibility) {
+    const a11yLines = [];
+    if (doc.accessibility.keyboardInteractions) {
+      a11yLines.push(...doc.accessibility.keyboardInteractions.map((k) => `Key ${k.key}: ${k.action}`));
+    }
+    if (doc.accessibility.ariaAttributes) {
+      a11yLines.push(...doc.accessibility.ariaAttributes.map((a) => `${a.attribute}: ${a.description}`));
+    }
+    if (doc.accessibility.focusBehaviors) {
+      a11yLines.push(...doc.accessibility.focusBehaviors);
+    }
+    sections.push(`Accessibility:\n${a11yLines.join("\n")}`);
+  }
+  return sections.join("\n\n");
 }
 
 async function cmdIndex(json) {

@@ -17,6 +17,25 @@ export default {
   ],
   swizzlePath: "packages/core/src/NavItem.tsx",
   extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
+  states: [
+    { name: "default", description: "Secondary label/icon color, no background.", tokens: ["label color", "icon/chevron color"] },
+    { name: "hover", description: "Secondary-action hover background.", tokens: ["hover background"] },
+    { name: "pressed", description: "Secondary-action pressed background.", tokens: ["pressed background"] },
+    { name: "selected", description: "Muted background, primary-color bold label — the current-page/active-item look.", tokens: ["selected background", "selected label color", "selected label weight"] },
+    { name: "focus-visible", description: "Outline ring, keyboard-only (:focus-visible, not :focus) — confirmed in NavItem.css.", tokens: ["focus ring color", "focus ring width"] },
+  ],
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Enter or Space", action: "Activates the item — native <button> behavior, no custom handler." },
+    ],
+    ariaAttributes: [
+      { attribute: "aria-label", description: "Set to `label` only when iconOnly is true, since there's no visible text in that mode." },
+    ],
+    focusBehaviors: [
+      "Real :focus-visible outline confirmed in NavItem.css, bound to color.border.focus.",
+      "Gap, confirmed by reading the source: `selected` is purely a visual CSS class (lat-nav-item--selected) with no corresponding aria-current or aria-selected — a screen reader user has no way to tell which item is the current/active one from the DOM alone.",
+    ],
+  },
   figmaTokens: {
     "padding (vertical)": "spacing.8",
     "padding (horizontal) / gap": "spacing.10",

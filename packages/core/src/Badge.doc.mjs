@@ -13,6 +13,20 @@ export default {
   ],
   swizzlePath: "packages/core/src/Badge.tsx",
   extends: "React.HTMLAttributes<HTMLSpanElement>",
+  // No states field: Badge's only real variation is the variant/size prop
+  // combinations, already fully covered by figmaTokens below — restating
+  // them as "states" would be filler, not new information.
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Enter or Space", action: "Activates the dismiss button when onDismiss is provided — native <button>, not a custom handler." },
+    ],
+    ariaAttributes: [
+      { attribute: 'aria-label="Dismiss"', description: "Hardcoded on the dismiss button when onDismiss is provided — not customizable per instance. The badge's own label content (children) has no ARIA role of its own; Badge is a plain <span>, not announced as a distinct control unless a parent adds one." },
+    ],
+    focusBehaviors: [
+      "The dismiss button has no custom/token-bound focus ring in Badge.css — confirmed by reading the source. No outline: none is set either, so the browser's unstyled default outline still shows on keyboard focus; same real, undocumented gap as Switch's track.",
+    ],
+  },
   figmaTokens: {
     "gap": "spacing.4",
     "border-radius": "radius.full",

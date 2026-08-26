@@ -13,6 +13,22 @@ export default {
   ],
   swizzlePath: "packages/core/src/NavSubItem.tsx",
   extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
+  states: [
+    { name: "default", description: "Secondary label/icon color, no background.", tokens: ["label color", "icon color"] },
+    { name: "hover", description: "Secondary-action hover background.", tokens: ["hover background"] },
+    { name: "pressed", description: "Secondary-action pressed background.", tokens: ["pressed background"] },
+    { name: "selected", description: "Muted background, primary-color bold label.", tokens: ["selected background", "selected label color", "selected label weight"] },
+    { name: "focus-visible", description: "Outline ring, keyboard-only — confirmed in NavSubItem.css.", tokens: ["focus ring color", "focus ring width"] },
+  ],
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Enter or Space", action: "Activates the item — native <button> behavior, no custom handler." },
+    ],
+    focusBehaviors: [
+      "Real :focus-visible outline confirmed in NavSubItem.css, bound to color.border.focus.",
+      "Same gap as NavItem, confirmed by reading the source: `selected` is a CSS-only class with no aria-current/aria-selected — not communicated to assistive tech.",
+    ],
+  },
   figmaTokens: {
     "padding (vertical)": "spacing.6",
     "padding (horizontal) / gap": "spacing.10",

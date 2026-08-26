@@ -17,6 +17,18 @@ export default {
   ],
   swizzlePath: "packages/core/src/SideNav.tsx",
   extends: null,
+  states: [
+    { name: "expanded", description: "Brand header, full nav list, footer row all render; children get no iconOnly override.", tokens: ["expanded padding", "expanded gap"] },
+    { name: "collapsed", description: "Brand/footer hidden entirely; every child is cloned with iconOnly forced true, regardless of what was passed.", tokens: ["collapsed padding (horizontal)", "collapsed padding (vertical)", "collapsed gap"] },
+  ],
+  accessibility: {
+    ariaAttributes: [
+      { attribute: "aria-label", description: "Set on the toggle button to \"Expand\" or \"Collapse\" depending on current state — confirmed dynamically correct in the source, not a static label." },
+    ],
+    focusBehaviors: [
+      "Gap, confirmed by reading the source: the root element is a plain <div> with no <nav> tag and no role=\"navigation\"/aria-label — a screen reader user browsing by landmark regions won't find this labeled as navigation at all.",
+    ],
+  },
   figmaTokens: {
     "panel background": "color.surface.raised",
     "panel border": "color.border.subtle",

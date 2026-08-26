@@ -12,6 +12,14 @@ export default {
   ],
   swizzlePath: "packages/core/src/Field.tsx",
   extends: "TextFieldProps",
+  states: [
+    { name: "error", description: "helperText gets a leading alert icon and switches to the danger color; the nested TextField's own error state is separate and passes through via ...rest.", tokens: ["helper color (error)"] },
+  ],
+  accessibility: {
+    ariaAttributes: [
+      { attribute: "for/id association", description: "Real, undocumented gap, confirmed by reading Field.tsx: the <label> has no htmlFor, and the nested TextField's input has no id being passed down for it to reference. Label and input aren't programmatically associated — a screen reader won't announce the label on input focus, and clicking the label text won't focus the input. Not a deliberate design decision, flagged here rather than papered over." },
+    ],
+  },
   figmaTokens: {
     "field gap": "spacing.4",
     "label color": "color.text.secondary",

@@ -21,6 +21,44 @@ export default {
   ],
   swizzlePath: "packages/core/src/Calendar.tsx",
   extends: null,
+  states: [
+    { name: "default", description: "Current-month day, no special state.", tokens: ["day text color (default)"] },
+    { name: "hover", description: "Muted background on pointer hover.", tokens: ["day hover background"] },
+    { name: "active (selected)", description: "Brand background, inverse text — one of selectedDays.", tokens: ["day active background", "day active text color"] },
+    { name: "range", description: "Subtle background — one of rangeDays, between two selected endpoints.", tokens: ["day range background"] },
+    { name: "disabled", description: "Native disabled attribute; dimmed text. Combines with range as a distinct \"range-disabled\" CSS class, though it shares the plain disabled text-color token.", tokens: ["day disabled text color"] },
+    { name: "hidden", description: "Adjacent-month padding day — rendered as plain text, not a button at all, non-interactive by construction rather than by a disabled attribute.", tokens: ["day hidden text color"] },
+  ],
+  // Real, significant gap found by tracing the actual keyboard behavior,
+  // not assumed from "it's a date picker so it probably has grid nav":
+  // Calendar has NO arrow-key navigation between day cells at all. Every
+  // day is a real <button> (confirmed in Calendar.tsx), so Tab/Shift+Tab
+  // and Enter/Space work per-button natively — but there's no onKeyDown
+  // implementing the WAI-ARIA date-grid pattern (ArrowUp/Down/Left/Right
+  // moving focus between cells), no role="grid"/"row"/"gridcell" on the
+  // container structure (plain divs with a CSS grid class only), and each
+  // day button's only accessible content is the bare day-of-month number
+  // — no aria-label with the full date, no aria-current="date" for today,
+  // no aria-selected for the active day. A keyboard user must Tab through
+  // up to 42 individual day buttons one at a time to reach a given date,
+  // with no indication via a screen reader of which date each button
+  // actually represents beyond the bare number. The header nav
+  // (prev/next/month-select/year-select) is genuinely well-labeled
+  // (aria-label on both nav buttons and both selects) and has a real
+  // :focus-visible ring bound to color.border.focus — this gap is
+  // specific to the day grid, not the whole component.
+  accessibility: {
+    keyboardInteractions: [
+      { key: "Tab / Shift+Tab", action: "Moves focus to the next/previous focusable element in DOM order — nav buttons, selects, then every visible day button in row-major order. No arrow-key grid navigation exists." },
+      { key: "Enter or Space (on a day button)", action: "Selects that day — native <button> activation, not a custom handler." },
+    ],
+    ariaAttributes: [
+      { attribute: "aria-label (nav buttons)", description: '"Previous month" / "Next month" — present and correct.' },
+      { attribute: "aria-label (selects)", description: '"Month" / "Year" — present and correct on both <select> elements.' },
+      { attribute: "aria-label (day buttons)", description: "Missing — each day button's only accessible name is its bare day-of-month number (e.g. \"15\"), not the full date. A screen reader announces \"15, button\" with no month/year context." },
+      { attribute: "aria-current / aria-selected", description: "Neither is set anywhere — today's date and the selected day(s) are conveyed only visually (background color), not programmatically." },
+    ],
+  },
   // The Calendar Day states in Figma (Default/Hover/Active/Hidden/Disabled/
   // Range/Range Disabled) map to CSS pseudo-classes and modifier classes
   // here rather than separate components — see Calendar.css.

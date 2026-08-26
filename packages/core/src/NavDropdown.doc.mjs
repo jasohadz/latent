@@ -16,6 +16,23 @@ export default {
   ],
   swizzlePath: "packages/core/src/NavDropdown.tsx",
   extends: null,
+  // Same "only what's distinct here" logic as figmaTokens below: the
+  // trigger and rows are real NavItem/NavSubItem instances, so their own
+  // states already live in NavItem.doc.mjs/NavSubItem.doc.mjs. Only the
+  // disclosure-specific facts belong here.
+  states: [
+    { name: "collapsed", description: "Sub-list not rendered; trigger's chevron points down.", tokens: [] },
+    { name: "expanded", description: "Sub-list renders with sub-list gap/indent; trigger's chevron points up.", tokens: ["sub-list gap", "sub-list indent"] },
+  ],
+  accessibility: {
+    ariaAttributes: [
+      { attribute: "aria-expanded", description: "Set on the trigger NavItem, reflecting the expanded prop directly — a real disclosure-pattern attribute, confirmed in the source." },
+    ],
+    focusBehaviors: [
+      "Gap, confirmed by reading the source: no arrow-key navigation between sub-items exists — each NavSubItem is a plain button in a list with no roving tabindex or keydown handling, so keyboard users tab through every sub-item individually rather than using Up/Down like a conventional menu.",
+      "Gap, confirmed by reading the source: no Escape-to-collapse handling exists — closing an expanded dropdown by keyboard means re-activating the trigger, not the more conventional Escape key.",
+    ],
+  },
   // Only 2 entries by design, not a gap: NavDropdown renders real NavItem/
   // NavSubItem instances for the trigger and sub-rows, so their own padding/
   // color/typography tokens already live in NavItem.doc.mjs/NavSubItem.doc.mjs

@@ -17,6 +17,16 @@ export default {
   ],
   swizzlePath: "packages/core/src/TopNav.tsx",
   extends: null,
+  states: [
+    { name: "menu: none", description: "No panel rendered below the bar.", tokens: [] },
+    { name: "menu: product / download", description: "Corresponding panel renders below the bar; the matching TopNavLink shows its active label color (see TopNavLink.doc.mjs).", tokens: ["panel padding", "panel background", "panel border", "panel border-radius", "panel shadow"] },
+  ],
+  accessibility: {
+    focusBehaviors: [
+      "Gap, confirmed by reading the source: the Product/Download TopNavLink triggers receive no aria-expanded here — TopNav never passes one through, and TopNavLink doesn't accept one as a distinct concern (see TopNavLink.doc.mjs). Worth noting: NavDropdown (a structurally similar trigger+panel pattern elsewhere in this repo) does set aria-expanded correctly — this is an inconsistency between two components solving the same disclosure problem, not a universal gap.",
+      "Gap, confirmed by reading the source: no Escape-to-close handling for an open panel, and the root has no role=\"navigation\"/aria-label landmark.",
+    ],
+  },
   figmaTokens: {
     "bar padding (vertical)": "spacing.8",
     "bar padding (horizontal)": "spacing.16",
