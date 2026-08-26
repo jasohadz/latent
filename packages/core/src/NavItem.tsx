@@ -50,7 +50,15 @@ export const NavItem = React.forwardRef<HTMLButtonElement, NavItemProps>(
       .join(" ");
 
     return (
-      <button ref={ref} type="button" className={classes} disabled={disabled} aria-label={iconOnly ? label : undefined} {...rest}>
+      <button
+        ref={ref}
+        type="button"
+        className={classes}
+        disabled={disabled}
+        aria-label={iconOnly ? label : undefined}
+        aria-current={selected ? "page" : undefined}
+        {...rest}
+      >
         {showIcon && icon ? <span className="lat-nav-item__icon">{icon}</span> : null}
         {iconOnly ? null : <span className="lat-nav-item__label">{label}</span>}
         {!iconOnly && showChevron ? (

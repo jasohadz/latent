@@ -26,7 +26,14 @@ export const NavSubItem = React.forwardRef<HTMLButtonElement, NavSubItemProps>(
       .join(" ");
 
     return (
-      <button ref={ref} type="button" className={classes} disabled={disabled} {...rest}>
+      <button
+        ref={ref}
+        type="button"
+        className={classes}
+        disabled={disabled}
+        aria-current={selected ? "page" : undefined}
+        {...rest}
+      >
         {showIcon ? (
           <Icon name="corner-down-right" size="sm" weight="light" className="lat-nav-sub-item__icon" />
         ) : null}

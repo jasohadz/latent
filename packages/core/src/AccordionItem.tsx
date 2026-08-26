@@ -26,12 +26,15 @@ export const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps
       .filter(Boolean)
       .join(" ");
 
+    const answerId = React.useId();
+
     return (
       <div ref={ref} className={classes}>
         <button
           type="button"
           className="lat-accordion-item__header"
           aria-expanded={open}
+          aria-controls={answerId}
           disabled={disabled}
           onClick={() => onToggle(!open)}
         >
@@ -44,7 +47,9 @@ export const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps
             <Icon name="chevron-down" />
           </span>
         </button>
-        {open ? <div className="lat-accordion-item__answer">{children}</div> : null}
+        <div id={answerId} className="lat-accordion-item__answer" hidden={!open}>
+          {children}
+        </div>
       </div>
     );
   }

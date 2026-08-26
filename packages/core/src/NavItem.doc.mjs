@@ -30,10 +30,10 @@ export default {
     ],
     ariaAttributes: [
       { attribute: "aria-label", description: "Set to `label` only when iconOnly is true, since there's no visible text in that mode." },
+      { attribute: "aria-current", description: 'Fixed 2026-08-26: set to "page" whenever `selected` is true (previously `selected` was purely a visual CSS class with no ARIA equivalent). One honest imprecision, not silently glossed over: NavItem is reused as NavDropdown\'s trigger, where `selected` really means "one of my sub-items is the current page," not "I myself am the current page" — aria-current="page" is a slight overclaim in that specific reuse, but was judged the better default over adding a second prop just to disambiguate a case NavDropdown.doc.mjs already documents as having its own gaps (no arrow-key nav, no Escape-to-close, still open). Overridable via aria-current in ...rest if a consumer needs the precise value.' },
     ],
     focusBehaviors: [
       "Real :focus-visible outline confirmed in NavItem.css, bound to color.border.focus.",
-      "Gap, confirmed by reading the source: `selected` is purely a visual CSS class (lat-nav-item--selected) with no corresponding aria-current or aria-selected — a screen reader user has no way to tell which item is the current/active one from the DOM alone.",
     ],
   },
   figmaTokens: {

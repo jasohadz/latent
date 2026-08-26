@@ -24,9 +24,11 @@ export default {
     keyboardInteractions: [
       { key: "Enter or Space", action: "Activates the item — native <button> behavior, no custom handler." },
     ],
+    ariaAttributes: [
+      { attribute: "aria-current", description: 'Fixed 2026-08-26, same change as NavItem: set to "page" whenever `selected` is true. NavSubItem is only ever used inside NavDropdown\'s sub-list of real navigable pages, so unlike NavItem\'s dropdown-trigger reuse there\'s no imprecision here — `selected` on a NavSubItem always means "this page".' },
+    ],
     focusBehaviors: [
       "Real :focus-visible outline confirmed in NavSubItem.css, bound to color.border.focus.",
-      "Same gap as NavItem, confirmed by reading the source: `selected` is a CSS-only class with no aria-current/aria-selected — not communicated to assistive tech.",
     ],
   },
   figmaTokens: {
