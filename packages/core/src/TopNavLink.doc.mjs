@@ -16,9 +16,17 @@ export default {
     { name: "default", description: "Secondary label color.", tokens: ["label color"] },
     { name: "active", description: "Primary label color — TopNav sets this when its own `menu` matches this link.", tokens: ["active label color"] },
   ],
+  // Fixed 2026-08-26 (part of the TopNav-family pass — see TopNav.doc.mjs
+  // and MegaMenuItem.doc.mjs). Focus ring added here; aria-expanded/
+  // aria-haspopup are supplied by the caller (TopNav) through the
+  // ButtonHTMLAttributes spread — this component never had to reject
+  // them, TopNav simply wasn't passing them.
   accessibility: {
+    ariaAttributes: [
+      { attribute: "aria-expanded / aria-haspopup", description: 'Not set by TopNavLink itself — passed straight through via the ButtonHTMLAttributes spread (`extends`). TopNav now supplies both on its Product/Download instances; the plain Pricing instance gets neither, correctly, since it has no panel.' },
+    ],
     focusBehaviors: [
-      "Gap, confirmed by reading the source: TopNavLink.css has no focus-visible rule at all (grepped the file directly — nothing), and the component renders a plain <button> with no aria-expanded/aria-haspopup even though (via TopNav) it opens a dropdown panel for Product/Download. A keyboard user gets no visible focus indicator and no signal this button controls an expandable region.",
+      "Token-bound focus-visible ring added (same pattern as Button/MegaMenuItem): outline: none on :focus, a real outline on :focus-visible using color.border.focus/sizing.border.thin/sizing.focus-ring-offset. Also added a border-radius (radius.input) so the ring renders rounded instead of a sharp rectangle around inline text.",
     ],
   },
   // Previously: Active=No's Label was raw unbound "Inter Regular" in
@@ -34,5 +42,9 @@ export default {
     "label color": "color.text.secondary",
     "chevron color": "color.icon.default",
     "active label color": "color.text.primary",
+    "border-radius": "radius.input",
+    "focus ring color": "color.border.focus",
+    "focus ring width": "sizing.border.thin",
+    "focus ring offset": "sizing.focus-ring-offset",
   },
 };

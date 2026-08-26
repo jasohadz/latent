@@ -44,13 +44,38 @@ export const TopNav = React.forwardRef<HTMLDivElement, TopNavProps>(
   ) => {
     const toggle = (target: TopNavMenu) => onMenuChange?.(menu === target ? "none" : target);
 
+    function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+      if (e.key === "Escape" && menu !== "none") {
+        e.preventDefault();
+        onMenuChange?.("none");
+      }
+    }
+
     return (
-      <div ref={ref} className={["lat-top-nav", className].filter(Boolean).join(" ")}>
+      <div
+        ref={ref}
+        className={["lat-top-nav", className].filter(Boolean).join(" ")}
+        role="navigation"
+        aria-label="Main navigation"
+        onKeyDown={handleKeyDown}
+      >
         <div className="lat-top-nav__bar">
           {logo}
           <div className="lat-top-nav__nav-row">
-            <TopNavLink label="Product" active={menu === "product"} onClick={() => toggle("product")} />
-            <TopNavLink label="Download" active={menu === "download"} onClick={() => toggle("download")} />
+            <TopNavLink
+              label="Product"
+              active={menu === "product"}
+              onClick={() => toggle("product")}
+              aria-expanded={menu === "product"}
+              aria-haspopup="true"
+            />
+            <TopNavLink
+              label="Download"
+              active={menu === "download"}
+              onClick={() => toggle("download")}
+              aria-expanded={menu === "download"}
+              aria-haspopup="true"
+            />
             <TopNavLink label="Pricing" active={false} showChevron={false} />
           </div>
           <Button variant="primary" size="sm" onClick={onCtaClick}>

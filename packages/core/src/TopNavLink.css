@@ -3,10 +3,17 @@
   align-items: center;
   gap: var(--lat-spacing-4);
   border: none;
+  border-radius: var(--lat-radius-input);
   background: transparent;
   cursor: pointer;
   font-family: var(--lat-font-family-sans);
   font-size: var(--lat-font-style-body-small);
+}
+
+.lat-top-nav-link:focus { outline: none; }
+.lat-top-nav-link:focus-visible {
+  outline: var(--lat-sizing-border-thin) solid var(--lat-color-border-focus);
+  outline-offset: var(--lat-sizing-focus-ring-offset);
 }
 
 .lat-top-nav-link__label {

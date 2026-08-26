@@ -14,15 +14,20 @@ export default {
   ],
   swizzlePath: "packages/core/src/MegaMenuItem.tsx",
   extends: "React.ButtonHTMLAttributes<HTMLButtonElement>",
-  // No `states` here, by design, not omission: `layout` (standard/
-  // featured) is a display variant already captured as a props enum, not
-  // an interaction state — and confirmed by reading MegaMenuItem.css in
-  // full, there is no hover/pressed/focus rule anywhere in the file at
-  // all (see the accessibility gap below), so there's no real interactive
-  // state to document beyond what the props already say.
+  // `layout` (standard/featured) stays a props enum, not a `states` entry
+  // — it's a display variant, not an interaction state. Fixed 2026-08-26
+  // (part of the TopNav-family pass — see TopNav.doc.mjs/TopNavLink.doc.mjs):
+  // real hover/pressed/focus-visible states now exist, so they're
+  // documented here instead of the old "there is no interactive state at
+  // all" note.
+  states: [
+    { name: "hover", description: "Muted background on pointer hover — same token as Button's secondary/ghost hover.", tokens: ["hover background"] },
+    { name: "pressed", description: "Slightly stronger background while the mouse button is held down.", tokens: ["pressed background"] },
+    { name: "featured", description: "layout=\"featured\" only: muted background at rest, overridden by hover/pressed above while interacting.", tokens: ["featured background"] },
+  ],
   accessibility: {
     focusBehaviors: [
-      "Significant gap, confirmed by reading MegaMenuItem.css in full: despite being cursor: pointer and a real <button>, there is zero hover, pressed, or focus-visible styling anywhere in the file — a keyboard or mouse user gets no visual feedback at all that this item is interactive or currently focused.",
+      "Fixed: token-bound hover/pressed backgrounds and a focus-visible ring added (same pattern as Button/TopNavLink) — outline: none on :focus, a real outline on :focus-visible. Previously zero hover, pressed, or focus styling existed anywhere in the file despite being a real, clickable <button>.",
     ],
   },
   figmaTokens: {
@@ -36,5 +41,10 @@ export default {
     "title font-weight": "font-weight.600",
     "description color": "color.text.tertiary",
     "description font-size": "font-style.body-small",
+    "hover background": "color.action.secondary.hover",
+    "pressed background": "color.action.secondary.pressed",
+    "focus ring color": "color.border.focus",
+    "focus ring width": "sizing.border.thin",
+    "focus ring offset": "sizing.focus-ring-offset",
   },
 };

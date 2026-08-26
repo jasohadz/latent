@@ -21,10 +21,23 @@ export default {
     { name: "menu: none", description: "No panel rendered below the bar.", tokens: [] },
     { name: "menu: product / download", description: "Corresponding panel renders below the bar; the matching TopNavLink shows its active label color (see TopNavLink.doc.mjs).", tokens: ["panel padding", "panel background", "panel border", "panel border-radius", "panel shadow"] },
   ],
+  // Fixed 2026-08-26 (the "TopNav family" pass — see TopNavLink.doc.mjs
+  // and MegaMenuItem.doc.mjs for the other two components in the same
+  // fix). Scope: aria-expanded/aria-haspopup on the two real triggers,
+  // Escape-to-close, and a navigation landmark on the root. NOT in
+  // scope: focus doesn't move anywhere on Escape (stays wherever it
+  // was — no focus-return-to-trigger management), and there's still no
+  // arrow-key navigation within an open panel (MegaMenuItem rows are
+  // Tab-stops, not an ARIA menu widget) — same honest-scoping discipline
+  // as Toggle/Calendar: no role implying behavior that isn't real.
   accessibility: {
-    focusBehaviors: [
-      "Gap, confirmed by reading the source: the Product/Download TopNavLink triggers receive no aria-expanded here — TopNav never passes one through, and TopNavLink doesn't accept one as a distinct concern (see TopNavLink.doc.mjs). Worth noting: NavDropdown (a structurally similar trigger+panel pattern elsewhere in this repo) does set aria-expanded correctly — this is an inconsistency between two components solving the same disclosure problem, not a universal gap.",
-      "Gap, confirmed by reading the source: no Escape-to-close handling for an open panel, and the root has no role=\"navigation\"/aria-label landmark.",
+    keyboardInteractions: [
+      { key: "Escape", action: 'Closes the currently open panel (onMenuChange("none")) if one is open. No-op otherwise. Does not move focus.' },
+    ],
+    ariaAttributes: [
+      { attribute: "aria-expanded (Product/Download TopNavLink instances)", description: "Now set to whether that link's own panel is open — matches NavDropdown's existing correct handling of the same trigger+panel pattern elsewhere in this repo." },
+      { attribute: 'aria-haspopup="true" (Product/Download TopNavLink instances)', description: 'Deliberately the generic "true", not "menu" — the open panel is a set of Tab-stoppable buttons, not an ARIA menu widget with arrow-key navigation, so aria-haspopup="menu" would announce interaction support that does not exist.' },
+      { attribute: 'role="navigation" / aria-label="Main navigation" (root)', description: "The root was a bare <div> with no landmark at all — added the role (rather than swapping to a real <nav> element, to avoid changing the forwardRef'd element type for existing consumers)." },
     ],
   },
   figmaTokens: {
