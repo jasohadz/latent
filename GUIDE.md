@@ -101,15 +101,19 @@ this. Phase 4 is that hardening pass, not page templates:
     pass (documenting honestly was the goal, not silently patching
     behavior while claiming to just be writing docs). Worth fixing,
     roughly in priority order:
-    - **`Calendar`** — zero arrow-key grid navigation; day buttons have no
-      `aria-label` with the actual date (bare number only), no
-      `aria-current`/`aria-selected`. A keyboard user tabs through up to
-      42 individual buttons with no date context announced.
-    - **`Toggle`/`ToggleMultiple`** — use the WAI-ARIA tabs pattern's
-      roles (`role="tablist"`/`"tab"`/`aria-selected`) without
-      implementing that pattern's required arrow-key navigation —
-      arguably worse than using no ARIA role at all, since it announces
-      behavior that isn't there.
+    - ~~**`Calendar`** — zero arrow-key grid navigation~~ **Fixed
+      2026-08-26** (commit `c83b32d`): implements the WAI-ARIA date-grid
+      pattern (`role="grid"`/`"row"`/`"gridcell"`, roving tabindex,
+      Arrow/Home/End, full-date `aria-label`s, `aria-selected`).
+      Deliberately scoped to the visible month only — doesn't cross month
+      boundaries. See `Calendar.doc.mjs`'s `accessibility` field.
+    - ~~**`Toggle`/`ToggleMultiple`** — use the WAI-ARIA tabs pattern's
+      roles without implementing arrow-key navigation~~ **Fixed
+      2026-08-26** (commit `f2e4e29`): roving tabindex plus
+      ArrowLeft/ArrowRight/Home/End with automatic activation, same
+      recipe in both files. Focus-ring gap (see `Switch` below)
+      deliberately left as-is, documented not silently fixed. See
+      `Toggle.doc.mjs`/`ToggleMultiple.doc.mjs`'s `accessibility` fields.
     - **The `TopNav` family is systematically weaker than the `SideNav`
       family** — not isolated one-offs. `MegaMenuItem` is a real
       clickable `<button>` with zero hover/pressed/focus styling
@@ -162,11 +166,12 @@ primitive — there isn't an obvious one left to add. Instead:
   before assuming there's nothing left to look at.
 - **The real next body of work**: item 15 above lists real accessibility
   bugs found by actually reading the component source, not documentation
-  gaps. `Calendar`'s missing grid keyboard nav and the `Toggle`/
-  `ToggleMultiple` ARIA-tabs-pattern mismatch are the two most worth
-  fixing first — both are places where a screen reader user gets told
-  something about the interface that isn't actually true, not just a
-  missing nicety.
+  gaps. `Calendar` and `Toggle`/`ToggleMultiple` are fixed (2026-08-26,
+  commits `c83b32d` and `f2e4e29`) — 14 items remain. The `TopNav` family
+  weakness is the next highest-value one: it's systemic (three components)
+  rather than an isolated gap, and like the two fixed ones, it's a place
+  where the interface claims behavior (a dropdown trigger) that isn't
+  backed by the ARIA/focus support it needs.
 - Known open item, still unresolved, fold in whenever it's actually
   blocking something rather than fixing it speculatively: Button has no
   true icon-only square variant (see the port session notes) — several
