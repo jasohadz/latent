@@ -151,11 +151,27 @@ this. Phase 4 is that hardening pass, not page templates:
       are real in the CSS but were never declared in `figmaTokens` — a
       real `check-parity` blind spot, it can't check a token that was
       never declared.
-    - **`NavItem`/`NavSubItem`** — `selected` is CSS-only, no
-      `aria-current`/`aria-selected`. **`NavDropdown`** — no arrow-key
-      nav between items, no Escape-to-close. **`SideNav`** — root has no
-      `<nav>`/`role="navigation"` landmark. **`AccordionItem`** — header
-      button has no `aria-controls`/`id` link to its answer content.
+    - ~~**`NavItem`/`NavSubItem`** — `selected` is CSS-only, no
+      `aria-current`~~ **Fixed 2026-08-26** (commit `1cc2228`): both set
+      `aria-current="page"` when `selected`. One documented imprecision
+      on `NavItem` specifically (not `NavSubItem`): it's reused as
+      `NavDropdown`'s trigger, where `selected` means "contains the
+      current page" rather than "is the current page" — a slight
+      overclaim, judged the better default over a second prop. See
+      `NavItem.doc.mjs`/`NavSubItem.doc.mjs`.
+    - **`NavDropdown`** — no arrow-key nav between items, no
+      Escape-to-close.
+    - **`SideNav`** — root has no `<nav>`/`role="navigation"` landmark.
+    - ~~**`AccordionItem`** — header button has no `aria-controls`/`id`
+      link to its answer content~~ **Fixed 2026-08-26** (commit
+      `1cc2228`): `aria-controls` + `React.useId()`-generated `id`,
+      which also required switching the answer content from
+      conditional rendering to always-present-plus-`hidden` so the id
+      it points at always exists. The `:focus { outline: none }` on the
+      header was re-checked and deliberately left alone — the
+      container's existing `:focus-within` border-color change is a
+      real, already-verified working focus indicator, not the
+      worse-than-missing pattern `ChatInput` has.
     - **`Switch`** — no deliberate focus ring (the browser's unstyled
       default still shows, since `outline: none` was never set either —
       it's an accident of omission, not a broken state, but not a
@@ -177,13 +193,15 @@ primitive — there isn't an obvious one left to add. Instead:
   before assuming there's nothing left to look at.
 - **The real next body of work**: item 15 above lists real accessibility
   bugs found by actually reading the component source, not documentation
-  gaps. `Calendar`, `Toggle`/`ToggleMultiple`, the `TopNav` family, and
-  `TextField`/`TextArea` are fixed, and `Panel` was re-examined and turned
-  out to be a doc gap rather than a code one (2026-08-26, commits
-  `c83b32d`, `f2e4e29`, `3f448f0`, `4aafde9`) — 10 items remain.
-  `NavItem`/`NavSubItem`'s missing `aria-current`/`aria-selected` and
-  `AccordionItem`'s missing `aria-controls`/`id` link are both small,
-  contained, single-component fixes worth picking next.
+  gaps. `Calendar`, `Toggle`/`ToggleMultiple`, the `TopNav` family,
+  `TextField`/`TextArea`, `NavItem`/`NavSubItem`, and `AccordionItem` are
+  fixed, and `Panel` was re-examined and turned out to be a doc gap
+  rather than a code one (2026-08-26, commits `c83b32d`, `f2e4e29`,
+  `3f448f0`, `4aafde9`, `1cc2228`) — 7 items remain: `ChatWindow`,
+  `ChatInput`, `Field`/`SubscribeField`, `Button`, `NavDropdown`,
+  `SideNav`, `Switch`. `SideNav`'s missing landmark is the smallest
+  single-line fix left; `NavDropdown`'s arrow-key-nav/Escape-to-close gap
+  pairs naturally with it since both live in the same nav-family pass.
 - Known open item, still unresolved, fold in whenever it's actually
   blocking something rather than fixing it speculatively: Button has no
   true icon-only square variant (see the port session notes) — several
