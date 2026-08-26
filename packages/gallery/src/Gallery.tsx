@@ -1,6 +1,7 @@
 import React from "react";
 
 import { AccordionItem } from "@latent/core/AccordionItem";
+import { Alert } from "@latent/core/Alert";
 import { Avatar } from "@latent/core/Avatar";
 import { AvatarGroup } from "@latent/core/AvatarGroup";
 import { Badge } from "@latent/core/Badge";
@@ -54,7 +55,10 @@ function ComponentCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className={["gallery__card", wide ? "gallery__card--wide" : ""].filter(Boolean).join(" ")}>
+    <div
+      className={["gallery__card", wide ? "gallery__card--wide" : ""].filter(Boolean).join(" ")}
+      data-gallery-component={name}
+    >
       <div className="gallery__card-name">{name}</div>
       <div
         className={[
@@ -89,6 +93,8 @@ export function Gallery() {
   const [sideNavCollapsed, setSideNavCollapsed] = React.useState(false);
   const [topNavMenu, setTopNavMenu] = React.useState<TopNavMenu>("none");
   const [chatInputValue, setChatInputValue] = React.useState("");
+  const [alertDismissed, setAlertDismissed] = React.useState(false);
+  const [alertExpanded, setAlertExpanded] = React.useState(false);
 
   return (
     <div className="gallery">
@@ -191,6 +197,29 @@ export function Gallery() {
             ctaLabel="Learn more"
             icon={<Icon name="sparkles" />}
           />
+        </ComponentCard>
+
+        <ComponentCard name="Alert" wide column>
+          {!alertDismissed ? (
+            <Alert
+              appearance="inverse"
+              icon={<Icon name="megaphone" />}
+              onDismiss={() => setAlertDismissed(true)}
+            >
+              New updates are available.
+            </Alert>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={() => setAlertDismissed(false)}>
+              Reset dismissed alert
+            </Button>
+          )}
+          <Alert
+            appearance="subtle"
+            icon={<Icon name="megaphone" />}
+            onExpand={() => setAlertExpanded((e) => !e)}
+          >
+            {alertExpanded ? "Expanded: here's more detail about the notice." : "New updates are available."}
+          </Alert>
         </ComponentCard>
 
         <ComponentCard name="BadgeGroup">

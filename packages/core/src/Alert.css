@@ -1,0 +1,62 @@
+.lat-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lat-spacing-10);
+  padding: var(--lat-spacing-12) var(--lat-spacing-16);
+  border-radius: var(--lat-radius-lg);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
+}
+
+.lat-alert__content {
+  display: flex;
+  align-items: center;
+  gap: var(--lat-spacing-8);
+  min-width: 0;
+}
+
+.lat-alert__message {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Icon.css sets .lat-icon's own color unconditionally (color.icon.default),
+   which otherwise overrides the appearance color .lat-alert sets — same fix
+   pattern Badge.css/Button.css already use for the same reason. */
+.lat-alert__icon .lat-icon,
+.lat-alert__action .lat-icon {
+  color: inherit;
+}
+
+.lat-alert__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+}
+.lat-alert__action:focus {
+  outline: none;
+}
+.lat-alert__action:focus-visible {
+  outline: var(--lat-sizing-border-default) solid var(--lat-color-border-focus);
+  outline-offset: 2px;
+}
+
+.lat-alert--inverse {
+  background-color: var(--lat-color-background-inverse);
+  color: var(--lat-color-text-inverse);
+  border: none;
+}
+
+.lat-alert--subtle {
+  background-color: var(--lat-color-background-subtle);
+  color: var(--lat-color-text-secondary);
+  border: var(--lat-sizing-border-thin) solid var(--lat-color-border-default);
+}
