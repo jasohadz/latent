@@ -1,27 +1,25 @@
 export default {
   name: "SelectOption",
-  summary: "A single row inside Select's or MultiSelect's floating panel — the shared building block both compose. Optionally shows a leading Checkbox for multi-choice rows.",
+  summary: "A single row inside Select's or MultiSelect's floating panel — the shared building block both compose.",
   props: [
     { name: "label", type: "string", default: "—", description: "The row's text." },
-    { name: "selected", type: "boolean", default: "false", description: "Muted background + bold label — the current-choice look, matching NavItem's own selected-row convention exactly." },
-    { name: "showCheckbox", type: "boolean", default: "false", description: "Renders a leading Checkbox reflecting `selected`, decorative (tabIndex=-1, aria-hidden) — the row itself, not the checkbox, is the real interactive/focusable target." },
+    { name: "selected", type: "boolean", default: "false", description: "Only affects aria-selected — no distinct visual treatment (see doNot). Selection is communicated by the option's chip appearing in the trigger, not by the row itself." },
   ],
-  example: `<SelectOption label="Hiking" selected={isSelected} showCheckbox onClick={handleToggle} />`,
+  example: `<SelectOption label="Hiking" selected={isSelected} onClick={handleToggle} />`,
   doNot: [
-    "Don't rely on the inner Checkbox for keyboard interaction — it's decorative (tabIndex=-1). Click/keyboard activation happens on the row itself.",
+    "Don't expect a persistent \"selected\" background/bold style on a chosen row — the Figma reference (\"Dropdown Item\") only has two states, default and hover, no third selected treatment. `selected` still sets aria-selected for real screen-reader value; it's a deliberate accessibility-only prop, not a visual one.",
     "Don't use this outside a Select/MultiSelect panel expecting standalone listbox semantics — role=\"option\" here assumes a role=\"listbox\" ancestor, which only those two components provide.",
   ],
   swizzlePath: "packages/core/src/SelectOption.tsx",
   extends: "React.HTMLAttributes<HTMLDivElement>",
   states: [
-    { name: "default", description: "Transparent background, regular-weight label.", tokens: ["label color", "label font-size"] },
-    { name: "hover", description: "Secondary-action hover background — same token NavItem/NavSubItem use.", tokens: ["hover background"] },
-    { name: "selected", description: "Muted background, bold label — matches NavItem's selected convention exactly, deliberately reused rather than inventing a new one.", tokens: ["selected background", "selected label weight"] },
+    { name: "default", description: "Transparent background.", tokens: ["label color", "label font-size"] },
+    { name: "hover", description: "Light brand-blue background — color.background.brand, not a neutral gray hover like NavItem's own convention. A deliberate difference: this component follows its own Figma reference's real hover color, not another component's.", tokens: ["hover background"] },
     { name: "focus-visible", description: "Outline ring, keyboard-only.", tokens: ["focus ring color", "focus ring width"] },
   ],
   accessibility: {
     keyboardInteractions: [
-      { key: "Enter or Space", action: "Activates the row — a custom onKeyDown handler, not native <button> behavior. The row is a <div role=\"option\">, not a <button>, specifically because showCheckbox nests a real (decorative) Checkbox, which is itself a <button> — and a <button> can't be a descendant of another <button> (invalid HTML). Caught via a real React DOM-nesting warning while testing in the gallery, not anticipated in advance." },
+      { key: "Enter or Space", action: "Activates the row — a custom onKeyDown handler, not native <button> behavior. The row is a <div role=\"option\">, not a <button> (see the 2026-08-27 note below)." },
     ],
     ariaAttributes: [
       { attribute: "role, aria-selected", description: 'role="option" with aria-selected reflecting `selected` — assumes a role="listbox" ancestor (Select/MultiSelect\'s own panel).' },
@@ -30,26 +28,27 @@ export default {
       "Real :focus-visible outline, bound to color.border.focus. Individually Tab-reachable — not a full roving-tabindex/aria-activedescendant listbox pattern, the same honest simplification NavDropdown's sub-list already documents.",
     ],
   },
-  // Built 2026-08-27 in Figma, synthesizing the two competing foreign
-  // references on the Select page: Style 1's checkbox-less "Dropdown Item"
-  // and Style 4's checkbox-driven "Multiselect Item" (which composes the
-  // "◈ Checkbox - Dark Mode" reference, see Checkbox.doc.mjs) were merged
-  // into one component with a showCheckbox boolean, rather than kept as
-  // two separate Figma-mirrored components — Select uses showCheckbox=false,
-  // MultiSelect uses true. Hover/selected background colors were re-derived
-  // from Latent's own NavItem convention (color.action.secondary.hover /
-  // color.background.muted), not the references' own raw hover-blue and
-  // muted-gray values, for consistency with the rest of the system rather
-  // than matching either reference's specific palette.
+  // Rebuilt 2026-08-27 to match "Style 1" specifically — the one foreign
+  // reference the user kept on the Select page after deleting the other
+  // three competing style explorations that were there when this
+  // component was first built (see git history for that first version).
+  // Two real differences from the first pass, confirmed via a fresh live
+  // Figma pull of Style 1's own "Dropdown Item": (1) no checkbox at all —
+  // Style 1's rows are plain hover-highlighted text, unlike the other
+  // (now-deleted) style's checkbox-driven rows; the showCheckbox prop and
+  // Checkbox composition were removed entirely, not just unused. (2) hover
+  // background is color.background.brand (light blue), not
+  // color.action.secondary.hover (neutral gray) — Style 1's own hover
+  // color is genuinely blue-tinted, confirmed via the reference's real
+  // fill value before mapping it to the closest matching Latent token.
+  // Also dropped the "selected" bg-muted+bold row styling the first pass
+  // invented (borrowed from NavItem's convention) — Style 1's real
+  // Dropdown Item only has default/hover, nothing else.
   figmaTokens: {
     "row padding": "spacing.8",
-    "row gap": "spacing.8",
-    "row border-radius": "radius.lg",
     "label color": "color.text.primary",
     "label font-size": "font-style.body-small",
-    "hover background": "color.action.secondary.hover",
-    "selected background": "color.background.muted",
-    "selected label weight": "font-weight.600",
+    "hover background": "color.background.brand",
     "focus ring color": "color.border.focus",
     "focus ring width": "sizing.border.default",
   },

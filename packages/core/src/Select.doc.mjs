@@ -13,12 +13,13 @@ export default {
   doNot: [
     "Don't expect selected values to render as chips in the trigger — that's MultiSelect's own pattern (multiple values), not this one (exactly one). Select shows the chosen item's label as plain text.",
     "Don't expect a full ARIA combobox/roving-tabindex listbox — options are individually Tab-reachable (with Arrow/Escape as keyboard conveniences), the same honest simplification NavDropdown's sub-list already documents. See SelectOption.doc.mjs.",
+    "Don't expect the panel to have a drop shadow — the Style 1 reference this was rebuilt from has none, just a 1px border; adding one would be a real (if small) fidelity regression.",
   ],
   swizzlePath: "packages/core/src/Select.tsx",
   extends: null,
   states: [
     { name: "closed", description: "Trigger shows the selected label or the placeholder, default border.", tokens: ["trigger border"] },
-    { name: "open (active)", description: "Trigger border switches to brand color; panel renders below it.", tokens: ["trigger border (active)", "panel background", "panel border", "panel border-radius", "panel shadow"] },
+    { name: "open (active)", description: "Trigger border switches to brand color; panel renders directly below it (4px gap), flush against the trigger's own width — square-cornered rows, clipped by the panel's own border-radius via overflow: hidden.", tokens: ["trigger border (active)", "panel background", "panel border", "panel border-radius"] },
     { name: "disabled", description: "Trigger border dims, cursor becomes not-allowed.", tokens: ["trigger border (disabled)"] },
   ],
   accessibility: {
@@ -36,19 +37,29 @@ export default {
       "A new pattern in this codebase, not reused from an existing component: outside-click closes the panel (via a document mousedown listener checking containment), since a select left open after clicking elsewhere is a real usability bug in a way TopNav's/NavDropdown's own persistent-until-toggled menus tolerate.",
     ],
   },
-  // Built 2026-08-27: synthesized from 4 competing foreign-reference style
-  // explorations on the Select page ("Style 1"-"Style 4", context-only,
-  // none bound to Latent tokens — same treatment as every other foreign
-  // reference this session). The trigger reuses TextField's own border/
-  // radius/padding tokens exactly (see TextField.doc.mjs); the panel
-  // reuses TopNav's own floating-panel convention exactly (background,
-  // border, radius.card, elevation.md — see TopNav.doc.mjs's panel
-  // entries). Verified together as one composed preview in Figma (label +
-  // trigger + panel of real SelectOption instances), not built as its own
-  // named Figma COMPONENT_SET — check-component-bindings has no live data
-  // for "Select" itself as a result (reports "no-live-data", non-blocking,
-  // same as any component before its first plugin sync); every token below
-  // was independently confirmed live via the composed preview's own
+  // Rebuilt 2026-08-27 to match "Style 1" specifically — the only foreign
+  // reference the user kept on the Select page after deleting the other
+  // three competing style explorations the first version of this
+  // component (built the same day) had synthesized across. Real
+  // differences from that first pass, confirmed via a fresh live pull of
+  // Style 1's own "MultiSelect Input" and "Dropdown" references: panel
+  // sits only 4px below the trigger (spacing.4, not spacing.8), has zero
+  // internal padding/gap (rows go edge-to-edge, clipped to the panel's own
+  // rounded corners via overflow: hidden, not individually rounded), no
+  // drop shadow at all (Style 1's reference genuinely has none — the
+  // first pass borrowed TopNav's elevation.md, which doesn't apply here),
+  // and background.default (near-white) rather than surface.raised
+  // (though those may resolve to the same value in this theme, the
+  // reference's real binding is background.default). The trigger itself
+  // is unchanged — still reuses TextField's own border/radius/padding
+  // tokens exactly, confirmed correct in both passes.
+  //
+  // Verified together as one composed preview in Figma (label + trigger +
+  // panel of real SelectOption instances), not built as its own named
+  // Figma COMPONENT_SET — check-component-bindings has no live data for
+  // "Select" itself as a result (reports "no-live-data", non-blocking,
+  // same as any component before its first plugin sync); every token
+  // below was independently confirmed live via the composed preview's own
   // figma_execute dump, the same rigor as a named component would get.
   figmaTokens: {
     "trigger padding": "spacing.8",
@@ -62,15 +73,9 @@ export default {
     "value color": "color.text.primary",
     "placeholder color": "color.text.tertiary",
     "chevron color": "color.icon.default",
-    "panel gap": "spacing.4",
-    "panel padding": "spacing.8",
-    "panel background": "color.surface.raised",
+    "panel gap (from trigger)": "spacing.4",
+    "panel background": "color.background.default",
     "panel border": "color.border.subtle",
-    "panel border-radius": "radius.card",
-    "panel shadow": "elevation.md",
+    "panel border-radius": "radius.lg",
   },
-  // "panel shadow" is skipped: an Effect Style (box-shadow), not a
-  // Variable — check-component-bindings only walks bound Variables, same
-  // as Card's/TopNav's own shadow skip entries.
-  figmaTokensSkipLiveCheck: ["panel shadow"],
 };

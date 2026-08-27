@@ -259,7 +259,7 @@ export function Gallery() {
         <ComponentCard name="SelectOption" wide column>
           <SelectOption label="Hiking" onClick={() => {}} />
           <SelectOption label="Fishing" selected onClick={() => {}} />
-          <SelectOption label="Reading" showCheckbox selected onClick={() => {}} />
+          <SelectOption label="Reading" onClick={() => {}} />
         </ComponentCard>
 
         <ComponentCard name="Select" wide>

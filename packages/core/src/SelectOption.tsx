@@ -1,31 +1,24 @@
 import React from "react";
-import { Checkbox } from "./Checkbox";
 import "./SelectOption.css";
 
 export interface SelectOptionProps extends React.HTMLAttributes<HTMLDivElement> {
   label: string;
+  /** Only affects aria-selected — no distinct visual treatment, matching the Figma reference's own Dropdown Item (which has just default/hover, no separate selected style). Selection is communicated by the option's chip appearing in the trigger, not by the row itself. */
   selected?: boolean;
-  /** Shows a leading Checkbox reflecting `selected` — MultiSelect's rows use this; Select's own rows omit it. */
-  showCheckbox?: boolean;
 }
 
 /**
  * SelectOption — a single row inside Select's or MultiSelect's floating
- * panel. A <div role="option">, not a <button> — showCheckbox renders a
- * real (decorative) Checkbox, which is itself a <button>, and a <button>
- * can't be a descendant of another <button> (invalid HTML, breaks click
- * semantics — caught via a real React DOM-nesting warning, not
- * theoretically). role="option" is also a pragmatic simplification, not a
- * full ARIA listbox/roving-tabindex pattern: each option is individually
- * Tab-reachable rather than managed via a single roving tabindex plus
- * aria-activedescendant, same honest tradeoff NavDropdown's own sub-list
- * already documents.
+ * panel. A <div role="option">, not a <button> (see the 2026-08-27 fix
+ * note below for why). role="option" is also a pragmatic simplification,
+ * not a full ARIA listbox/roving-tabindex pattern: each option is
+ * individually Tab-reachable rather than managed via a single roving
+ * tabindex plus aria-activedescendant, same honest tradeoff NavDropdown's
+ * own sub-list already documents.
  */
 export const SelectOption = React.forwardRef<HTMLDivElement, SelectOptionProps>(
-  ({ label, selected = false, showCheckbox = false, className, onClick, onKeyDown, ...rest }, ref) => {
-    const classes = ["lat-select-option", selected ? "lat-select-option--selected" : "", className]
-      .filter(Boolean)
-      .join(" ");
+  ({ label, selected = false, className, onClick, onKeyDown, ...rest }, ref) => {
+    const classes = ["lat-select-option", className].filter(Boolean).join(" ");
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
       onKeyDown?.(e);
@@ -47,16 +40,6 @@ export const SelectOption = React.forwardRef<HTMLDivElement, SelectOptionProps>(
         onKeyDown={handleKeyDown}
         {...rest}
       >
-        {showCheckbox ? (
-          <Checkbox
-            checked={selected}
-            onChange={() => {}}
-            size="sm"
-            tabIndex={-1}
-            aria-hidden="true"
-            className="lat-select-option__checkbox"
-          />
-        ) : null}
         <span className="lat-select-option__label">{label}</span>
       </div>
     );

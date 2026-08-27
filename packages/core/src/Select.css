@@ -62,16 +62,14 @@
 
 .lat-select__panel {
   position: absolute;
-  top: calc(100% + var(--lat-spacing-8));
+  top: calc(100% + var(--lat-spacing-4));
   left: 0;
   right: 0;
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: var(--lat-spacing-4);
-  padding: var(--lat-spacing-8);
-  background-color: var(--lat-color-surface-raised);
+  overflow: hidden;
+  background-color: var(--lat-color-background-default);
   border: var(--lat-sizing-border-thin) solid var(--lat-color-border-subtle);
-  border-radius: var(--lat-radius-card);
-  box-shadow: var(--lat-elevation-md);
+  border-radius: var(--lat-radius-lg);
 }

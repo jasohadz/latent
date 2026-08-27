@@ -20,19 +20,17 @@ export interface MultiSelectProps {
 }
 
 /**
- * MultiSelect — a labeled multi-value dropdown: a bordered trigger showing
- * a "N selected" summary + chevron, opening a floating panel of real
- * SelectOption rows (each with a leading Checkbox). Selected values also
- * render as a wrapped row of real, dismissible Badge chips below the
- * trigger — reusing Badge rather than a bespoke chip component. Stays open
- * across selections (typical multi-select UX); closes on outside click or
- * Escape.
+ * MultiSelect — a labeled multi-value dropdown. Selected values render as
+ * real, dismissible Badge chips wrapping *inside* the bordered trigger
+ * itself (not below it, not a "N selected" summary) — matching the Style 1
+ * Figma reference exactly. Stays open across selections (typical
+ * multi-select UX); closes on outside click or Escape.
  */
-export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
+export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
   ({ label, placeholder = "Select...", items, value, onChange, disabled = false, className }, ref) => {
     const [open, setOpen] = React.useState(false);
     const containerRef = React.useRef<HTMLDivElement>(null);
-    const triggerRef = React.useRef<HTMLButtonElement>(null);
+    const triggerRef = React.useRef<HTMLDivElement>(null);
     const optionRefs = React.useRef<(HTMLDivElement | null)[]>([]);
     const labelId = React.useId();
 
@@ -71,45 +69,61 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
     }
 
     const selectedItems = items.filter((i) => value.includes(i.value));
-    const summary = selectedItems.length === 0 ? placeholder : `${selectedItems.length} selected`;
 
     return (
       <div ref={containerRef} className={["lat-multi-select", className].filter(Boolean).join(" ")} onKeyDown={handleKeyDown}>
         <label className="lat-multi-select__label" id={labelId}>
           {label}
         </label>
-        <button
+        {/* A <div role="button">, not a real <button> — it needs to contain
+            Badge's own dismiss <button>s, and a <button> can't be a
+            descendant of another <button> (invalid HTML). Same class of
+            fix as SelectOption's own <div role="option">. */}
+        <div
           ref={(el) => {
             triggerRef.current = el;
             if (typeof ref === "function") ref(el);
             else if (ref) ref.current = el;
           }}
-          type="button"
-          className={["lat-multi-select__trigger", open ? "lat-multi-select__trigger--active" : ""].filter(Boolean).join(" ")}
+          role="button"
+          tabIndex={disabled ? -1 : 0}
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-labelledby={labelId}
-          disabled={disabled}
-          onClick={() => setOpen((o) => !o)}
+          aria-disabled={disabled}
+          className={[
+            "lat-multi-select__trigger",
+            open ? "lat-multi-select__trigger--active" : "",
+            disabled ? "lat-multi-select__trigger--disabled" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          onClick={() => {
+            if (!disabled) setOpen((o) => !o);
+          }}
+          onKeyDown={(e) => {
+            if (disabled) return;
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setOpen((o) => !o);
+            }
+          }}
         >
-          <span
-            className={["lat-multi-select__value", selectedItems.length === 0 ? "lat-multi-select__value--placeholder" : ""]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            {summary}
-          </span>
+          {selectedItems.length === 0 ? (
+            <span className="lat-multi-select__placeholder">{placeholder}</span>
+          ) : (
+            // stopPropagation so clicking a chip (its label or its dismiss
+            // button) never also toggles the trigger's own open state.
+            <div className="lat-multi-select__chips" onClick={(e) => e.stopPropagation()}>
+              {selectedItems.map((item) => (
+                <Badge key={item.value} variant="brand" size="small" onDismiss={() => toggle(item.value)}>
+                  {item.label}
+                </Badge>
+              ))}
+            </div>
+          )}
           <Icon name="chevron-down" size="sm" className="lat-multi-select__chevron" />
-        </button>
-        {selectedItems.length > 0 ? (
-          <div className="lat-multi-select__chips">
-            {selectedItems.map((item) => (
-              <Badge key={item.value} variant="brand" size="small" onDismiss={() => toggle(item.value)}>
-                {item.label}
-              </Badge>
-            ))}
-          </div>
-        ) : null}
+        </div>
         {open ? (
           <div className="lat-multi-select__panel" role="listbox" aria-multiselectable="true" aria-labelledby={labelId}>
             {items.map((item, i) => (
@@ -120,7 +134,6 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                 }}
                 label={item.label}
                 selected={value.includes(item.value)}
-                showCheckbox
                 onClick={() => toggle(item.value)}
               />
             ))}

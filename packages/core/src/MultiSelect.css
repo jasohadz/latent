@@ -16,21 +16,17 @@
 
 .lat-multi-select__trigger {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--lat-spacing-8);
+  gap: var(--lat-spacing-4);
   width: 100%;
   padding: var(--lat-spacing-8);
   border-radius: var(--lat-radius-lg);
   border: var(--lat-sizing-border-thin) solid var(--lat-color-border-default);
   background: transparent;
   cursor: pointer;
-  font-family: var(--lat-font-family-sans);
-  font-size: var(--lat-font-style-body-small);
-  color: var(--lat-color-text-primary);
-  text-align: left;
 }
-.lat-multi-select__trigger:hover:not(:disabled) {
+.lat-multi-select__trigger:hover {
   border-color: var(--lat-color-border-strong);
 }
 .lat-multi-select__trigger:focus {
@@ -40,44 +36,44 @@
 .lat-multi-select__trigger--active {
   border-color: var(--lat-color-border-brand);
 }
-.lat-multi-select__trigger:disabled {
+.lat-multi-select__trigger--disabled {
   border-color: var(--lat-color-border-subtle);
   cursor: not-allowed;
   opacity: 0.6;
+  pointer-events: none;
 }
 
-.lat-multi-select__value {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.lat-multi-select__value--placeholder {
+.lat-multi-select__placeholder {
+  flex: 1 1 auto;
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
   color: var(--lat-color-text-tertiary);
-}
-
-.lat-multi-select__chevron {
-  color: var(--lat-color-icon-default);
-  flex-shrink: 0;
 }
 
 .lat-multi-select__chips {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--lat-spacing-4);
+  flex: 1 1 auto;
+}
+
+.lat-multi-select__chevron {
+  color: var(--lat-color-icon-default);
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .lat-multi-select__panel {
   position: absolute;
-  top: calc(100% + var(--lat-spacing-8));
+  top: calc(100% + var(--lat-spacing-4));
   left: 0;
   right: 0;
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: var(--lat-spacing-4);
-  padding: var(--lat-spacing-8);
-  background-color: var(--lat-color-surface-raised);
+  overflow: hidden;
+  background-color: var(--lat-color-background-default);
   border: var(--lat-sizing-border-thin) solid var(--lat-color-border-subtle);
-  border-radius: var(--lat-radius-card);
-  box-shadow: var(--lat-elevation-md);
+  border-radius: var(--lat-radius-lg);
 }
