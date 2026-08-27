@@ -10,14 +10,14 @@ export default {
   ],
   example: `<ChatInput value={message} onChange={setMessage} onSubmit={sendMessage} />`,
   doNot: [
-    "The send button's active (non-empty value) color isn't a documented Figma state — it's an app-requested affordance reusing color.action.primary.default, not a verified spec value.",
+    "Don't assume the send button's filled-state color is blue/brand — it's color.background.inverse (dark), the same token the empty state's *container* uses elsewhere in the system, not color.action.primary.default. That was an earlier, unverified guess (see the 2026-08-27 correction note below), now replaced with the real Figma value.",
   ],
   swizzlePath: "packages/core/src/ChatInput.tsx",
   extends: null,
   // Verified against the real .tsx/.css, not inferred from props alone.
   states: [
-    { name: "empty", description: "Send button uses the default inverse background — value.trim() is falsy.", tokens: ["send background"] },
-    { name: "has value", description: "Send button switches to the primary action color once value.trim() is truthy — a real, class-driven state change, not just a visual affordance.", tokens: ["send background (active, has value)"] },
+    { name: "empty (value=empty)", description: "Send button uses a muted background — value.trim() is falsy. Matches Figma's real \"value=empty\" variant exactly.", tokens: ["send background"] },
+    { name: "filled (value=filled)", description: "Send button switches to an inverse (dark) background once value.trim() is truthy — matches Figma's real \"value=filled\" variant exactly, not an invented affordance.", tokens: ["send background (filled)"] },
   ],
   accessibility: {
     keyboardInteractions: [
@@ -43,17 +43,30 @@ export default {
   // (Breakpoint) — resolves to the same primitive as our declared
   // font-style.body (Semantic) at desktop. Same deliberate-simplification
   // pattern as Calendar's weekday font-size.
-  // "send background (active, has value)": already documented above (see
-  // doNot) as an app-requested affordance with no Figma precedent, not a
-  // gap in verification — Figma's ChatInput component has no "value"-
-  // dependent send-button variant at all to check against.
+  // 2026-08-27 correction, found via a real live Figma pull of the actual
+  // "Chat Input" COMPONENT_SET on the Ai Chat doc page (a real value=empty/
+  // value=filled variant pair — this was NOT a foreign/context reference,
+  // it's Latent's own already-ported component), prompted by the user
+  // updating it in Figma and reporting the coded version didn't match:
+  // - "send background" was color.background.inverse (dark) for the empty
+  //   state — wrong. Figma's real value=empty variant binds
+  //   color.background.muted (a light, subtle gray).
+  // - The filled state was invented entirely (color.action.primary.default,
+  //   a blue never present in Figma) — replaced with Figma's real
+  //   value=filled binding, color.background.inverse (dark) — the exact
+  //   value the empty state was wrongly using before.
+  // - "send icon color" (color.icon.inverse) is unchanged and correct in
+  //   both states — confirmed identical in the live pull, not something
+  //   this correction touched.
+  // This was a real, verifiable spec the whole time; the original 2026-07-29
+  // port simply never found it and documented the whole state pair as an
+  // unverified app-requested guess instead of investigating further.
   figmaTokensSkipLiveCheck: [
     "focus ring color",
     "focus ring width",
     "focus ring offset",
     "field font-family",
     "field font-size",
-    "send background (active, has value)",
   ],
   figmaTokens: {
     "container padding": "spacing.2",
@@ -67,8 +80,8 @@ export default {
     "field placeholder color": "color.text.tertiary",
     "field font-family": "font-family.sans",
     "field font-size": "font-style.body",
-    "send background": "color.background.inverse",
-    "send background (active, has value)": "color.action.primary.default",
+    "send background": "color.background.muted",
+    "send background (filled)": "color.background.inverse",
     "send icon color": "color.icon.inverse",
     "focus ring color": "color.border.focus",
     "focus ring width": "sizing.border.thin",

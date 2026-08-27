@@ -50,15 +50,12 @@
   flex-shrink: 0;
   border: none;
   border-radius: var(--lat-radius-slimlg);
-  background-color: var(--lat-color-background-inverse);
+  background-color: var(--lat-color-background-muted);
   color: var(--lat-color-icon-inverse);
   cursor: pointer;
   transition: background-color 150ms ease;
 }
 
-/* Not part of ChatInput's documented Figma spec (no value-dependent state
-   listed in figmaTokens) — an app-requested affordance, built from the same
-   real action token Button's primary variant uses, not an invented color. */
-.lat-chat-input__send--active {
-  background-color: var(--lat-color-action-primary-default);
+.lat-chat-input__send--filled {
+  background-color: var(--lat-color-background-inverse);
 }

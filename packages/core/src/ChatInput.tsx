@@ -34,7 +34,7 @@ export const ChatInput = React.forwardRef<HTMLInputElement, ChatInputProps>(
         />
         <button
           type="button"
-          className={["lat-chat-input__send", value.trim() ? "lat-chat-input__send--active" : ""]
+          className={["lat-chat-input__send", value.trim() ? "lat-chat-input__send--filled" : ""]
             .filter(Boolean)
             .join(" ")}
           aria-label="Send message"
