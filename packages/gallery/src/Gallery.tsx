@@ -12,7 +12,6 @@ import { Calendar } from "@latent/core/Calendar";
 import { Card } from "@latent/core/Card";
 import { ChatInput } from "@latent/core/ChatInput";
 import { ChatWindow } from "@latent/core/ChatWindow";
-import { Checkbox } from "@latent/core/Checkbox";
 import { Field } from "@latent/core/Field";
 import { Icon } from "@latent/core/Icon";
 import { MegaMenuItem } from "@latent/core/MegaMenuItem";
@@ -100,7 +99,6 @@ export function Gallery() {
   const [chatInputValue, setChatInputValue] = React.useState("");
   const [alertDismissed, setAlertDismissed] = React.useState(false);
   const [alertExpanded, setAlertExpanded] = React.useState(false);
-  const [checkboxChecked, setCheckboxChecked] = React.useState(true);
   const [selectValue, setSelectValue] = React.useState<string | undefined>(undefined);
   const [multiSelectValue, setMultiSelectValue] = React.useState<string[]>(["hiking"]);
   const hobbyItems = [
@@ -175,12 +173,6 @@ export function Gallery() {
 
         <ComponentCard name="Switch">
           <Switch pressed={switchOn} onChange={setSwitchOn} supportingText="Enable notifications" />
-        </ComponentCard>
-
-        <ComponentCard name="Checkbox">
-          <Checkbox checked={checkboxChecked} onChange={setCheckboxChecked} size="sm" />
-          <Checkbox checked={checkboxChecked} onChange={setCheckboxChecked} size="md" />
-          <Checkbox checked={checkboxChecked} onChange={setCheckboxChecked} size="lg" />
         </ComponentCard>
 
         <ComponentCard name="TextField">
