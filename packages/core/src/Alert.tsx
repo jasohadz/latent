@@ -12,7 +12,7 @@ export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   /** inverse only: renders a trailing dismiss (x) button and fires this when clicked. */
   onDismiss?: () => void;
-  /** subtle only: renders a trailing chevron-down expand affordance and fires this when clicked. */
+  /** subtle only: renders a trailing circle-fading-plus expand affordance and fires this when clicked. */
   onExpand?: () => void;
 }
 
@@ -41,7 +41,7 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         ) : null}
         {appearance === "subtle" && onExpand ? (
           <button type="button" className="lat-alert__action" aria-label="Expand" onClick={onExpand}>
-            <Icon name="chevron-down" size="sm" />
+            <Icon name="circle-fading-plus" size="sm" />
           </button>
         ) : null}
       </div>

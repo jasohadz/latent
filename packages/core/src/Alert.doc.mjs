@@ -6,7 +6,7 @@ export default {
     { name: "icon", type: "React.ReactNode", default: "undefined", description: "Leading icon, e.g. <Icon name=\"megaphone\" />. Optional — the reference this was built from always shows one, but nothing about the component requires it." },
     { name: "children", type: "React.ReactNode", default: "—", description: "The message text." },
     { name: "onDismiss", type: "() => void", default: "undefined", description: "appearance=\"inverse\" only: renders a trailing dismiss (x) button and fires this when clicked. Ignored under appearance=\"subtle\"." },
-    { name: "onExpand", type: "() => void", default: "undefined", description: "appearance=\"subtle\" only: renders a trailing chevron-down button and fires this when clicked. Ignored under appearance=\"inverse\"." },
+    { name: "onExpand", type: "() => void", default: "undefined", description: "appearance=\"subtle\" only: renders a trailing circle-fading-plus button and fires this when clicked. Ignored under appearance=\"inverse\"." },
   ],
   example: `<Alert appearance="inverse" icon={<Icon name="megaphone" />} onDismiss={handleDismiss}>New updates are available.</Alert>`,
   doNot: [
@@ -78,4 +78,13 @@ export default {
   // treatment at all — same reasoning as Calendar's focus-ring skip
   // entries.
   figmaTokensSkipLiveCheck: ["focus ring color", "focus ring width"],
+  // 2026-08-27, found via a real plugin sync + CI check (not a routine
+  // re-verify): the subtle variant's trailing icon changed in Figma from
+  // chevron-down to circle-fading-plus, confirmed as a deliberate change
+  // by the user, not an accident — ported to Alert.tsx to match. Also
+  // found and fixed the same day: the "container gap" binding
+  // (spacing.10, between the message content and the trailing icon) had
+  // gone unbound in Figma — value was still correct, the Variable
+  // reference itself was gone — re-bound directly, no code change needed
+  // since the CSS value was already right.
 };
