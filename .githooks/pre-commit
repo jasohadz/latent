@@ -30,7 +30,7 @@
 #    this is what actually catches that. Skipped (not blocking) if that
 #    export file doesn't exist yet, same as sync figma/check-styles below.
 #
-# 3. Docs — blocks on two independent things inside check-docs:
+# 3. Docs — blocks on any of five independent things inside check-docs:
 #    a) a staged .md file contains a known-stale term (e.g. a Figma
 #       collection's old pre-rename name asserted as current). Append-only
 #       blocklist in packages/cli/bin/latent.mjs's DOC_BLOCKLIST — doesn't
@@ -41,6 +41,21 @@
 #       every prop has a description) — catches a doc silently missing
 #       fields the way check-parity catches CSS silently drifting from
 #       figmaTokens.
+#    c) plugin-coverage: a real component (.doc.mjs) missing from, or a
+#       stale entry left in, packages/figma-plugin/code.js's COMPONENT_NAMES
+#       array — either direction silently breaks the Latent Sync plugin's
+#       live-bindings extraction for that component.
+#    d) lockfile-sync: a packages/*/package.json workspace with no matching
+#       entry in package-lock.json's packages map — passes `npm install`
+#       silently, fails `npm ci` (what CI actually runs) hard.
+#    e) icon-cascade: a component's CSS sets `color` on a wrapper expecting
+#       an <Icon> child to inherit it via currentColor, but has no
+#       `<selector> .lat-icon { color: inherit; }` rescue rule — Icon.css's
+#       own unconditional default silently wins the cascade instead.
+#    (c)/(d)/(e) added 2026-08-27, after all three slipped through
+#    check-parity/check-component-bindings for real that same day — see
+#    CLAUDE.md's check-docs section and each check's own header comment in
+#    latent.mjs for the full root-cause writeup.
 #
 # `verify` (packages/cli/bin/latent.mjs) runs all of sync figma/check-styles/
 # check-parity/check-docs unconditionally in one call — this hook doesn't
@@ -158,14 +173,14 @@ if [ -n "$COMPONENTS_TOUCHED" ]; then
 fi
 
 # --- 3. Docs ---
-DOCS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '\.md$|\.doc\.mjs$')
+DOCS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '\.md$|\.doc\.mjs$|^package(-lock)?\.json$|^packages/[^/]+/package\.json$|^packages/core/src/.*\.css$|^packages/figma-plugin/code\.js$')
 if [ -n "$DOCS_TOUCHED" ]; then
-  echo "latent: markdown or component doc files changed — running check-docs..."
+  echo "latent: docs, lockfile, plugin, or component CSS changed — running check-docs..."
   DOCS_OUT=$(node packages/cli/bin/latent.mjs check-docs --json)
   DOCS_STATUS=$(printf '%s' "$DOCS_OUT" | json_status)
   if [ "$DOCS_STATUS" != "clean" ]; then
     echo ""
-    echo "BLOCKED (check-docs): known-stale term in a tracked .md file, or a .doc.mjs missing required fields"
+    echo "BLOCKED (check-docs): known-stale term, a .doc.mjs missing required fields, plugin-coverage/lockfile-sync/icon-cascade drift"
     echo "$DOCS_OUT"
     FAIL=1
   fi

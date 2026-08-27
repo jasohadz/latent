@@ -589,8 +589,180 @@ async function checkDocSchema() {
   return violations;
 }
 
+// Checks two directions of drift between packages/core/src's real
+// components and the Latent Sync plugin's own COMPONENT_NAMES list
+// (packages/figma-plugin/code.js) — a plain JS array literal, parsed by
+// regex rather than imported, since code.js runs inside the Figma plugin
+// sandbox and isn't a module this CLI can import. Pure text/file check, no
+// Figma connection needed.
+//
+// Built 2026-08-27 after Alert/AlertStack/Select/MultiSelect/SelectOption
+// shipped with real .doc.mjs files but were never added to COMPONENT_NAMES
+// — the real plugin sync silently produced no live-bindings data for any
+// of them (component-bindings.live.json had 29 keys, not 34) for the
+// better part of a session, discovered only because the user manually
+// checked GitHub after a sync. check-component-bindings itself couldn't
+// catch this: a component missing from COMPONENT_NAMES just reports
+// "no-live-data" (deliberately non-blocking, since a component's first day
+// of life has no sync yet either) — nothing distinguished "brand new,
+// never synced" from "shipped a week ago and someone forgot to register
+// it." This check closes exactly that gap, mechanically, on every commit
+// that touches a .doc.mjs.
+function checkPluginCoverage() {
+  const violations = [];
+  const pluginRelPath = "packages/figma-plugin/code.js";
+  const pluginPath = path.join(REPO_ROOT, pluginRelPath);
+  if (!existsSync(pluginPath)) return violations; // plugin file missing is a different, unrelated problem
+
+  const src = readFileSync(pluginPath, "utf-8");
+  const match = src.match(/const COMPONENT_NAMES\s*=\s*\[([\s\S]*?)\];/);
+  if (!match) {
+    violations.push({
+      kind: "plugin-coverage",
+      file: pluginRelPath,
+      component: null,
+      reason: "Could not find/parse the COMPONENT_NAMES array — this check can't verify anything until code.js's own shape is fixed",
+    });
+    return violations;
+  }
+  const namesInPlugin = new Set(Array.from(match[1].matchAll(/"([A-Za-z0-9]+)"/g)).map((m) => m[1]));
+
+  // Icon is a deliberate, permanent exclusion (see code.js's own comment
+  // next to COMPONENT_NAMES) — a thin lucide-react wrapper with no bound
+  // style properties of its own to verify.
+  for (const name of discoverComponents()) {
+    if (name === "Icon") continue;
+    if (!namesInPlugin.has(name)) {
+      violations.push({
+        kind: "plugin-coverage",
+        file: pluginRelPath,
+        component: name,
+        reason: `"${name}" has a real .doc.mjs but is missing from COMPONENT_NAMES — the Latent Sync plugin will silently produce no live-bindings data for it until this is added`,
+      });
+    }
+  }
+
+  // The reverse gap: a name still in COMPONENT_NAMES for a component
+  // that's since been removed from packages/core/src (this happened for
+  // real with Checkbox, built then deleted the same session) — harmless
+  // to the plugin itself (it just won't find a matching Figma node), but
+  // worth flagging as dead weight nobody's cleaning up.
+  const discovered = new Set(discoverComponents());
+  for (const name of namesInPlugin) {
+    if (!discovered.has(name)) {
+      violations.push({
+        kind: "plugin-coverage",
+        file: pluginRelPath,
+        component: name,
+        reason: `"${name}" is still in COMPONENT_NAMES but has no matching .doc.mjs in packages/core/src — likely a removed component whose plugin entry was never cleaned up`,
+      });
+    }
+  }
+
+  return violations;
+}
+
+// Checks that every packages/*/package.json workspace has a matching entry
+// in the root package-lock.json — npm install (used throughout local work)
+// tolerates a stale lockfile silently; npm ci (what CI actually runs)
+// doesn't. Built 2026-08-27 after packages/gallery was tracked as a real
+// workspace (commit 95bbc32) without regenerating package-lock.json,
+// which broke the Latent Sync Check workflow's `npm ci` step with no local
+// warning at all — this is the mechanical check that would have caught it
+// immediately, on the same commit, instead of on the next real CI run.
+function checkLockfileSync() {
+  const violations = [];
+  const lockPath = path.join(REPO_ROOT, "package-lock.json");
+  if (!existsSync(lockPath)) return violations; // no lockfile at all is a different, unrelated problem
+
+  let lock;
+  try {
+    lock = JSON.parse(readFileSync(lockPath, "utf-8"));
+  } catch {
+    violations.push({ kind: "lockfile-sync", file: "package-lock.json", component: null, reason: "package-lock.json is not valid JSON" });
+    return violations;
+  }
+  const lockPackages = lock.packages ?? {};
+
+  const packagesDir = path.join(REPO_ROOT, "packages");
+  if (!existsSync(packagesDir)) return violations;
+  for (const dir of readdirSync(packagesDir)) {
+    const pkgJsonPath = path.join(packagesDir, dir, "package.json");
+    if (!existsSync(pkgJsonPath)) continue; // most packages/* are plain source dirs, not their own workspace package
+    const lockKey = `packages/${dir}`;
+    if (!(lockKey in lockPackages)) {
+      violations.push({
+        kind: "lockfile-sync",
+        file: "package-lock.json",
+        component: null,
+        reason: `packages/${dir}/package.json exists as a real workspace but "${lockKey}" is missing from package-lock.json's packages map — run npm install at the repo root and commit the result`,
+      });
+    }
+  }
+  return violations;
+}
+
+// Checks for a real, repeatedly-found bug class: a component's CSS sets
+// `color` on a wrapper element (expecting an <Icon> child to inherit it via
+// currentColor) without a matching `<selector> .lat-icon { color: inherit;
+// }` rescue rule. Icon.css sets .lat-icon's own color unconditionally
+// (color.icon.default) — a direct rule on the icon element itself always
+// wins over an inherited value from a parent, regardless of the parent's
+// specificity, so without the rescue rule the icon silently renders the
+// wrong color. Badge.css/Button.css already had the fix; Search.css/
+// ChatInput.css didn't, and check-parity/check-component-bindings couldn't
+// catch it — both only verify a token is *referenced* somewhere in the CSS
+// text, never that it actually wins the cascade. Found 2026-08-27 via
+// direct computed-style checks in a live browser, not a token audit —
+// this check turns that manual audit into something that runs on every
+// commit instead of only when someone notices a wrong color by eye.
+//
+// Deliberately narrow: only flags a selector whose declared color differs
+// from color.icon.default (Icon.css's own baseline) — a selector declaring
+// color.icon.default itself is textually missing the same rescue rule, but
+// renders identically either way (Icon.css's default already matches), so
+// there's no visible bug to report.
+function checkIconCascade() {
+  const violations = [];
+  const srcDir = path.join(REPO_ROOT, "packages/core/src");
+  if (!existsSync(srcDir)) return violations;
+
+  for (const file of readdirSync(srcDir)) {
+    if (!file.endsWith(".css")) continue;
+    const relPath = `packages/core/src/${file}`;
+    const css = readFileSync(path.join(srcDir, file), "utf-8");
+    const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
+    let m;
+    while ((m = ruleRe.exec(css))) {
+      const selector = m[1].trim();
+      const body = m[2];
+      if (/%/.test(selector) || /\.lat-icon\b/.test(selector)) continue; // skip @keyframes steps and rules already targeting .lat-icon directly
+      const colorMatch = body.match(/(?:^|;|\{)\s*color:\s*(var\(--lat-color-icon-[a-z-]+\))/);
+      if (!colorMatch) continue;
+      const declaredColor = colorMatch[1];
+      if (declaredColor === "var(--lat-color-icon-default)") continue; // matches Icon.css's own baseline — no visible bug either way
+      const rescuePattern = `${selector} .lat-icon`;
+      if (!css.includes(rescuePattern)) {
+        violations.push({
+          kind: "icon-cascade",
+          file: relPath,
+          component: file.slice(0, -".css".length),
+          reason: `"${selector}" sets color to ${declaredColor} expecting an <Icon> child to inherit it, but has no "${rescuePattern} { color: inherit; }" rescue rule — Icon.css's own unconditional default will silently win instead`,
+        });
+      }
+    }
+  }
+  return violations;
+}
+
 async function computeCheckDocs() {
-  const violations = [...checkStaleTerms(), ...(await checkDocSchema())];
+  const violations = [
+    ...checkStaleTerms(),
+    ...(await checkDocSchema()),
+    ...checkPluginCoverage(),
+    ...checkLockfileSync(),
+    ...checkIconCascade(),
+  ];
   return {
     type: "check-docs-result",
     status: violations.length === 0 ? "clean" : "violations-found",
