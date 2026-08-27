@@ -2,6 +2,7 @@ import React from "react";
 
 import { AccordionItem } from "@latent/core/AccordionItem";
 import { Alert } from "@latent/core/Alert";
+import { AlertStack } from "@latent/core/AlertStack";
 import { Avatar } from "@latent/core/Avatar";
 import { AvatarGroup } from "@latent/core/AvatarGroup";
 import { Badge } from "@latent/core/Badge";
@@ -220,6 +221,20 @@ export function Gallery() {
           >
             {alertExpanded ? "Expanded: here's more detail about the notice." : "New updates are available."}
           </Alert>
+        </ComponentCard>
+
+        <ComponentCard name="AlertStack" wide column>
+          <AlertStack>
+            <Alert appearance="inverse" icon={<Icon name="megaphone" />} onDismiss={() => {}}>
+              First notice
+            </Alert>
+            <Alert appearance="inverse" icon={<Icon name="megaphone" />} onDismiss={() => {}}>
+              Second notice
+            </Alert>
+            <Alert appearance="inverse" icon={<Icon name="megaphone" />} onDismiss={() => {}}>
+              Third notice
+            </Alert>
+          </AlertStack>
         </ComponentCard>
 
         <ComponentCard name="BadgeGroup">

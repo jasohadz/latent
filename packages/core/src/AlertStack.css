@@ -1,0 +1,34 @@
+.lat-alert-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.lat-alert-stack > * {
+  transition: margin 150ms ease;
+}
+
+/* Collapsed (default): each card overlaps the one before it, revealing a
+   sliver — later children paint on top in normal flow, so the last child
+   (front of the pile) needs no inset, and the two behind it narrow
+   progressively to read as a receding stack. Matches the Figma reference's
+   own (unbound) collapsed-state numbers. */
+.lat-alert-stack > * + * {
+  margin-top: calc(-1 * var(--lat-spacing-24));
+}
+.lat-alert-stack > *:first-child {
+  margin-inline: var(--lat-spacing-16);
+}
+.lat-alert-stack > *:nth-child(2) {
+  margin-inline: var(--lat-spacing-8);
+}
+
+/* Expanded: hover AND focus-within, not hover alone — content on hover
+   that has no keyboard-equivalent trigger fails WCAG 1.4.13. */
+.lat-alert-stack:hover > * + *,
+.lat-alert-stack:focus-within > * + * {
+  margin-top: var(--lat-spacing-16);
+}
+.lat-alert-stack:hover > *,
+.lat-alert-stack:focus-within > * {
+  margin-inline: 0;
+}
