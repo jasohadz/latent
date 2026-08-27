@@ -63,6 +63,19 @@
   cursor: pointer;
 }
 
+/* Icon.css sets .lat-icon's own color unconditionally (color.icon.default),
+   which silently overrides this button's own inherited color regardless of
+   the parent's declared value — same fix pattern Badge.css/Button.css
+   already use for the same reason. Without this, the clear icon rendered
+   as color.icon.default (gray-700) instead of the declared color.icon.subtle
+   (gray-400) despite the CSS above correctly declaring the right token —
+   check-parity can't catch this class of bug, since it only checks the
+   token is referenced somewhere in the file, not that it actually wins the
+   cascade. Found via direct computed-style verification in a live browser. */
+.lat-search__clear .lat-icon {
+  color: inherit;
+}
+
 /* Submit is a real Button instance (variant="primary" iconOnly) — Button.css
    owns padding/border/radius/background/icon-color. Only the flex-shrink
    override belongs here, so it doesn't get squeezed by the input field. */

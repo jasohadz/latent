@@ -58,6 +58,18 @@ export default {
   // font-style.body (Semantic) at desktop. Same deliberate-simplification
   // pattern as Calendar's weekday font-size.
   figmaTokensSkipLiveCheck: ["focus ring width", "input font-size"],
+  // 2026-08-27: found a real bug this check-parity/check-component-bindings
+  // structurally can't catch — the "clear icon color" token below was
+  // always correctly declared in Search.css, but the icon actually
+  // rendered as color.icon.default (Icon.css's own unconditional default),
+  // not the declared color.icon.subtle, because .lat-search__clear set
+  // `color` on itself expecting the icon to inherit it, and Icon.css's own
+  // direct rule on .lat-icon wins over an inherited value regardless of
+  // specificity. Both checks only verify the token is *referenced*
+  // somewhere in the CSS text, never that it actually wins the cascade —
+  // found via direct computed-style verification in a live browser, not a
+  // token audit. Fixed with the same `.lat-search__clear .lat-icon {
+  // color: inherit; }` pattern Badge/Button already use.
   figmaTokens: {
     "container padding": "spacing.4",
     "container gap": "spacing.8",

@@ -56,6 +56,18 @@
   transition: background-color 150ms ease;
 }
 
+/* Icon.css sets .lat-icon's own color unconditionally (color.icon.default),
+   silently overriding this button's own color regardless of what it
+   declares — same fix pattern Badge.css/Button.css/Search.css already use.
+   Without this the send icon rendered as color.icon.default (gray) instead
+   of the declared color.icon.inverse (white) in both states — found via
+   direct computed-style verification, not visible from a screenshot alone
+   (a dark-gray icon on ChatInput's own dark backgrounds still reads as
+   faintly visible, not obviously broken). */
+.lat-chat-input__send .lat-icon {
+  color: inherit;
+}
+
 .lat-chat-input__send--filled {
   background-color: var(--lat-color-background-inverse);
 }

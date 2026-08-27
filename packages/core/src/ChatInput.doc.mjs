@@ -55,9 +55,18 @@ export default {
   //   a blue never present in Figma) — replaced with Figma's real
   //   value=filled binding, color.background.inverse (dark) — the exact
   //   value the empty state was wrongly using before.
-  // - "send icon color" (color.icon.inverse) is unchanged and correct in
-  //   both states — confirmed identical in the live pull, not something
-  //   this correction touched.
+  // - "send icon color" (color.icon.inverse) was already the correctly
+  //   declared token in both states — but a second, separate bug (found
+  //   the same day, via direct computed-style checks in a live browser,
+  //   not this live-Figma-pull) meant it never actually rendered: Icon.css
+  //   sets .lat-icon's own color unconditionally, which wins over an
+  //   inherited value from .lat-chat-input__send regardless of what that
+  //   parent declares — the icon was rendering as color.icon.default
+  //   (gray) the whole time. Fixed with the same `.lat-chat-input__send
+  //   .lat-icon { color: inherit; }` pattern Badge/Button/Search use.
+  //   Neither check-parity nor check-component-bindings can catch this
+  //   class of bug — both only verify a token is referenced somewhere in
+  //   the CSS text, never that it actually wins the cascade.
   // This was a real, verifiable spec the whole time; the original 2026-07-29
   // port simply never found it and documented the whole state pair as an
   // unverified app-requested guess instead of investigating further.
