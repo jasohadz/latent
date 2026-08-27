@@ -2,6 +2,15 @@
   position: relative;
   display: inline-flex;
   flex-direction: column;
+  /* Figma's real Bar hugs its content with a fixed gap between Logo/
+     NavRow/CTA (primaryAxisSizingMode: hug on the outer component,
+     SPACE_BETWEEN on Bar with none of its 3 children set to grow) — not a
+     nav-row that expands to fill whatever width it's placed in. inline-
+     flex already hugs by default, but an ambient flex/grid parent with
+     align-items/justify-items: stretch (e.g. the gallery's own wide-card
+     layout) silently stretches it anyway; align-self opts back out of
+     that regardless of where this gets placed. */
+  align-self: flex-start;
 }
 
 .lat-top-nav__bar {
@@ -24,7 +33,10 @@
   display: flex;
   align-items: center;
   gap: var(--lat-spacing-24);
-  flex: 1 1 auto;
+  /* Fixed 2026-08-28: was flex: 1 1 auto, growing to consume all leftover
+     width in the bar and shoving the CTA far to the right — Figma's real
+     NavRow never grows (layoutSizingHorizontal: HUG), the bar itself just
+     hugs Logo+NavRow+CTA at the fixed spacing-24 gap declared above. */
 }
 
 .lat-top-nav__panel {
