@@ -19,7 +19,7 @@ export default {
   extends: null,
   states: [
     { name: "closed", description: "Trigger shows the selected label or the placeholder, default border.", tokens: ["trigger border"] },
-    { name: "open (active)", description: "Trigger border switches to brand color; panel renders directly below it (4px gap), flush against the trigger's own width — square-cornered rows, clipped by the panel's own border-radius via overflow: hidden.", tokens: ["trigger border (active)", "panel background", "panel border", "panel border-radius"] },
+    { name: "open (active)", description: "Trigger border switches to brand color; panel renders directly below it (4px gap), with its own 4px inner padding — rows are individually rounded (radius.slimlg) inside it, not flush/square against the panel edge.", tokens: ["trigger border (active)", "panel background", "panel border", "panel border-radius", "panel padding"] },
     { name: "disabled", description: "Trigger border dims, cursor becomes not-allowed.", tokens: ["trigger border (disabled)"] },
   ],
   accessibility: {
@@ -62,6 +62,15 @@ export default {
   // composite this session (Alert, AlertStack, SelectOption) got a real
   // component, so this one does too now. All tokens below reconfirmed
   // against the new component's own live figma_execute dump.
+  //
+  // "panel padding" added 2026-08-27: the user directly edited the real
+  // Figma panel, adding 4px inner padding (bound to spacing.4) — was 0
+  // when this doc was first written, matching Style 1's own flush,
+  // zero-padding panel. This is a genuine design refinement beyond the
+  // pasted reference, not a fidelity correction; paired with
+  // SelectOption's new row border-radius (see SelectOption.doc.mjs) so
+  // rows read as individually-rounded items inside a padded card rather
+  // than a flush edge-to-edge list.
   figmaTokens: {
     "trigger padding": "spacing.8",
     "trigger border-radius": "radius.lg",
@@ -75,6 +84,7 @@ export default {
     "placeholder color": "color.text.tertiary",
     "chevron color": "color.icon.default",
     "panel gap (from trigger)": "spacing.4",
+    "panel padding": "spacing.4",
     "panel background": "color.background.default",
     "panel border": "color.border.subtle",
     "panel border-radius": "radius.lg",

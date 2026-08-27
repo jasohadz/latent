@@ -44,8 +44,19 @@ export default {
   // Also dropped the "selected" bg-muted+bold row styling the first pass
   // invented (borrowed from NavItem's convention) — Style 1's real
   // Dropdown Item only has default/hover, nothing else.
+  //
+  // "row border-radius" added 2026-08-27: the user directly edited the
+  // row instances inside Select's/MultiSelect's real Figma panel,
+  // rounding them to radius.slimlg (6px, bound) now that the panel has
+  // its own padding (see Select.doc.mjs) — rows no longer sit flush
+  // against the panel edge, so the earlier square-corner choice tied to
+  // the old zero-padding panel no longer applies. Applied as an instance
+  // override in Figma (not on SelectOption's own master component), but
+  // since SelectOption only ever renders inside these two panels in
+  // practice, it belongs in the shared component here.
   figmaTokens: {
     "row padding": "spacing.8",
+    "row border-radius": "radius.slimlg",
     "label color": "color.text.primary",
     "label font-size": "font-style.body-small",
     "hover background": "color.background.brand",

@@ -20,7 +20,7 @@ export default {
   states: [
     { name: "closed, none selected", description: "Trigger shows the placeholder text.", tokens: ["trigger border"] },
     { name: "closed, some selected", description: "Trigger shows wrapped, dismissible Badge chips instead of the placeholder — no count summary.", tokens: ["trigger border"] },
-    { name: "open (active)", description: "Trigger border switches to brand color; panel renders directly below (4px gap), flush and shadowless.", tokens: ["trigger border (active)", "panel background", "panel border", "panel border-radius"] },
+    { name: "open (active)", description: "Trigger border switches to brand color; panel renders directly below (4px gap), shadowless, with its own 4px inner padding — rows are individually rounded (radius.slimlg) inside it, not flush/square.", tokens: ["trigger border (active)", "panel background", "panel border", "panel border-radius", "panel padding"] },
     { name: "disabled", description: "Trigger border dims, cursor becomes not-allowed.", tokens: ["trigger border (disabled)"] },
   ],
   accessibility: {
@@ -65,6 +65,11 @@ export default {
   // ever a composed preview before, with no component identity or live
   // bindings of its own. No real reason for that shortcut; fixed to match
   // every other composite this session.
+  //
+  // "panel padding" added 2026-08-27, same change and reasoning as
+  // Select.doc.mjs's own entry — the user directly edited the real Figma
+  // panel, adding 4px padding (bound to spacing.4), paired with
+  // SelectOption's new row border-radius (see SelectOption.doc.mjs).
   figmaTokens: {
     "trigger padding": "spacing.8",
     "trigger border-radius": "radius.lg",
@@ -78,6 +83,7 @@ export default {
     "chip gap": "spacing.4",
     "chevron color": "color.icon.default",
     "panel gap (from trigger)": "spacing.4",
+    "panel padding": "spacing.4",
     "panel background": "color.background.default",
     "panel border": "color.border.subtle",
     "panel border-radius": "radius.lg",

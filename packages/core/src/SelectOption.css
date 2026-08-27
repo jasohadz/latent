@@ -4,6 +4,7 @@
   width: 100%;
   padding: var(--lat-spacing-8);
   border: none;
+  border-radius: var(--lat-radius-slimlg);
   background: transparent;
   cursor: pointer;
   text-align: left;
