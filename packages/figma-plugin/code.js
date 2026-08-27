@@ -159,15 +159,28 @@ async function extractStyles() {
 // Real component names in packages/core/src, matching each Figma
 // component/component-set's name with spaces stripped (Title Case with
 // spaces -> PascalCase — the same mechanical transform NAMING-CONVENTIONS.md
-// documents for props, confirmed to hold for every one of these 29 before
+// documents for props, confirmed to hold for every one of these before
 // writing this). Append-only, same discipline as LAYER_NAMES/ERROR_CODES —
 // add an entry whenever a new primitive ships in packages/core/src. Icon
 // isn't included: it's a thin lucide-react wrapper with no bound style
 // properties of its own to verify.
+//
+// Alert, AlertStack, MultiSelect, Select, SelectOption added 2026-08-27
+// (the original 29 above are unchanged) — a real gap found the hard way:
+// these 5 components had already shipped in packages/core/src, but this
+// list was never updated, so a real plugin sync run silently produced a
+// component-bindings.live.json with no entries for any of them at all
+// (confirmed directly — 29 keys, not 34, after a real sync). Every
+// check-component-bindings pass against these 5 up to that point had only
+// ever run against a hand-seeded local copy of this file, not real
+// plugin output — worth remembering this file is the actual source of
+// truth for what the plugin extracts, not whatever's sitting in a local
+// component-bindings.live.json.
 const COMPONENT_NAMES = [
-  "AccordionItem", "Avatar", "AvatarGroup", "Badge", "BadgeGroup", "Button",
-  "Calendar", "Card", "ChatInput", "ChatWindow", "Field", "MegaMenuItem",
-  "MessageBubble", "NavDropdown", "NavItem", "NavSubItem", "Panel", "Search",
+  "AccordionItem", "Alert", "AlertStack", "Avatar", "AvatarGroup", "Badge",
+  "BadgeGroup", "Button", "Calendar", "Card", "ChatInput", "ChatWindow",
+  "Field", "MegaMenuItem", "MessageBubble", "MultiSelect", "NavDropdown",
+  "NavItem", "NavSubItem", "Panel", "Search", "Select", "SelectOption",
   "SideNav", "Stat", "SubscribeField", "Switch", "Testimonial", "TextArea",
   "TextField", "Toggle", "ToggleMultiple", "TopNav", "TopNavLink",
 ];

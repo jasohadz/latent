@@ -12,20 +12,29 @@ phases depend on earlier ones being solid, especially the token schema.
    - `semantic.json` and `density.json` — mode-aware (`{ value: { light, dark } }` / `{ value: { default, condensed } }`); each leaf stores an alias reference into `primitives.json` rather than a resolved literal.
    - `breakpoint.json` — mode-aware across `mobile`/`tablet`/`desktop`.
    Figma's variable collections (Primitives, Semantic, Density, Breakpoint) must mirror these names/nesting exactly — the Semantic collection was briefly misnamed "Style Tokens" in the Figma file itself and renamed back on 2026-08-20; `packages/figma-plugin`'s `matchLayer()` only recognizes the correct name.
-4. Primitives: 30 components now live in `packages/core/src/`, each following Button's exact three-file pattern (`.tsx` + `.css` + `.doc.mjs`, each with a `figmaTokens` mapping):
+4. Primitives: 35 components now live in `packages/core/src/`, each following Button's exact three-file pattern (`.tsx` + `.css` + `.doc.mjs`, each with a `figmaTokens` mapping):
    - **Atoms**: Button, Icon, Badge, Avatar, Toggle, ToggleMultiple, Switch, TextField, TextArea
-   - **Composites**: AccordionItem, Card, BadgeGroup, AvatarGroup, Testimonial, Field, SubscribeField, Search, Stat, Panel, Calendar
+   - **Composites**: AccordionItem, Alert, AlertStack, Card, BadgeGroup, AvatarGroup, Testimonial, Field, SubscribeField, Search, Select, MultiSelect, SelectOption, Stat, Panel, Calendar
    - **Navigation**: NavItem, NavSubItem, NavDropdown, SideNav, TopNavLink, MegaMenuItem, TopNav
    - **Chat**: ChatInput, MessageBubble, ChatWindow
 
-   The full Figma design-system component set has been ported — this phase's original goal ("add 4-7 more") is complete. New primitives only get added now if Figma grows a genuinely new one; the default next step is Phase 4, not more atoms.
+   The original Figma design-system component set was ported first (30
+   components; that phase's original goal, "add 4-7 more", is what's
+   described as complete above) — Alert, AlertStack, Select, MultiSelect,
+   and SelectOption were added later (2026-08-26/27, see items 18-19
+   below) once genuinely new Figma reference material existed for them.
+   A Checkbox atom was also built and later removed the same session —
+   see item 19 — once its Figma source (a since-deleted reference) turned
+   out unrelated to what it was built for. New primitives only get added
+   now if Figma grows a genuinely new one; the default next step is
+   Phase 4, not more atoms.
 
 ## Phase 2 — Figma-to-code pipeline (core loop done)
 
 5. ~~Structure Figma variable collections to mirror `tokens.json` 1:1~~ — done: Figma's Primitives/Semantic/Density/Breakpoint collections (653 variables) now map directly onto the four token files, per `TOKEN-SCHEMA-V2.md`.
 6. ~~Use F8igma Console... to pull each collection live~~ — this was the original manual recipe (still works as a fallback, see `TOKEN-SCHEMA-V2.md`'s execution steps); superseded 2026-08-20 by step 9 below for the pull/export half. `theme-neutral/theme.css` still has no generator and is still hand-mirrored from `tokens.json` — that part remains manual.
 7. Run `node packages/cli/bin/latent.mjs sync figma --file <export>.json --json` — now diffs per layer *and* per mode (a token that matches in Light but drifted in Dark reports as drift). Clean against a fresh export.
-8. Once a component's Figma spec is stable, run `check-parity <name>` to confirm the shipped CSS matches it — all 30 components are wired to semantic paths and pass.
+8. Once a component's Figma spec is stable, run `check-parity <name>` to confirm the shipped CSS matches it — all 35 components are wired to semantic paths and pass.
 9. ~~(Later) automate steps 6-7 as a script or CI job instead of running by hand~~ — done 2026-08-20: `packages/figma-plugin/` (the "Latent Sync" Figma plugin) pulls variables/styles from the open Figma file and pushes `figma-export.live.json`/`styles-export.live.json` to a `figma-sync` GitHub branch directly, no manual export/paste step. Every push triggers `.github/workflows/latent-sync-check.yml`, which runs `verify` (sync figma + check-styles + check-parity for every component + check-docs, one command — see `CLAUDE.md`) automatically. Reconciling any drift it reports is still a human step by design — see `packages/figma-plugin/README.md`.
 
 ## Phase 3 — Agent-readiness layer (done)
@@ -39,7 +48,7 @@ phases depend on earlier ones being solid, especially the token schema.
 Latent ships a local, offline Q&A layer over its own component contracts and docs — `latent index` / `latent ask`, backed by `node-llama-cpp` (no separate app to install) and a `vectra` file index. No external service, no API key. See `CLAUDE.md`'s "Key mechanics" for how it actually works internally (chunking, the committed-index/gitignored-models split, why `--check` does an exact lookup instead of trusting semantic search).
 
 1. `npm install` — already part of normal repo setup, pulls `vectra` and `node-llama-cpp`
-2. `node packages/cli/bin/latent.mjs index --json` — first run downloads the local models into `.latent-models/` (gitignored, a few GB, one-time); every run after is instant. Currently indexes all 30 components (~80 chunks) and 10 root docs (~85 chunks).
+2. `node packages/cli/bin/latent.mjs index --json` — first run downloads the local models into `.latent-models/` (gitignored, a few GB, one-time); every run after is instant. Currently indexes all 35 components (~141 chunks) and 11 root docs (~151 chunks).
 3. `node packages/cli/bin/latent.mjs ask "what variants does Button have"` — streams the answer live to your terminal as it generates; add `--json` for a single structured result instead (question/answer/sources), no streaming.
 
 The knowledge index (`.latent-index/`) is committed to the repo and kept fresh by the pre-commit hook once your local models are set up — see `.githooks/pre-commit`'s "Knowledge index" section. Use `--check <Component>` to have `ask` explain a failing `check-parity` result against the component's real declared contract instead of guessing — this reliably surfaces the actual failing property now (verified against a deliberately broken component during testing), not just a generic non-answer.
@@ -262,20 +271,78 @@ this. Phase 4 is that hardening pass, not page templates:
     offset). Confirmed clean via `check-component-bindings` on all 16
     plus a full `verify --json` run reporting `status: clean`.
 17. Publish `packages/core`, `packages/theme-neutral`, `packages/cli` as scoped npm packages once the API stabilizes — not before, since `swizzle` paths and prop names become breaking changes for anyone who's forked
+18. **Alert / AlertStack (2026-08-26)** — built from a foreign reference
+    on the Components/Alert Figma page (a "Fey"-branded Alert/Alert stack
+    pair, context-only, same treatment as Calendar's own foreign
+    reference). `appearance="inverse"` (dark, dismissible) /
+    `"subtle"` (bordered, pairs with an expand affordance) re-expresses
+    the reference's Style=Default/Dark split in Latent's own naming and
+    tokens, not a verbatim clone. AlertStack composes 3 real Alert
+    instances into a collapsed peeking fan (pure CSS hover/focus-within,
+    no controlled prop — the reference itself defines this as a hover
+    interaction). `packages/gallery/` (a local, `npm run dev`-able page
+    rendering every real component live) was also built and tracked as a
+    permanent tool in this pass — see its own `README.md`.
+19. **Select / MultiSelect / SelectOption (2026-08-26/27)** — a longer,
+    three-pass story worth knowing before touching these components
+    again:
+    - First pass: built by synthesizing 4 competing foreign-reference
+      style explorations that were all on the Select Figma page at the
+      time ("Style 1"-"Style 4"). Also built a `Checkbox` atom, sourced
+      from a "◈ Checkbox - Dark Mode" reference that turned out to live
+      on "Style 4", not "Style 1".
+    - Second pass: the user deleted every style except "Style 1" and
+      asked the components to match that one specifically. Rebuilt
+      SelectOption checkbox-less (Style 1's real "Dropdown Item" has no
+      checkbox at all), MultiSelect's chips inline-in-trigger (not a
+      below-trigger row or a "N selected" summary — both were drawn from
+      the now-deleted "Style 4"), panels flush/shadowless. This made
+      `Checkbox` genuinely unused anywhere in the codebase — removed
+      entirely (files, gallery card, `component-bindings.live.json`
+      entry, the Figma doc-page section). The user then re-pasted the
+      real Style 1 components directly onto the page as clean,
+      isolated reference context, confirmed identical to what the
+      rebuild already used.
+    - Third pass: `Select`/`MultiSelect` had been left as an ad-hoc
+      composed-preview frame in Figma, not a real named
+      `COMPONENT_SET` — the one shortcut in this session where every
+      other composite got a proper component. Fixed directly in
+      response to the user asking "why is Select not a component?" —
+      rebuilt both as real components with `state=closed/open`
+      variants. Also picked up two direct Figma edits from the user
+      afterward (panel `padding: spacing.4`, row
+      `border-radius: radius.slimlg`, both confirmed as real Variable
+      bindings, not raw literals) and ported them to code.
+    - Hit the `resize()`-resets-`primaryAxisSizingMode`-to-`FIXED` Figma
+      Plugin API gotcha three separate times while building all of the
+      above (first documented in Alert's own build) — always re-apply
+      the sizing mode *after* any `resize()` call, not before.
 
 ## Where to pick up
 
-Phases 1-4 are done except two open items — Phase 4 turned out to be a
-real hardening pass on Phase 3 (see above), not templates. Don't start
-the next session by reaching for another isolated primitive — there
-isn't an obvious one left to add, and don't re-open the *accessibility*
-punch list (item 15) looking for more work — it's genuinely done, unlike
-item 16's newer, separate component-bindings punch list below, which
-isn't. Instead:
+Phases 1-4 are done, including both punch lists below (items 15 and 16)
+and the Alert/Select work (items 18-19) — Phase 4 turned out to be a real
+hardening pass on Phase 3 (see above), not templates. Don't start the next
+session by reaching for another isolated primitive — there isn't an
+obvious one left to add, and don't re-open any of the closed items below
+looking for more work; a *new* gap found in one is a fresh finding, not a
+leftover. Instead:
 
 - The gitignored-location audit (`packages/chat-app/`, `brand assets/`) is
   done for both known locations — check `.gitignore` for new entries
   before assuming there's nothing left to look at.
+- **Real gap found and fixed 2026-08-27, worth not repeating:** 9 commits
+  (Alert through the padding/radius pickup) sat on local `main` for a full
+  session without ever being pushed to `origin/main`. This surfaced only
+  because the user asked to check GitHub after a plugin sync — the sync
+  itself pushes to `figma-sync` off whatever `origin/main` currently is,
+  so a stale `origin/main` makes `check-component-bindings` fail in CI
+  against code that was already fixed locally, for components that
+  aren't even the ones being worked on. `git push origin main` isn't
+  implied by "commit" — check `git rev-list --left-right --count
+  origin/main...main` periodically in any session doing several commits,
+  and push (with confirmation) once real work is ready to leave the
+  local machine, not just at the very end by habit.
 - **Item 15's accessibility punch list is now fully closed** (2026-08-26,
   commits `c83b32d`, `f2e4e29`, `3f448f0`, `4aafde9`, `1cc2228`,
   `2832ea3`) — every real gap the `states`/`accessibility` backfill found
@@ -296,12 +363,24 @@ isn't. Instead:
   `verify` pass — that's exactly the "fix the checker's mood, not the
   reason it's angry" shortcut this whole feature was built to stop
   happening silently.
-- Known open item, still unresolved, fold in whenever it's actually
-  blocking something rather than fixing it speculatively: Button has no
-  true icon-only square variant (see the port session notes) — several
-  existing components work around this with plain styled buttons.
+- **Corrected stale entry (2026-08-27):** this bullet used to claim
+  "Button has no true icon-only square variant" as a known open item —
+  that was already false by the time it was written; Button's
+  `iconOnly` discriminated-union prop (real square icon-only trigger,
+  required `aria-label`) has existed since 2026-07-30. Caught during a
+  full-docs sweep, not from anyone re-reporting the gap. If you find
+  another doc making a stale claim like this, fix it the same way —
+  don't just delete the wrong sentence, leave a note saying it was
+  wrong and since when.
+- **Items 18-19 (Alert/AlertStack/Select/MultiSelect/SelectOption) are
+  done** (2026-08-27) — don't re-open looking for more work; a real
+  `Checkbox` atom was built and removed in the same arc, see item 19 for
+  why. If you find a *new* gap in any of these five, it's a fresh
+  finding, not a leftover.
 - If templates come back, the actual blocker isn't component coverage —
   it's that nothing in this repo has ever been visually verified end to
   end. Prove a trivial render first (fonts load, theme applies, one
   component looks right) before building anything real on top of it, per
-  `CLAUDE.md`'s "Building and previewing UI work" rules.
+  `CLAUDE.md`'s "Building and previewing UI work" rules — `packages/gallery/`
+  (tracked 2026-08-26) is exactly that trivial-render tool now; use it
+  before assuming this blocker still needs solving from scratch.
