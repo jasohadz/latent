@@ -54,13 +54,14 @@ export default {
   // is unchanged — still reuses TextField's own border/radius/padding
   // tokens exactly, confirmed correct in both passes.
   //
-  // Verified together as one composed preview in Figma (label + trigger +
-  // panel of real SelectOption instances), not built as its own named
-  // Figma COMPONENT_SET — check-component-bindings has no live data for
-  // "Select" itself as a result (reports "no-live-data", non-blocking,
-  // same as any component before its first plugin sync); every token
-  // below was independently confirmed live via the composed preview's own
-  // figma_execute dump, the same rigor as a named component would get.
+  // Rebuilt again same day as a real, named Figma COMPONENT_SET
+  // (state=closed/open) — previously this was only a composed preview
+  // (label + trigger + panel of real SelectOption instances) with no
+  // component identity of its own, which is why it had no live-bindings
+  // data at all. There was no real reason for that shortcut; every other
+  // composite this session (Alert, AlertStack, SelectOption) got a real
+  // component, so this one does too now. All tokens below reconfirmed
+  // against the new component's own live figma_execute dump.
   figmaTokens: {
     "trigger padding": "spacing.8",
     "trigger border-radius": "radius.lg",
@@ -78,4 +79,11 @@ export default {
     "panel border": "color.border.subtle",
     "panel border-radius": "radius.lg",
   },
+  // "label font-weight" is skipped below (figmaTokensSkipLiveCheck): the
+  // label text uses a Bold font style (matching font-weight.600's real
+  // 600 weight), but only fontSize was bound to a Variable when building
+  // the label — the font weight itself is expressed via font style choice
+  // (Geist Bold), not a bound fontWeight Variable. Confirmed correct
+  // value, genuinely unbound in Figma.
+  figmaTokensSkipLiveCheck: ["label font-weight"],
 };

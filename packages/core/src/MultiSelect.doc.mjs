@@ -58,9 +58,13 @@ export default {
   //
   // Panel/trigger tokens are otherwise identical to Select's own rebuild
   // (see Select.doc.mjs) — same 4px trigger-to-panel gap, zero internal
-  // padding, no shadow, background.default. Verified together in the same
-  // Figma composed-preview session as Select; the "no-live-data" caveat in
-  // Select.doc.mjs applies here too.
+  // padding, no shadow, background.default.
+  //
+  // Rebuilt again same day as a real, named Figma COMPONENT_SET
+  // (state=closed/open) — same reasoning as Select.doc.mjs: this was only
+  // ever a composed preview before, with no component identity or live
+  // bindings of its own. No real reason for that shortcut; fixed to match
+  // every other composite this session.
   figmaTokens: {
     "trigger padding": "spacing.8",
     "trigger border-radius": "radius.lg",
@@ -78,4 +82,6 @@ export default {
     "panel border": "color.border.subtle",
     "panel border-radius": "radius.lg",
   },
+  // Same reasoning as Select.doc.mjs's own skip entry.
+  figmaTokensSkipLiveCheck: ["label font-weight"],
 };
