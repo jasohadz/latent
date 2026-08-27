@@ -4,6 +4,15 @@
   border: 1px solid var(--lat-color-border-subtle);
   border-radius: var(--lat-radius-card);
   box-shadow: var(--lat-elevation-lg);
+  /* Figma's real SideNav hugs its content in both states — expanded has
+     an explicit 240px width below, but collapsed (the narrow icon rail)
+     never got one, so with no constraint of its own it silently stretched
+     to fill an ambient flex/grid parent with align-items: stretch (the
+     gallery's own wide-card layout, in this case) — same class of bug as
+     TopNav's full-width stretch, fixed the same way: opt back out of
+     stretch regardless of where this gets placed, rather than relying on
+     every state having its own explicit width. */
+  align-self: flex-start;
 }
 
 .lat-side-nav--expanded {
