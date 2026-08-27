@@ -15,6 +15,13 @@ body {
   margin-bottom: var(--lat-spacing-24);
 }
 
+.gallery__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lat-spacing-16);
+}
+
 .gallery__title {
   font-size: var(--lat-font-size-500);
   font-weight: var(--lat-font-weight-700);

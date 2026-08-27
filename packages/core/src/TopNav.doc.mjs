@@ -45,21 +45,26 @@ export default {
   // only walks bound Variables and can never see this; check-styles/
   // styles.json already covers Effect Styles separately.
   // "bar gap" is skipped below: confirmed correct (24px, matching
-  // spacing.24 exactly) but unbound to any Variable in Figma — nothing
-  // for this check to find regardless of correctness.
-  // "bar padding (left)" also skipped: value corrected 2026-08-26 to
-  // match Figma's real 12px exactly, but Figma itself has this as an
-  // unbound literal, not a Variable — nothing for this check to find
-  // regardless of whether the value is right (it is, now).
-  figmaTokensSkipLiveCheck: ["panel shadow", "bar gap", "bar padding (left)"],
+  // spacing.24 exactly) but still unbound to any Variable in Figma as of
+  // the 2026-08-27 spacing-binding pass (see below) — nothing for this
+  // check to find regardless of correctness.
+  // "bar padding (left)" was in this same skip list until 2026-08-27 —
+  // Figma's own Bar frame now binds it to spacing/12 (part of a wider
+  // pass binding every previously-unbound spacing value on the Top Nav
+  // page: Logo/NavRow/NavLink gaps, the bar-to-panel gap, panel padding/
+  // grid gaps, and MegaMenuItem/TopNavLink's own padding/gaps at the
+  // source). Moved down into figmaTokens below now that it's real,
+  // checkable data instead of a skip.
+  figmaTokensSkipLiveCheck: ["panel shadow", "bar gap"],
   figmaTokens: {
     "bar padding (vertical)": "spacing.8",
     // Fixed 2026-08-26: was a symmetric spacing.16 — the real bar padding
     // is asymmetric (confirmed by reading the live node directly: top/
-    // right/bottom all spacing.8, left spacing.12), and unbound to any
-    // Variable in Figma at that. Split into left/right entries below to
-    // actually reflect that instead of one misleadingly-named symmetric
-    // "horizontal" value.
+    // right/bottom all spacing.8, left spacing.12) — at the time unbound
+    // to any Variable in Figma; "bar padding (left)" is bound to
+    // spacing/12 as of the 2026-08-27 spacing-binding pass. Split into
+    // left/right entries below to actually reflect the asymmetry instead
+    // of one misleadingly-named symmetric "horizontal" value.
     "bar padding (right)": "spacing.8",
     "bar padding (left)": "spacing.12",
     "bar gap": "spacing.24",
@@ -68,7 +73,8 @@ export default {
     "bar background": "color.surface.raised",
     // Fixed 2026-08-26: was spacing.12 — the real panel padding is a
     // uniform spacing.8 on all four sides (confirmed by reading the live
-    // node directly), unbound to any Variable in Figma.
+    // node directly). Bound to spacing/8 in Figma as of the 2026-08-27
+    // spacing-binding pass (was unbound before that).
     "panel padding": "spacing.8",
     "panel background": "color.surface.raised",
     "panel border": "color.border.subtle",

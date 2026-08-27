@@ -79,7 +79,28 @@ function ComponentCard({
   );
 }
 
+const DARK_MODE_STORAGE_KEY = "latent-gallery-dark-mode";
+
 export function Gallery() {
+  // Page-level light/dark toggle — drives data-latent-mode on <html>, which
+  // theme.css's :root[data-latent-mode="dark"] block reads. Persisted so a
+  // reload doesn't silently flip back to light.
+  const [darkMode, setDarkMode] = React.useState(() => {
+    try {
+      return localStorage.getItem(DARK_MODE_STORAGE_KEY) === "dark";
+    } catch {
+      return false;
+    }
+  });
+  React.useEffect(() => {
+    document.documentElement.setAttribute("data-latent-mode", darkMode ? "dark" : "light");
+    try {
+      localStorage.setItem(DARK_MODE_STORAGE_KEY, darkMode ? "dark" : "light");
+    } catch {
+      // localStorage unavailable (private browsing, etc.) — mode just won't persist.
+    }
+  }, [darkMode]);
+
   // --- Interactive component state, one hook per stateful component below ---
   const [toggleIndex, setToggleIndex] = React.useState<0 | 1>(0);
   const [toggleMultiIndex, setToggleMultiIndex] = React.useState(1);
@@ -111,7 +132,10 @@ export function Gallery() {
   return (
     <div className="gallery">
       <header className="gallery__header">
-        <h1 className="gallery__title">Latent Component Gallery</h1>
+        <div className="gallery__header-row">
+          <h1 className="gallery__title">Latent Component Gallery</h1>
+          <Switch pressed={darkMode} onChange={setDarkMode} supportingText="Dark mode" />
+        </div>
         <p className="gallery__subtitle">
           Every component in packages/core/src, rendered live from real source — local-only, not published. Run
           with `npm run dev` from packages/gallery.
