@@ -36,10 +36,6 @@
 .lat-chat-input__field:focus {
   outline: none;
 }
-.lat-chat-input__field:focus-visible {
-  outline: var(--lat-sizing-border-thin) solid var(--lat-color-border-focus);
-  outline-offset: var(--lat-sizing-focus-ring-offset);
-}
 
 .lat-chat-input__send {
   display: inline-flex;

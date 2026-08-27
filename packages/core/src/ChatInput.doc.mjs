@@ -28,14 +28,9 @@ export default {
       { attribute: 'aria-label="Send message"', description: "Set on the trailing icon-only button — required since it has no visible text label." },
     ],
     focusBehaviors: [
-      "Fixed 2026-08-26: a real :focus-visible style was added, bound to color.border.focus/sizing.border.thin/sizing.focus-ring-offset — the same tokens Button's own focus ring uses. Previously `outline: none` on :focus had no replacement, actively removing the browser's native default outline rather than simply lacking a custom one — worse than a missing ring, not just equivalent to one. Scoped to the text field only, matching what was actually flagged — the attach/send icon buttons were never called out as a gap and weren't touched.",
+      "2026-08-26: a :focus-visible ring was added (bound to color.border.focus/sizing.border.thin/sizing.focus-ring-offset) to replace a bare outline: none. 2026-08-27: removed again per explicit user request — the ring showed on a plain mouse click, not just keyboard focus (text inputs match :focus-visible on click in most browsers, since typing is expected next), and the desired affordance is just the native blinking caret. `outline: none` on :focus is back, this time deliberately: Figma's own ChatInput field never had a focus ring bound either (see figmaTokens note below), so this is also a net reduction in code/Figma drift, not just a stylistic reversion.",
     ],
   },
-  // Three focus-ring entries: deliberate code-only addition, not a Figma
-  // binding — Figma's real ChatInput field has no focus ring bound at all
-  // (confirmed by the live pull this check is built on). Fixed 2026-08-26
-  // to replace a bare outline: none with a real ring, filling a gap
-  // Figma's own design doesn't have.
   // "field font-family": confirmed the live text node's font family is a
   // literal "Geist", not bound to any Variable — nothing for this check
   // to find regardless of correctness.
@@ -71,9 +66,6 @@ export default {
   // port simply never found it and documented the whole state pair as an
   // unverified app-requested guess instead of investigating further.
   figmaTokensSkipLiveCheck: [
-    "focus ring color",
-    "focus ring width",
-    "focus ring offset",
     "field font-family",
     "field font-size",
   ],
@@ -92,8 +84,5 @@ export default {
     "send background": "color.background.muted",
     "send background (filled)": "color.background.inverse",
     "send icon color": "color.icon.inverse",
-    "focus ring color": "color.border.focus",
-    "focus ring width": "sizing.border.thin",
-    "focus ring offset": "sizing.focus-ring-offset",
   },
 };
