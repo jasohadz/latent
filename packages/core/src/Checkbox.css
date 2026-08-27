@@ -1,0 +1,43 @@
+.lat-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: var(--lat-radius-sm);
+  border: var(--lat-sizing-border-default) solid var(--lat-color-border-default);
+  background-color: transparent;
+  cursor: pointer;
+}
+.lat-checkbox:focus {
+  outline: none;
+}
+.lat-checkbox:focus-visible {
+  outline: var(--lat-sizing-border-default) solid var(--lat-color-border-focus);
+  outline-offset: 2px;
+}
+.lat-checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lat-checkbox--sm {
+  width: var(--lat-sizing-icon-sm);
+  height: var(--lat-sizing-icon-sm);
+}
+.lat-checkbox--md {
+  width: var(--lat-sizing-icon-md);
+  height: var(--lat-sizing-icon-md);
+}
+.lat-checkbox--lg {
+  width: var(--lat-sizing-icon-lg);
+  height: var(--lat-sizing-icon-lg);
+}
+
+.lat-checkbox--checked {
+  background-color: var(--lat-color-action-primary-default);
+  border-color: var(--lat-color-action-primary-default);
+}
+.lat-checkbox__icon {
+  color: var(--lat-color-text-on-brand);
+}

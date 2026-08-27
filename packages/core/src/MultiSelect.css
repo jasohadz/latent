@@ -1,0 +1,83 @@
+.lat-multi-select {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-4);
+  width: 100%;
+}
+
+.lat-multi-select__label {
+  color: var(--lat-color-text-secondary);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
+  font-weight: var(--lat-font-weight-600);
+  line-height: var(--lat-font-line-height-200-normal);
+}
+
+.lat-multi-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lat-spacing-8);
+  width: 100%;
+  padding: var(--lat-spacing-8);
+  border-radius: var(--lat-radius-lg);
+  border: var(--lat-sizing-border-thin) solid var(--lat-color-border-default);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
+  color: var(--lat-color-text-primary);
+  text-align: left;
+}
+.lat-multi-select__trigger:hover:not(:disabled) {
+  border-color: var(--lat-color-border-strong);
+}
+.lat-multi-select__trigger:focus {
+  outline: none;
+}
+.lat-multi-select__trigger:focus-visible,
+.lat-multi-select__trigger--active {
+  border-color: var(--lat-color-border-brand);
+}
+.lat-multi-select__trigger:disabled {
+  border-color: var(--lat-color-border-subtle);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.lat-multi-select__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lat-multi-select__value--placeholder {
+  color: var(--lat-color-text-tertiary);
+}
+
+.lat-multi-select__chevron {
+  color: var(--lat-color-icon-default);
+  flex-shrink: 0;
+}
+
+.lat-multi-select__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lat-spacing-4);
+}
+
+.lat-multi-select__panel {
+  position: absolute;
+  top: calc(100% + var(--lat-spacing-8));
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-4);
+  padding: var(--lat-spacing-8);
+  background-color: var(--lat-color-surface-raised);
+  border: var(--lat-sizing-border-thin) solid var(--lat-color-border-subtle);
+  border-radius: var(--lat-radius-card);
+  box-shadow: var(--lat-elevation-md);
+}

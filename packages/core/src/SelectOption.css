@@ -1,0 +1,36 @@
+.lat-select-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--lat-spacing-8);
+  padding: var(--lat-spacing-8);
+  border: none;
+  border-radius: var(--lat-radius-lg);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
+  color: var(--lat-color-text-primary);
+}
+.lat-select-option:hover {
+  background-color: var(--lat-color-action-secondary-hover);
+}
+.lat-select-option:focus {
+  outline: none;
+}
+.lat-select-option:focus-visible {
+  outline: var(--lat-sizing-border-default) solid var(--lat-color-border-focus);
+  outline-offset: -2px;
+}
+
+.lat-select-option--selected {
+  background-color: var(--lat-color-background-muted);
+}
+.lat-select-option--selected .lat-select-option__label {
+  font-weight: var(--lat-font-weight-600);
+}
+
+.lat-select-option__checkbox {
+  pointer-events: none;
+}
