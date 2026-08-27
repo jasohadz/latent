@@ -67,7 +67,12 @@
 
 .lat-button--sm { padding: var(--lat-spacing-4) var(--lat-spacing-8); font-size: var(--lat-typography-button-font-size-sm); line-height: var(--lat-typography-button-line-height-sm); }
 .lat-button--md { padding: var(--lat-spacing-8); font-size: var(--lat-typography-button-font-size-md); line-height: var(--lat-typography-button-line-height-md); }
-.lat-button--lg { padding: var(--lat-spacing-8) var(--lat-spacing-24); font-size: var(--lat-font-size-500); line-height: var(--lat-font-line-height-500-normal); }
+/* Fixed 2026-08-27: was font-size-500/line-height-500-normal (20px/30px) —
+   Figma's real "xl" (code's "lg") CTA text is 18px/27px, the 400 tier, not
+   500. lg has no dedicated typography.button.*.lg entry in density.json
+   (only sm/md are modeled there), so this stays a direct primitive-alias
+   reference rather than inventing a new density-token shape unprompted. */
+.lat-button--lg { padding: var(--lat-spacing-8) var(--lat-spacing-24); font-size: var(--lat-font-size-400); line-height: var(--lat-font-line-height-400-normal); }
 
 /* Padding varies by size for icon-only (verified 2026-07-30): sm/md/lg map
    to Figma's small/default/xl at spacing-6/8/12. Figma's own "small" tier

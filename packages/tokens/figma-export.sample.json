@@ -2128,8 +2128,8 @@
         "font-size": {
           "sm": {
             "value": {
-              "default": "{typography.font-size.300}",
-              "condensed": "{typography.font-size.200}"
+              "default": "{typography.font-size.200}",
+              "condensed": "{typography.font-size.100}"
             }
           },
           "md": {
@@ -2142,8 +2142,8 @@
         "line-height": {
           "sm": {
             "value": {
-              "default": "{typography.line-height.300.normal}",
-              "condensed": "{typography.line-height.200.tight}"
+              "default": "{typography.line-height.200.normal}",
+              "condensed": "{typography.line-height.100.tight}"
             }
           },
           "md": {

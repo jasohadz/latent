@@ -632,9 +632,17 @@
   --lat-typography-input-hint-font-size-md: var(--lat-primitive-typography-font-size-200);
   --lat-typography-input-hint-line-height-sm: var(--lat-primitive-typography-line-height-100-normal);
   --lat-typography-input-hint-line-height-md: var(--lat-primitive-typography-line-height-200-normal);
-  --lat-typography-button-font-size-sm: var(--lat-primitive-typography-font-size-300);
+  /* Fixed 2026-08-27: font-size-sm/line-height-sm were literally identical
+     to their -md siblings (a copy-paste bug in density.json's own
+     typography.button block, not just here) — every other role in that
+     same file (input/label/hint) differentiates sm as one tier below md,
+     and Figma's own live "small" Button variant confirms 14px/21px
+     (font-size-200/line-height-200-normal), not 16px/24px. Found via a
+     user-reported TopNav CTA looking oversized; see Button.doc.mjs's
+     figmaTokens comment for the full verification. */
+  --lat-typography-button-font-size-sm: var(--lat-primitive-typography-font-size-200);
   --lat-typography-button-font-size-md: var(--lat-primitive-typography-font-size-300);
-  --lat-typography-button-line-height-sm: var(--lat-primitive-typography-line-height-300-normal);
+  --lat-typography-button-line-height-sm: var(--lat-primitive-typography-line-height-200-normal);
   --lat-typography-button-line-height-md: var(--lat-primitive-typography-line-height-300-normal);
   --lat-sizing-action-xs: var(--lat-primitive-dimensions-28);
   --lat-sizing-action-sm: var(--lat-primitive-dimensions-32);
@@ -749,9 +757,9 @@
   --lat-typography-input-hint-font-size-md: var(--lat-primitive-typography-font-size-100);
   --lat-typography-input-hint-line-height-sm: var(--lat-primitive-typography-line-height-100-tight);
   --lat-typography-input-hint-line-height-md: var(--lat-primitive-typography-line-height-100-tight);
-  --lat-typography-button-font-size-sm: var(--lat-primitive-typography-font-size-200);
+  --lat-typography-button-font-size-sm: var(--lat-primitive-typography-font-size-100);
   --lat-typography-button-font-size-md: var(--lat-primitive-typography-font-size-200);
-  --lat-typography-button-line-height-sm: var(--lat-primitive-typography-line-height-200-tight);
+  --lat-typography-button-line-height-sm: var(--lat-primitive-typography-line-height-100-tight);
   --lat-typography-button-line-height-md: var(--lat-primitive-typography-line-height-200-tight);
   --lat-radius-none: var(--lat-primitive-border-radius-0);
   --lat-radius-xxs: var(--lat-primitive-border-radius-25);

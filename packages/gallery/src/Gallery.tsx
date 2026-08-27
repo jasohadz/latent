@@ -390,6 +390,7 @@ export function Gallery() {
           <TopNav
             menu={topNavMenu}
             onMenuChange={setTopNavMenu}
+            logo={<img src="/latent-logo-icon-default.svg" alt="Latent" width={24} height={24} />}
             ctaLabel="Free Trial"
             productItems={[
               { title: "Analytics", description: "Track usage", icon: <Icon name="chart-bar" /> },

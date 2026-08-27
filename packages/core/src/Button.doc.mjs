@@ -73,12 +73,68 @@ export default {
   // begin with (Figma's Plugin API has no x/y-position variable binding)
   // — check-component-bindings only walks bound Variables and can never
   // see a raw measured pixel value like this one.
-  figmaTokensSkipLiveCheck: ["focus ring offset"],
+  // "font-size (lg)"/"line-height (lg)" are skipped below: density.json's
+  // typography.button block only models sm/md — lg is a direct primitive
+  // alias (--lat-font-size-400 etc., see Button.css), not its own
+  // typography.button.*.lg token path, so there's no dotted path here for
+  // check-component-bindings to resolve against a live Figma binding the
+  // normal way. Verified correct by hand instead (Figma's real "xl"
+  // variant, node 43:21945, appearance=filled/state=default/size=xl:
+  // fontSize 18, lineHeight 27px) — see Button.css's own comment on the fix.
+  //
+  // "font-size (sm)"/"line-height (sm)" are also skipped: check-component-
+  // bindings looked for a Figma variable literally named
+  // "typography/button/font-size/sm" and found none — because Figma's real
+  // "small" Button variant doesn't use a dedicated per-size Density
+  // variable at all, it reuses the Semantic "font/style/body-small" text
+  // style (which itself resolves to typography/font-size/200, i.e. 14px).
+  // Only "md" got its own typography.button.font-size.md Density variable
+  // in Figma; "small" borrows an unrelated-named token instead, so the
+  // coarse name-matching this check does can't bridge the two names. The
+  // *value* (14px/21px) is confirmed correct against that real binding
+  // chain — see the figmaTokens comment on these two entries below for
+  // the full trail.
+  figmaTokensSkipLiveCheck: [
+    "focus ring offset",
+    "font-size (lg)",
+    "line-height (lg)",
+    "font-size (sm)",
+    "line-height (sm)",
+  ],
   figmaTokens: {
     "border-radius": "radius.slimlg",
     "padding (md, all sides)": "spacing.8",
     "font-size (md)": "typography.button.font-size.md",
     "line-height (md)": "typography.button.line-height.md",
+    // Fixed 2026-08-27: sm was never differentiated from md at all — a
+    // copy-paste bug in density.json's typography.button block (both sm
+    // and md pointed at font-size.300/line-height.300.normal). Confirmed
+    // against Figma's real "small" Button variant (node 43:21945,
+    // appearance=filled/state=default/size=small): label fontSize 14,
+    // lineHeight 21px — font-size.200/line-height.200.normal, one tier
+    // below md, matching the sm-is-one-tier-below-md pattern every other
+    // role in that same density.json file already follows (input/label/
+    // hint). Found via a user-reported TopNav CTA rendering visibly
+    // oversized on localhost:5185 — the CTA is a real size="sm" Button
+    // instance, so this was silently wrong everywhere sm is used, not
+    // just there. Never previously declared here at all, so check-parity/
+    // check-component-bindings had nothing to check against — same class
+    // of "never verified because never declared" gap as the icon-cascade
+    // bug from the day before (see CLAUDE.md's icon-cascade section).
+    "font-size (sm)": "typography.button.font-size.sm",
+    "line-height (sm)": "typography.button.line-height.sm",
+    // Fixed 2026-08-27, found alongside the sm bug above: lg used
+    // font.size.500/font.line-height.500.normal (20px/30px) in Button.css.
+    // Figma's real "xl" variant (node 43:21945, appearance=filled/
+    // state=default/size=xl) is 18px/27px — bound to font/style/body-large
+    // (Semantic), which resolves to typography/font-size/400, the same
+    // "reuses an existing Semantic text style instead of a dedicated
+    // Density variable" pattern as sm's font/style/body-small. Declared
+    // here as the generic font.size.400/font.line-height.400.normal alias
+    // (there's no typography.button.*.lg entry in density.json to point
+    // at instead — see Button.css's own comment).
+    "font-size (lg)": "font.size.400",
+    "line-height (lg)": "font.line-height.400.normal",
     "background (primary default)": "color.action.primary.default",
     "background (primary hover)": "color.action.primary.hover",
     "background (primary pressed)": "color.action.primary.pressed",
