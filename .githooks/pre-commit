@@ -100,6 +100,21 @@ if [ -n "$THEME_SOURCES_TOUCHED" ]; then
   git add packages/theme-neutral/theme.css packages/theme-neutral/fonts.css
 fi
 
+# Story UI's docs (packages/storybook/story-ui-docs/ + story-ui-considerations.md)
+# are generated from the .doc.mjs contracts and token JSON — regenerate and
+# re-stage them whenever either changes, so Story UI never learns a stale
+# component or token name. Blocks if they'd exceed Story UI's prompt budget.
+STORY_UI_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/core/src/.*\.doc\.mjs$|^packages/tokens/(semantic|density|styles|code-only)\.json$|^packages/storybook/story-ui\.config\.js$|^packages/cli/bin/story-ui-docs\.mjs$')
+if [ -n "$STORY_UI_TOUCHED" ]; then
+  echo "latent: contracts or tokens changed — regenerating Story UI docs..."
+  if node packages/cli/bin/latent.mjs story-ui-docs --write --json >/dev/null; then
+    git add packages/storybook/story-ui-docs packages/storybook/story-ui-considerations.md
+  else
+    echo "BLOCKED (story-ui-docs): run 'node packages/cli/bin/latent.mjs story-ui-docs --json' for details (likely over Story UI's prompt budget)."
+    FAIL=1
+  fi
+fi
+
 # --- 1. Tokens/Styles ---
 TOKENS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/tokens/|^STYLES\.md$')
 if [ -n "$TOKENS_TOUCHED" ]; then

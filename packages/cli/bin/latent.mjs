@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // latent — CLI for the design system. Every command supports --json so an
 // agent gets structured output instead of parsing prose.
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, copyFileSync, rmSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { flattenTokens, tokenPathToCssVar, tokensEqual, isTerminalModeMap } from "../../tokens/flatten.mjs";
 import { buildTheme, THEME_CSS_PATH, FONTS_CSS_PATH } from "../../tokens/build-theme.mjs";
+import { buildStoryUiDocs, readStoryUiImportPath } from "./story-ui-docs.mjs";
 import { LocalIndex } from "vectra";
 import { getLlama, resolveModelFile, LlamaChatSession } from "node-llama-cpp";
 
@@ -76,6 +77,7 @@ const COMMANDS = {
     responseTypes: ["apply-drift-result"],
   },
   "build-theme": { args: [], flags: ["--json", "--write", "--force"], responseTypes: ["build-theme-result"] },
+  "story-ui-docs": { args: [], flags: ["--json", "--write"], responseTypes: ["story-ui-docs-result"] },
   manifest: { args: [], flags: ["--json"], responseTypes: ["manifest"] },
   index: { args: [], flags: ["--json"], responseTypes: ["index-result", "error"] },
   ask: { args: ["<question>"], flags: ["--json", "--check", "--monitor", "--cite"], responseTypes: ["ask-result", "error"] },
@@ -1184,6 +1186,7 @@ async function computeVerify() {
 
   const checkDocs = await computeCheckDocs();
   const buildThemeResult = computeBuildTheme({ write: false });
+  const storyUiDocs = await computeStoryUiDocs({ write: false });
 
   const failed = [];
   if (syncFigma.type === "error" || syncFigma.driftCount > 0) failed.push("sync figma");
@@ -1210,6 +1213,7 @@ async function computeVerify() {
   }
   if (checkDocs.violations.length > 0) failed.push("check-docs");
   if (buildThemeResult.status !== "up-to-date") failed.push("build-theme");
+  if (storyUiDocs.status !== "up-to-date") failed.push("story-ui-docs");
 
   return {
     type: "verify-result",
@@ -1221,6 +1225,7 @@ async function computeVerify() {
     checkComponentBindings,
     checkDocs,
     buildTheme: buildThemeResult,
+    storyUiDocs,
   };
 }
 
@@ -1245,6 +1250,7 @@ function contextForFailure(label, v) {
   if (label === "check-styles") return v.checkStyles;
   if (label === "check-docs") return v.checkDocs;
   if (label === "build-theme") return v.buildTheme;
+  if (label === "story-ui-docs") return v.storyUiDocs;
   const [kind, ...rest] = label.split(" ");
   const component = rest.join(" ");
   if (kind === "check-parity") return v.checkParity.find((r) => (r.component ?? r.requested) === component);
@@ -1538,6 +1544,81 @@ function cmdBuildTheme(json, write, force) {
   const result = computeBuildTheme({ write, force });
   print(result, json);
   if (result.error || result.status === "stale") process.exitCode = 1;
+}
+
+// --- story-ui-docs: regenerates what Story UI reads to learn Latent ---
+// --- (packages/storybook/story-ui-docs/ + story-ui-considerations.md) ---
+// --- from the .doc.mjs contracts and token JSON — see story-ui-docs.mjs. ---
+//
+// Dry-run by default (non-zero exit when stale, so verify can gate on it);
+// --write regenerates. Every file under story-ui-docs/ is generated, so a
+// stale file left behind by a removed component is deleted on --write.
+// Also fails when the docs would exceed Story UI's prompt budgets, which it
+// would otherwise truncate without telling anyone.
+const STORYBOOK_DIR = path.join(REPO_ROOT, "packages/storybook");
+const STORY_UI_DOCS_DIR = path.join(STORYBOOK_DIR, "story-ui-docs");
+const STORY_UI_CONSIDERATIONS = path.join(STORYBOOK_DIR, "story-ui-considerations.md");
+
+function listFilesRecursive(dir, base = dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? listFilesRecursive(path.join(dir, e.name), base) : [path.relative(base, path.join(dir, e.name)).replace(/\\/g, "/")],
+  );
+}
+
+async function computeStoryUiDocs({ write }) {
+  const docs = [];
+  for (const name of discoverComponents()) docs.push(await loadDoc(name));
+  const tokenNames = (file) => Object.keys(flattenTokens(JSON.parse(readFileSync(path.join(TOKENS_DIR, file), "utf-8"))));
+  const codeOnly = JSON.parse(readFileSync(path.join(TOKENS_DIR, "code-only.json"), "utf-8"));
+  const codeOnlyNames = Object.entries(codeOnly)
+    .filter(([k]) => !k.startsWith("_"))
+    .flatMap(([group, entries]) => Object.keys(entries).map((k) => `${group}.${k}`));
+  const styles = JSON.parse(readFileSync(path.join(TOKENS_DIR, "styles.json"), "utf-8"));
+  const elevationNames = Object.keys(styles.effect ?? {}).map((n) => n.toLowerCase().replace(/\//g, "."));
+
+  const { files, considerations, budget } = buildStoryUiDocs({
+    docs,
+    semanticNames: tokenNames("semantic.json"),
+    densityNames: tokenNames("density.json"),
+    codeOnlyNames,
+    elevationNames,
+    importPath: readStoryUiImportPath(path.join(STORYBOOK_DIR, "story-ui.config.js")),
+  });
+
+  const read = (p) => (existsSync(p) ? readFileSync(p, "utf-8").replace(/\r\n/g, "\n") : null);
+  const expected = new Set(Object.keys(files));
+  const changed = Object.keys(files).filter((p) => read(path.join(STORY_UI_DOCS_DIR, p)) !== files[p]);
+  const extra = listFilesRecursive(STORY_UI_DOCS_DIR).filter((p) => !expected.has(p));
+  const considerationsStale = read(STORY_UI_CONSIDERATIONS) !== considerations;
+  const overBudget = budget.used > budget.total || budget.overFile.length > 0;
+  const stale = changed.length > 0 || extra.length > 0 || considerationsStale;
+
+  const result = {
+    type: "story-ui-docs-result",
+    status: overBudget ? "over-budget" : stale ? "stale" : "up-to-date",
+    written: false,
+    changed,
+    extra,
+    considerationsStale,
+    budget,
+  };
+  if (write && !overBudget && stale) {
+    for (const [p, content] of Object.entries(files)) {
+      mkdirSync(path.dirname(path.join(STORY_UI_DOCS_DIR, p)), { recursive: true });
+      writeFileSync(path.join(STORY_UI_DOCS_DIR, p), content);
+    }
+    for (const p of extra) rmSync(path.join(STORY_UI_DOCS_DIR, p));
+    writeFileSync(STORY_UI_CONSIDERATIONS, considerations);
+    return { ...result, status: "written", written: true };
+  }
+  return result;
+}
+
+async function cmdStoryUiDocs(json, write) {
+  const result = await computeStoryUiDocs({ write });
+  print(result, json);
+  if (result.status === "stale" || result.status === "over-budget") process.exitCode = 1;
 }
 
 // --- draft-doc: uses the local chat model to draft a `.doc.mjs` prop ---
@@ -2039,6 +2120,8 @@ async function main() {
     }
     case "build-theme":
       return cmdBuildTheme(json, rest.includes("--write"), rest.includes("--force"));
+    case "story-ui-docs":
+      return cmdStoryUiDocs(json, rest.includes("--write"));
     case "manifest":
       return cmdManifest(json);
     case "compose-check":
