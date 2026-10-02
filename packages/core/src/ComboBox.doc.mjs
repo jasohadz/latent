@@ -58,7 +58,9 @@ export default {
   // style since 2026-10-02 (applied by the user in Figma): Geist Regular,
   // font/style/body-small, line-height bound to Primitives
   // typography/line-height/200/normal (21px) — code reads the semantic
-  // font.line-height.200.normal, which aliases that same primitive. The
+  // --lat-font-line-height-200-normal, which aliases that same primitive
+  // (keyed "font-line-height.200-normal" below, the spelling Alert and
+  // Calendar use, which check-component-bindings matches to it). The
   // label has no text style, same as Select's.
   figmaTokens: {
     "gap (label to trigger)": "spacing.4",
@@ -78,7 +80,7 @@ export default {
     "value color": "color.text.primary",
     "value font-size": "font-style.body-small",
     "value font-weight": "font-weight.400",
-    "value line-height": "font.line-height.200.normal",
+    "value line-height": "font-line-height.200-normal",
     "placeholder color": "color.text.tertiary",
     "panel padding": "spacing.4",
     "panel background": "color.background.default",

@@ -1417,32 +1417,32 @@
       "action": {
         "xs": {
           "value": {
-            "light": "{dimensions.24}",
-            "dark": "{dimensions.24}"
+            "light": "{density.sizing.action.xs}",
+            "dark": "{density.sizing.action.xs}"
           }
         },
         "sm": {
           "value": {
-            "light": "{dimensions.28}",
-            "dark": "{dimensions.28}"
+            "light": "{density.sizing.action.sm}",
+            "dark": "{density.sizing.action.sm}"
           }
         },
         "md": {
           "value": {
-            "light": "{dimensions.32}",
-            "dark": "{dimensions.32}"
+            "light": "{density.sizing.action.md}",
+            "dark": "{density.sizing.action.md}"
           }
         },
         "lg": {
           "value": {
-            "light": "{dimensions.36}",
-            "dark": "{dimensions.36}"
+            "light": "{density.sizing.action.lg}",
+            "dark": "{density.sizing.action.lg}"
           }
         },
         "xl": {
           "value": {
-            "light": "{dimensions.40}",
-            "dark": "{dimensions.40}"
+            "light": "{density.sizing.action.xl}",
+            "dark": "{density.sizing.action.xl}"
           }
         }
       },
