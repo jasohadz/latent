@@ -12,6 +12,9 @@ const config: StorybookConfig = {
     '../src/stories/**/*.@(mdx|stories.@(js|jsx|ts|tsx))'
   ],
   framework: "@storybook/react-vite",
+  // Compiles Story UI's .mdx pages — without it `storybook build` (and so
+  // Chromatic) fails on them; dev mode compiles lazily and never notices.
+  addons: ["@storybook/addon-docs"],
   // Reuse the gallery's public dir so TopNav's logo resolves at the same path.
   staticDirs: ["../../gallery/public"],
   viteFinal: (viteConfig) =>

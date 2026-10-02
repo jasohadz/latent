@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { flattenTokens, tokenPathToCssVar, tokensEqual, isTerminalModeMap } from "../../tokens/flatten.mjs";
-import { buildTheme, THEME_CSS_PATH } from "../../tokens/build-theme.mjs";
+import { buildTheme, THEME_CSS_PATH, FONTS_CSS_PATH } from "../../tokens/build-theme.mjs";
 import { LocalIndex } from "vectra";
 import { getLlama, resolveModelFile, LlamaChatSession } from "node-llama-cpp";
 
@@ -1502,9 +1502,13 @@ function parseThemeBlocks(css) {
 }
 
 function computeBuildTheme({ write, force = false }) {
-  const { css, warnings } = buildTheme();
-  const current = existsSync(THEME_CSS_PATH) ? readFileSync(THEME_CSS_PATH, "utf-8") : "";
+  const { css, fontsCss, warnings } = buildTheme();
+  // Strip CRLF: git's autocrlf can check files out that way on Windows — not drift.
+  const read = (p) => (existsSync(p) ? readFileSync(p, "utf-8").replace(/\r\n/g, "\n") : "");
+  const current = read(THEME_CSS_PATH);
   const relPath = path.relative(REPO_ROOT, THEME_CSS_PATH).replace(/\\/g, "/");
+  const fontsRelPath = path.relative(REPO_ROOT, FONTS_CSS_PATH).replace(/\\/g, "/");
+  const fontsStale = read(FONTS_CSS_PATH) !== fontsCss;
   const before = parseThemeBlocks(current);
   const after = parseThemeBlocks(css);
   const added = [], removed = [], changed = [];
@@ -1516,14 +1520,15 @@ function computeBuildTheme({ write, force = false }) {
     }
     for (const [k, v] of b) if (!a.has(k)) added.push({ block: sel, name: k, value: v });
   }
-  // Git's autocrlf can check the file out with CRLF on Windows — not drift.
-  const upToDate = current.replace(/\r\n/g, "\n") === css;
-  const result = { type: "build-theme-result", path: relPath, status: upToDate ? "up-to-date" : "stale", written: false, added, removed, changed, warnings };
+  const upToDate = current === css && !fontsStale;
+  const result = { type: "build-theme-result", path: relPath, fontsPath: fontsRelPath, status: upToDate ? "up-to-date" : "stale", fontsStale, written: false, added, removed, changed, warnings };
   if (write && !upToDate) {
-    if (!force && gitDirtyFiles([relPath]).length > 0) {
-      return { ...result, error: `${relPath} has uncommitted changes — commit or discard them first, or pass --force` };
+    const dirty = force ? [] : gitDirtyFiles([relPath, fontsRelPath]);
+    if (dirty.length > 0) {
+      return { ...result, error: `${dirty.join(", ")} has uncommitted changes — commit or discard them first, or pass --force` };
     }
     writeFileSync(THEME_CSS_PATH, css);
+    writeFileSync(FONTS_CSS_PATH, fontsCss);
     return { ...result, status: "written", written: true };
   }
   return result;

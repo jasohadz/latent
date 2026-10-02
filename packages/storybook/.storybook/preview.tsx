@@ -1,5 +1,7 @@
 import React from "react";
 import type { Preview } from "@storybook/react-vite";
+// fonts.css first: its @imports must lead the bundled CSS or browsers drop them.
+import "@latent/theme/fonts.css";
 import "@latent/theme/theme.css";
 import "./preview.css";
 

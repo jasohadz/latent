@@ -10,10 +10,11 @@
     "storybook-with-ui": "concurrently \"npm run storybook\" \"npm run story-ui\""
   },
   "devDependencies": {
+    "@storybook/addon-docs": "^10.6.1",
     "@storybook/react-vite": "^10.6.1",
     "@tpitre/story-ui": "^5.21.2",
-    "storybook": "^10.6.1",
     "concurrently": "^8.2.0",
-    "react-live": "^4.1.8"
+    "react-live": "^4.1.8",
+    "storybook": "^10.6.1"
   }
 }

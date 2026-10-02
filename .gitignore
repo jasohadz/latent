@@ -13,3 +13,7 @@ build-storybook.log
 .env.*
 # Story UI server runtime state
 .story-ui/
+# Story UI output: per-user generated stories and chat history
+packages/storybook/src/stories/generated/
+packages/storybook/src/stories/.story-mappings.json
+packages/storybook/.story-ui-history/

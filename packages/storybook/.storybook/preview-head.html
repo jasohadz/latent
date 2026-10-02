@@ -1,12 +1,8 @@
-<!-- theme.css declares font-family.sans/mono as Geist/Geist Mono but ships no
-     webfont — loaded here since nothing upstream does. Same block as
-     packages/gallery/index.html. -->
+<!-- The fonts themselves come from @latent/theme/fonts.css (generated from
+     the font-family tokens, imported in preview.tsx); these only warm up the
+     connection to Google Fonts. -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap"
-  rel="stylesheet"
-/>
 <script>
   document.documentElement.setAttribute("data-latent-theme", "neutral");
 </script>
