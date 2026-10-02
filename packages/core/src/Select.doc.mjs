@@ -73,6 +73,9 @@ export default {
   // than a flush edge-to-edge list.
   figmaTokens: {
     "trigger padding": "spacing.8",
+    // Was spacing.8 in code until 2026-10-02; Figma's trigger itemSpacing
+    // is bound to spacing/4 (found while porting ComboBox).
+    "trigger gap": "spacing.4",
     "trigger border-radius": "radius.lg",
     "trigger border": "color.border.default",
     "trigger border (active)": "color.border.brand",

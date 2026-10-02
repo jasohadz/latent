@@ -53,10 +53,20 @@ export default {
   // filter wouldn't keep — treated as illustrative demo text, not a
   // filtering spec. Not yet in component-bindings.live.json until Latent
   // Sync runs with ComboBox in its COMPONENT_NAMES.
+  //
+  // Value text (placeholder and typed value) uses the Body/Small/Small text
+  // style since 2026-10-02 (applied by the user in Figma): Geist Regular,
+  // font/style/body-small, line-height bound to Primitives
+  // typography/line-height/200/normal (21px) — code reads the semantic
+  // font.line-height.200.normal, which aliases that same primitive. The
+  // label has no text style, same as Select's.
   figmaTokens: {
     "gap (label to trigger)": "spacing.4",
     "trigger padding": "spacing.8",
     "trigger gap": "spacing.4",
+    // Figma's trigger is a fixed 36px frame; bound to Density
+    // sizing/action/md on 2026-10-02 (value unchanged) so code can follow it.
+    "trigger height": "sizing.action.md",
     "trigger border-radius": "radius.lg",
     "trigger border width": "sizing-border.thin",
     "trigger border": "color.border.default",
@@ -67,6 +77,8 @@ export default {
     "label font-weight": "font-weight.600",
     "value color": "color.text.primary",
     "value font-size": "font-style.body-small",
+    "value font-weight": "font-weight.400",
+    "value line-height": "font.line-height.200.normal",
     "placeholder color": "color.text.tertiary",
     "panel padding": "spacing.4",
     "panel background": "color.background.default",
@@ -79,5 +91,7 @@ export default {
   // disabled variant; reused from Select's code. "active row background":
   // bound inside the Select Option instance, which the coarse check reads
   // as SelectOption's binding, not ComboBox's.
-  figmaTokensSkipLiveCheck: ["label font-weight", "trigger border (disabled)", "active row background"],
+  // "value font-weight": Regular comes from the text style's font, not a
+  // bound fontWeight variable (the same reason as the label).
+  figmaTokensSkipLiveCheck: ["label font-weight", "value font-weight", "trigger border (disabled)", "active row background"],
 };

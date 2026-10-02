@@ -22,6 +22,9 @@
   align-items: center;
   gap: var(--lat-spacing-4);
   width: 100%;
+  /* Fixed, like Figma's trigger frame — the value text's 21px line-height
+     would otherwise grow it past 36px. Density token, so condensed shrinks it. */
+  height: var(--lat-sizing-action-md);
   padding: var(--lat-spacing-8);
   border-radius: var(--lat-radius-lg);
   border: var(--lat-sizing-border-thin) solid var(--lat-color-border-default);
@@ -51,8 +54,12 @@
   border: none;
   outline: none;
   background: transparent;
+  /* Figma's Body/Small/Small text style: Geist Regular, body-small size,
+     line-height 200/normal (21px). */
   font-family: var(--lat-font-family-sans);
   font-size: var(--lat-font-style-body-small);
+  font-weight: var(--lat-font-weight-400);
+  line-height: var(--lat-font-line-height-200-normal);
   color: var(--lat-color-text-primary);
 }
 .lat-combo-box__input::placeholder {
