@@ -1,0 +1,10 @@
+/* Same page baseline as packages/gallery/src/gallery.css's body rule. Some
+   components (e.g. Card's title/body) don't set font-family themselves and
+   rely on inheriting it — without this they fall back to the browser's
+   default serif, and dark mode's canvas stays white. */
+body {
+  margin: 0;
+  background-color: var(--lat-color-background-default);
+  color: var(--lat-color-text-primary);
+  font-family: var(--lat-font-family-sans);
+}

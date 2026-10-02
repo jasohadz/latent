@@ -5,3 +5,5 @@ swizzled/
 packages/chat-app/
 brand assets/
 .latent-models/
+storybook-static/
+build-storybook.log

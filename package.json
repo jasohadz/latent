@@ -7,11 +7,17 @@
   "scripts": {
     "ds": "node packages/cli/bin/latent.mjs",
     "generate-sample-fixture": "node packages/tokens/generate-sample-fixture.mjs",
-    "postinstall": "git config core.hooksPath .githooks"
+    "postinstall": "git config core.hooksPath .githooks",
+    "storybook": "storybook dev -p 6006 -c packages/storybook/.storybook",
+    "build-storybook": "storybook build -c packages/storybook/.storybook",
+    "chromatic": "chromatic --exit-zero-on-changes"
   },
   "dependencies": {
     "lucide-react": "^1.24.0",
     "node-llama-cpp": "^3.20.0",
     "vectra": "^0.15.0"
+  },
+  "devDependencies": {
+    "chromatic": "^18.10.1"
   }
 }
