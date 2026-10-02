@@ -31,7 +31,7 @@ No exceptions on `name`/`summary`/`props`/`example`/`doNot`/`swizzlePath`/`exten
 
 `packages/tokens/tokens.json` is the single source of truth. When you change it:
 
-1. Mirror the change by hand into `packages/theme-neutral/theme.css` (there is no generator script yet — this is a manual sync today).
+1. Regenerate `packages/theme-neutral/theme.css` with `node packages/tokens/build-theme.mjs` (never hand-edit it — the pre-commit hook also regenerates it when token JSON is staged).
 2. If the token is Figma-authored, the Figma variable collection must mirror the same name/nesting — coordinate the rename/change on both sides.
 3. Run `sync figma` (see below) to confirm nothing drifted.
 

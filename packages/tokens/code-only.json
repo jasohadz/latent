@@ -1,0 +1,9 @@
+{
+  "_comment": "Tokens with no Figma variable behind them, emitted into theme.css by build-theme.mjs. Each needs a note saying why Figma can't hold it. Keep this list short — anything Figma *can* bind belongs in Figma, not here.",
+  "sizing": {
+    "focus-ring-offset": {
+      "value": "3px",
+      "note": "Measured off the Button focus-ring layer in Figma (46:41). Can't be variable-bound because the Plugin API's VariableBindableNodeField doesn't include x/y position. Fixed across theme and density: a focus ring's offset is an a11y distance, not compressible spacing."
+    }
+  }
+}

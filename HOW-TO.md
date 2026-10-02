@@ -51,9 +51,11 @@ themselves:
    `--write`, and it never deletes a code-only token/style on its own
    (that direction of drift still needs a manual decision either way).
 3. Commit. The pre-commit hook (`.githooks/`, installed via step 1's
-   `npm install`) re-runs the relevant checks automatically and blocks the
-   commit if the files you just wrote are inconsistent with each other — a
-   safety net for step 2, not a replacement for doing it.
+   `npm install`) regenerates `packages/theme-neutral/theme.css` from the
+   token files you just wrote — that's what makes your rebrand show up in
+   the gallery and Storybook — then re-runs the relevant checks and blocks
+   the commit if the files are inconsistent with each other. A safety net
+   for step 2, not a replacement for doing it.
 
 No plugin, or a Figma file you can't install a dev plugin into? Point an
 agent (Claude Code or otherwise) at `CLAUDE.md` and the

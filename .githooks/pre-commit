@@ -90,6 +90,16 @@ if [ -n "$SCHEMA_TOUCHED" ]; then
   git add packages/tokens/figma-export.sample.json
 fi
 
+# theme.css is generated from the token JSON (packages/tokens/build-theme.mjs)
+# — regenerate and re-stage it whenever one of its sources changes, so a
+# synced rebrand reaches every consumer without a hand-mirroring step.
+THEME_SOURCES_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/tokens/(primitives|semantic|density|styles|code-only)\.json$|^packages/tokens/build-theme\.mjs$')
+if [ -n "$THEME_SOURCES_TOUCHED" ]; then
+  echo "latent: theme sources changed — regenerating packages/theme-neutral/theme.css..."
+  node packages/tokens/build-theme.mjs || FAIL=1
+  git add packages/theme-neutral/theme.css
+fi
+
 # --- 1. Tokens/Styles ---
 TOKENS_TOUCHED=$(printf '%s\n' "$CHANGED" | grep -E '^packages/tokens/|^STYLES\.md$')
 if [ -n "$TOKENS_TOUCHED" ]; then

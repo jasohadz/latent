@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { flattenTokens, tokenPathToCssVar, tokensEqual, isTerminalModeMap } from "../../tokens/flatten.mjs";
+import { buildTheme, THEME_CSS_PATH } from "../../tokens/build-theme.mjs";
 import { LocalIndex } from "vectra";
 import { getLlama, resolveModelFile, LlamaChatSession } from "node-llama-cpp";
 
@@ -74,6 +75,7 @@ const COMMANDS = {
     flags: ["--json", "--write", "--force", "--tokens-file", "--styles-file"],
     responseTypes: ["apply-drift-result"],
   },
+  "build-theme": { args: [], flags: ["--json", "--write", "--force"], responseTypes: ["build-theme-result"] },
   manifest: { args: [], flags: ["--json"], responseTypes: ["manifest"] },
   index: { args: [], flags: ["--json"], responseTypes: ["index-result", "error"] },
   ask: { args: ["<question>"], flags: ["--json", "--check", "--monitor", "--cite"], responseTypes: ["ask-result", "error"] },
@@ -1181,6 +1183,7 @@ async function computeVerify() {
   }
 
   const checkDocs = await computeCheckDocs();
+  const buildThemeResult = computeBuildTheme({ write: false });
 
   const failed = [];
   if (syncFigma.type === "error" || syncFigma.driftCount > 0) failed.push("sync figma");
@@ -1206,6 +1209,7 @@ async function computeVerify() {
     // the full checkComponentBindings array below, just not gating.
   }
   if (checkDocs.violations.length > 0) failed.push("check-docs");
+  if (buildThemeResult.status !== "up-to-date") failed.push("build-theme");
 
   return {
     type: "verify-result",
@@ -1216,6 +1220,7 @@ async function computeVerify() {
     checkParity,
     checkComponentBindings,
     checkDocs,
+    buildTheme: buildThemeResult,
   };
 }
 
@@ -1239,6 +1244,7 @@ function contextForFailure(label, v) {
   if (label === "sync figma") return v.syncFigma;
   if (label === "check-styles") return v.checkStyles;
   if (label === "check-docs") return v.checkDocs;
+  if (label === "build-theme") return v.buildTheme;
   const [kind, ...rest] = label.split(" ");
   const component = rest.join(" ");
   if (kind === "check-parity") return v.checkParity.find((r) => (r.component ?? r.requested) === component);
@@ -1476,6 +1482,57 @@ async function cmdApplyDrift(json, write, force, tokensFile, stylesFile) {
   const result = await computeApplyDrift({ tokensFile, stylesFile, write, force });
   print(result, json);
   if (result.error) process.exitCode = 1;
+}
+
+// --- build-theme: regenerates packages/theme-neutral/theme.css from the ---
+// --- token JSON (packages/tokens/build-theme.mjs does the actual work). ---
+//
+// Dry-run by default: reports which declarations would be added, removed, or
+// changed, and exits non-zero if theme.css is stale — so `verify` and CI can
+// gate on it the same way they gate on sync figma. --write rewrites the file,
+// refusing over uncommitted edits to it unless --force (same guard as
+// apply-drift — a hand edit there would otherwise vanish silently).
+function parseThemeBlocks(css) {
+  const blocks = {};
+  for (const m of css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+    const map = (blocks[m[1].trim()] ??= new Map());
+    for (const d of m[2].matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) map.set(d[1], d[2].trim());
+  }
+  return blocks;
+}
+
+function computeBuildTheme({ write, force = false }) {
+  const { css, warnings } = buildTheme();
+  const current = existsSync(THEME_CSS_PATH) ? readFileSync(THEME_CSS_PATH, "utf-8") : "";
+  const relPath = path.relative(REPO_ROOT, THEME_CSS_PATH).replace(/\\/g, "/");
+  const before = parseThemeBlocks(current);
+  const after = parseThemeBlocks(css);
+  const added = [], removed = [], changed = [];
+  for (const sel of new Set([...Object.keys(before), ...Object.keys(after)])) {
+    const a = before[sel] ?? new Map(), b = after[sel] ?? new Map();
+    for (const [k, v] of a) {
+      if (!b.has(k)) removed.push({ block: sel, name: k, value: v });
+      else if (b.get(k) !== v) changed.push({ block: sel, name: k, from: v, to: b.get(k) });
+    }
+    for (const [k, v] of b) if (!a.has(k)) added.push({ block: sel, name: k, value: v });
+  }
+  // Git's autocrlf can check the file out with CRLF on Windows — not drift.
+  const upToDate = current.replace(/\r\n/g, "\n") === css;
+  const result = { type: "build-theme-result", path: relPath, status: upToDate ? "up-to-date" : "stale", written: false, added, removed, changed, warnings };
+  if (write && !upToDate) {
+    if (!force && gitDirtyFiles([relPath]).length > 0) {
+      return { ...result, error: `${relPath} has uncommitted changes — commit or discard them first, or pass --force` };
+    }
+    writeFileSync(THEME_CSS_PATH, css);
+    return { ...result, status: "written", written: true };
+  }
+  return result;
+}
+
+function cmdBuildTheme(json, write, force) {
+  const result = computeBuildTheme({ write, force });
+  print(result, json);
+  if (result.error || result.status === "stale") process.exitCode = 1;
 }
 
 // --- draft-doc: uses the local chat model to draft a `.doc.mjs` prop ---
@@ -1975,6 +2032,8 @@ async function main() {
       const stylesFile = stylesFlagIdx >= 0 ? rest[stylesFlagIdx + 1] : undefined;
       return cmdApplyDrift(json, write, force, tokensFile, stylesFile);
     }
+    case "build-theme":
+      return cmdBuildTheme(json, rest.includes("--write"), rest.includes("--force"));
     case "manifest":
       return cmdManifest(json);
     case "compose-check":
