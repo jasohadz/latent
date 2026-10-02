@@ -116,8 +116,13 @@ async function resolveBoundVars(boundVariables) {
 async function extractStyles() {
   const text = {};
   for (const style of await figma.getLocalTextStylesAsync()) {
+    // variationSettings (e.g. { wght: 700 }) is how Figma reports a variable
+    // font's axes — for Geist it just restates the weight already named by
+    // fontName.style, and styles.json's schema never captured it. Dropped for
+    // the same reason as the effect bookkeeping fields below.
+    const { variationSettings, ...fontName } = style.fontName;
     text[style.name] = {
-      fontName: style.fontName,
+      fontName,
       lineHeight: style.lineHeight,
       letterSpacing: style.letterSpacing,
       textCase: style.textCase,
