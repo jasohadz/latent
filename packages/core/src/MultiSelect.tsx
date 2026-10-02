@@ -32,7 +32,7 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
   ({ label, placeholder = "Select...", items, value, onChange, disabled = false, className }, ref) => {
     const [open, setOpen] = React.useState(false);
     const containerRef = React.useRef<HTMLDivElement>(null);
-    const triggerRef = React.useRef<HTMLDivElement>(null);
+    const triggerRef = React.useRef<HTMLButtonElement>(null);
     const optionRefs = React.useRef<(HTMLDivElement | null)[]>([]);
     const labelId = React.useId();
 
@@ -77,22 +77,14 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
         <label className="lat-multi-select__label" id={labelId}>
           {label}
         </label>
-        {/* A <div role="button">, not a real <button> — it needs to contain
-            Badge's own dismiss <button>s, and a <button> can't be a
-            descendant of another <button> (invalid HTML). Same class of
-            fix as SelectOption's own <div role="option">. */}
+        {/* The bordered frame is a plain container, not a button: it holds
+            Badge's own dismiss <button>s, and an interactive control can't
+            contain another one (axe's nested-interactive — the frame was a
+            <div role="button"> until 2026-10-02). The real <button> inside
+            opens the panel and fills the frame's remaining width; clicking
+            the frame's own padding toggles too, as a mouse convenience. */}
         <div
-          ref={(el) => {
-            triggerRef.current = el;
-            if (typeof ref === "function") ref(el);
-            else if (ref) ref.current = el;
-          }}
-          role="button"
-          tabIndex={disabled ? -1 : 0}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-labelledby={labelId}
-          aria-disabled={disabled}
+          ref={ref}
           className={[
             "lat-multi-select__trigger",
             open ? "lat-multi-select__trigger--active" : "",
@@ -103,19 +95,10 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
           onClick={() => {
             if (!disabled) setOpen((o) => !o);
           }}
-          onKeyDown={(e) => {
-            if (disabled) return;
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setOpen((o) => !o);
-            }
-          }}
         >
-          {selectedItems.length === 0 ? (
-            <span className="lat-multi-select__placeholder">{placeholder}</span>
-          ) : (
+          {selectedItems.length > 0 ? (
             // stopPropagation so clicking a chip (its label or its dismiss
-            // button) never also toggles the trigger's own open state.
+            // button) never also toggles the panel.
             <div className="lat-multi-select__chips" onClick={(e) => e.stopPropagation()}>
               {selectedItems.map((item) => (
                 <Badge key={item.value} variant="brand" size="small" onDismiss={() => toggle(item.value)}>
@@ -123,8 +106,23 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
                 </Badge>
               ))}
             </div>
-          )}
-          <Icon name="chevron-down" size="sm" className="lat-multi-select__chevron" />
+          ) : null}
+          <button
+            ref={triggerRef}
+            type="button"
+            className="lat-multi-select__toggle"
+            aria-haspopup="listbox"
+            aria-expanded={open}
+            aria-labelledby={labelId}
+            disabled={disabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((o) => !o);
+            }}
+          >
+            {selectedItems.length === 0 ? <span className="lat-multi-select__placeholder">{placeholder}</span> : null}
+            <Icon name="chevron-down" size="sm" className="lat-multi-select__chevron" />
+          </button>
         </div>
         {open ? (
           <div className="lat-multi-select__panel" role="listbox" aria-multiselectable="true" aria-labelledby={labelId}>

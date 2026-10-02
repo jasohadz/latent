@@ -52,6 +52,9 @@ const preview: Preview = {
   parameters: {
     layout: "centered",
     controls: { matchers: { color: /(background|color)$/i } },
+    // axe runs on every story; "todo" reports violations (Accessibility
+    // panel, Chromatic) without failing the build.
+    a11y: { test: "todo" },
     // Snapshot every story in both modes — each mode sets the latentMode
     // global the decorator above reads.
     chromatic: {

@@ -1,4 +1,8 @@
 .lat-select-option {
+  /* A div at width: 100%, so content-box put its padding outside the panel's
+     content area — the row's right side ran 16px under the panel's clipped
+     edge until 2026-10-02 (found by a gallery overflow sweep). */
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   width: 100%;

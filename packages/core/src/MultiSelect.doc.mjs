@@ -25,14 +25,14 @@ export default {
   ],
   accessibility: {
     keyboardInteractions: [
-      { key: "Enter or Space (trigger)", action: "Toggles the panel open/closed." },
+      { key: "Enter or Space (toggle button)", action: "Toggles the panel open/closed. Tab order: each chip's dismiss button, then the toggle button." },
       { key: "ArrowDown / ArrowUp (panel open)", action: "Moves focus to the next/previous option — a convenience, not full roving-tabindex management, same as Select." },
       { key: "Escape (panel open)", action: "Closes the panel and returns focus to the trigger." },
       { key: "Enter or Space (on an option)", action: "Toggles it in `value` — the panel stays open." },
       { key: "Enter or Space (on a chip's dismiss button)", action: "Removes that value — native <button> behavior via Badge's own onDismiss. Its click also stopPropagation()s so it doesn't also toggle the panel open/closed." },
     ],
     ariaAttributes: [
-      { attribute: "role, aria-haspopup, aria-expanded (trigger)", description: 'The trigger is a <div role="button"> (not a real <button> — it contains Badge\'s own dismiss <button>s, and a <button> can\'t be a descendant of another <button>), with aria-haspopup="listbox" and aria-expanded reflecting open state.' },
+      { attribute: "aria-haspopup, aria-expanded, aria-labelledby (toggle button)", description: 'The bordered frame is a plain container holding the chips (each with Badge\'s own dismiss <button>) and a real <button> that opens the panel, with aria-haspopup="listbox", aria-expanded reflecting open state, and the field label as its name. Until 2026-10-02 the frame itself was a <div role="button"> wrapping the dismiss buttons: nested interactive controls, which axe flags and screen readers can\'t navigate reliably.' },
       { attribute: "role, aria-multiselectable, aria-labelledby (panel)", description: 'role="listbox" aria-multiselectable="true", labelled by the same id as the trigger\'s own label.' },
     ],
     focusBehaviors: [

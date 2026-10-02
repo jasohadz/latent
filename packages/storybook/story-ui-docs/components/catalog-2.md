@@ -70,6 +70,7 @@ Example: `<SubscribeField buttonPosition="side" value={email} onChange={setEmail
 ### Switch
 An on/off toggle for boolean settings.
 Example: `<Switch pressed={enabled} onChange={setEnabled} supportingText="Enable notifications" />`
+- Don't render a Switch with neither supportingText nor aria-label — screen readers announce it as an unnamed switch.
 - Don't hardcode the thumb travel distance in a consumer override — it's derived from the track/thumb/padding sizes here; change those instead.
 
 ### Testimonial

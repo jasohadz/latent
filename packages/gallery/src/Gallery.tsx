@@ -23,6 +23,7 @@ import { NavSubItem } from "@latent/core/NavSubItem";
 import { Panel } from "@latent/core/Panel";
 import { Search } from "@latent/core/Search";
 import { Select } from "@latent/core/Select";
+import { ComboBox } from "@latent/core/ComboBox";
 import { SelectOption } from "@latent/core/SelectOption";
 import { SideNav } from "@latent/core/SideNav";
 import { Stat } from "@latent/core/Stat";
@@ -121,6 +122,7 @@ export function Gallery() {
   const [alertDismissed, setAlertDismissed] = React.useState(false);
   const [alertExpanded, setAlertExpanded] = React.useState(false);
   const [selectValue, setSelectValue] = React.useState<string | undefined>(undefined);
+  const [comboValue, setComboValue] = React.useState<string | undefined>(undefined);
   const [multiSelectValue, setMultiSelectValue] = React.useState<string[]>(["hiking"]);
   const hobbyItems = [
     { value: "hiking", label: "Hiking" },
@@ -280,6 +282,22 @@ export function Gallery() {
 
         <ComponentCard name="Select" wide>
           <Select label="Hobby" placeholder="Select hobby" items={hobbyItems} value={selectValue} onChange={setSelectValue} />
+        </ComponentCard>
+
+        <ComponentCard name="ComboBox" wide>
+          <ComboBox
+            label="Country"
+            placeholder="Search country..."
+            items={[
+              { value: "us", label: "United States" },
+              { value: "uk", label: "United Kingdom" },
+              { value: "uy", label: "Uruguay" },
+              { value: "ca", label: "Canada" },
+              { value: "de", label: "Germany" },
+            ]}
+            value={comboValue}
+            onChange={setComboValue}
+          />
         </ComponentCard>
 
         <ComponentCard name="MultiSelect" wide>

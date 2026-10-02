@@ -17,7 +17,9 @@ const config: StorybookConfig = {
   // addon-mcp serves an MCP endpoint at http://localhost:6006/mcp so coding
   // agents (and Story UI) can read component docs and stories. The component
   // manifest is what it serves — built from the stories and their source.
-  addons: ["@storybook/addon-docs", "@storybook/addon-mcp"],
+  // addon-a11y runs axe on every story (the Accessibility panel locally, and
+  // Chromatic's accessibility tests on each build).
+  addons: ["@storybook/addon-docs", "@storybook/addon-mcp", "@storybook/addon-a11y"],
   features: { experimentalComponentsManifest: true },
   // Reuse the gallery's public dir so TopNav's logo resolves at the same path.
   staticDirs: ["../../gallery/public"],

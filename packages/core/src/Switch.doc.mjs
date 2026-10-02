@@ -5,10 +5,12 @@ export default {
     { name: "pressed", type: "boolean", default: "—", description: "Whether the switch is on." },
     { name: "onChange", type: "(pressed: boolean) => void", default: "—", description: "Fires with the new pressed value when clicked." },
     { name: "disabled", type: "boolean", default: "false", description: "50% opacity on the track; the on+disabled track uses a distinct dimmed brand color, not just opacity over the normal on-color." },
-    { name: "supportingText", type: "string", default: "undefined", description: "Optional caption rendered beside the track." },
+    { name: "supportingText", type: "string", default: "undefined", description: "Optional caption rendered beside the track. It's also the switch's accessible name (aria-labelledby)." },
+    { name: "aria-label", type: "string", default: "undefined", description: "Accessible name for a switch with no supportingText. Ignored when supportingText is set. Without either, the switch has no name and warns in dev." },
   ],
   example: `<Switch pressed={enabled} onChange={setEnabled} supportingText="Enable notifications" />`,
   doNot: [
+    "Don't render a Switch with neither supportingText nor aria-label — screen readers announce it as an unnamed switch.",
     "Don't hardcode the thumb travel distance in a consumer override — it's derived from the track/thumb/padding sizes here; change those instead.",
   ],
   swizzlePath: "packages/core/src/Switch.tsx",
@@ -30,6 +32,7 @@ export default {
     ariaAttributes: [
       { attribute: 'role="switch"', description: "Identifies the control as a switch, not a generic button, to assistive tech." },
       { attribute: "aria-checked", description: "Kept in sync with the pressed prop directly." },
+      { attribute: "aria-labelledby / aria-label", description: "Fixed 2026-10-02 (axe button-name, found by the Storybook a11y audit): the supportingText caption now names the switch via aria-labelledby; with no caption, the aria-label prop does. Before, the caption sat beside the button unconnected and the switch had no accessible name." },
     ],
     focusBehaviors: [
       "Fixed 2026-08-26: token-bound :focus-visible ring added, same pattern as Button/MegaMenuItem/TopNavLink — outline: none on :focus, a real outline on :focus-visible bound to color.border.focus/sizing.border.thin/sizing.focus-ring-offset. Previously relied on the browser's unstyled default outline by accident (Switch.css never set outline: none either), not a deliberate design.",

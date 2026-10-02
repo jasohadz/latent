@@ -15,6 +15,10 @@
 }
 
 .lat-multi-select__trigger {
+  /* A div, unlike Select's <button> trigger, defaults to content-box — which
+     put the padding/border outside the 100% width (it overhung its container
+     by 18px in the gallery until 2026-10-02). */
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -26,13 +30,15 @@
   background: transparent;
   cursor: pointer;
 }
-.lat-multi-select__trigger:hover {
+/* Hover excludes the open/focused states — otherwise this rule's higher
+   specificity keeps the hover gray over the brand border while the pointer
+   rests on an open multi-select. */
+.lat-multi-select__trigger:hover:not(.lat-multi-select__trigger--active):not(:focus-within) {
   border-color: var(--lat-color-border-strong);
 }
-.lat-multi-select__trigger:focus {
-  outline: none;
-}
-.lat-multi-select__trigger:focus-visible,
+/* Keyboard focus is on the inner toggle button (or a chip's dismiss
+   button); the frame shows it, the same brand border as open. */
+.lat-multi-select__trigger:has(:focus-visible),
 .lat-multi-select__trigger--active {
   border-color: var(--lat-color-border-brand);
 }
@@ -41,6 +47,23 @@
   cursor: not-allowed;
   opacity: 0.6;
   pointer-events: none;
+}
+
+.lat-multi-select__toggle {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: inherit;
+}
+.lat-multi-select__toggle:focus {
+  outline: none;
 }
 
 .lat-multi-select__placeholder {
