@@ -10,3 +10,12 @@
 <script>
   document.documentElement.setAttribute("data-latent-theme", "neutral");
 </script>
+
+<style>
+  /* Story UI: the preview root fills the canvas, so a story's width never follows its content.
+     Storybook's default #storybook-root is block-level and fills its parent;
+     a preview stylesheet that centres the body turns it into a shrink-to-fit
+     flex item, and the page then resizes whenever its content changes.
+     Not applied to layout: 'centered', where hugging the content is intended. */
+  body:not(.sb-main-centered) #storybook-root { width: 100%; }
+</style>

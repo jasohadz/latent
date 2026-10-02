@@ -7,3 +7,7 @@ brand assets/
 .latent-models/
 storybook-static/
 build-storybook.log
+
+# Local secrets (Story UI API key, etc.)
+.env
+.env.*

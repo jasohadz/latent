@@ -9,6 +9,8 @@
     "generate-sample-fixture": "node packages/tokens/generate-sample-fixture.mjs",
     "postinstall": "git config core.hooksPath .githooks",
     "storybook": "storybook dev -p 6006 -c packages/storybook/.storybook",
+    "story-ui": "npm run story-ui -w packages/storybook",
+    "storybook-with-ui": "npm run storybook-with-ui -w packages/storybook",
     "build-storybook": "storybook build -c packages/storybook/.storybook",
     "chromatic": "chromatic --exit-zero-on-changes"
   },

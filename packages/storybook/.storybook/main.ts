@@ -8,7 +8,9 @@ const dirname = import.meta.dirname;
 // deliberately exactly 3 files per component (.tsx/.css/.doc.mjs), which the
 // CLI's component discovery and the pre-commit hook both assume.
 const config: StorybookConfig = {
-  stories: ["../stories/**/*.stories.@(ts|tsx)"],
+  stories: ["../stories/**/*.stories.@(ts|tsx)",
+    '../src/stories/**/*.@(mdx|stories.@(js|jsx|ts|tsx))'
+  ],
   framework: "@storybook/react-vite",
   // Reuse the gallery's public dir so TopNav's logo resolves at the same path.
   staticDirs: ["../../gallery/public"],

@@ -1,0 +1,3580 @@
+/**
+ * StoryUIPanel CSS - ShadCN-Inspired Design
+ *
+ * A clean, minimal interface inspired by ShadCN UI and Google Gemini.
+ * Self-contained CSS with no external dependencies.
+ * Supports both light mode (default) and dark mode.
+ */
+
+/* ============================================
+   CSS Custom Properties (ShadCN-style tokens)
+   ============================================ */
+.sui-root {
+  /* Font System - Storybook's exact stacks */
+  --font-sans: "Nunito Sans", -apple-system, ".SFNSText-Regular", "San Francisco", BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, Menlo, Monaco, "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Droid Sans Mono", "Courier New", monospace;
+
+  /* Base Colors - Light Mode (Storybook 10 palette) */
+  --background: 0 0% 100%;
+  --foreground: 210 10% 20%;
+  --card: 210 50% 98%;
+  --card-foreground: 210 10% 20%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 10% 20%;
+  --primary: 212 100% 42%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 31% 95%;
+  --secondary-foreground: 210 10% 20%;
+  --muted: 210 31% 95%;
+  --muted-foreground: 213 10% 40%;
+  --accent: 212 100% 93%;
+  --accent-foreground: 210 10% 20%;
+  --destructive: 16 100% 34%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 210 25% 89%;
+  --input: 210 25% 89%;
+  /* Form-control boundaries need 3:1 (WCAG 1.4.11); decorative borders don't */
+  --input-strong: 210 16% 55%;
+  --ring: 212 100% 42%;
+
+  /* User Bubble - Storybook hover-blue tint */
+  --user-bubble-bg: 212 100% 93%;
+  --user-bubble-fg: 210 10% 20%;
+  --user-bubble-border: 212 70% 86%;
+
+  /* AI Bubble - Pure white */
+  --ai-bubble-bg: 0 0% 100%;
+  --ai-bubble-fg: 210 10% 20%;
+  --ai-bubble-border: 210 25% 89%;
+
+  /* Semantic Colors */
+  --success: 101 52% 32%;
+  --success-foreground: 0 0% 100%;
+  --warning: 31 72% 30%;
+  --warning-foreground: 0 0% 100%;
+  --info: 212 100% 42%;
+  --info-foreground: 0 0% 100%;
+
+  /* Radius */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 12px;
+  --radius-full: 9999px;
+
+  /* Spacing */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Tint behind a status colour used as text (pills, the active tab). Light
+     text-on-tint needs a thinner wash than dark to hold 4.5:1. */
+  --tint: 0.08;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --header-height: 44px;
+  --input-height: 44px;
+  --max-chat-width: 720px;
+}
+
+/* Semantic aliases for the panel's newer surfaces (Design Context, Voice
+   Canvas, verification). Their styles read these names; nothing defined them,
+   so every one fell back to a light-mode literal in both schemes. Derived
+   from the hsl tokens above, so the dark block below re-colours them too. */
+.sui-root {
+  --sui-text: hsl(var(--foreground));
+  --sui-text-secondary: hsl(var(--muted-foreground));
+  --sui-border: hsl(var(--border));
+  --sui-surface: hsl(var(--card));
+  --sui-surface-subtle: hsl(var(--secondary));
+  --sui-accent: hsl(var(--primary));
+  --sui-success: hsl(var(--success));
+  --sui-warning: hsl(var(--warning));
+  --sui-danger: hsl(var(--destructive));
+  --sui-mono: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+
+/* Dark Mode - Storybook 10 dark palette */
+.sui-root.dark {
+  --background: 220 4% 14%;
+  --foreground: 210 6% 80%;
+  --card: 210 4% 11%;
+  --card-foreground: 210 6% 80%;
+  --popover: 210 4% 11%;
+  --popover-foreground: 210 6% 80%;
+  --primary: 212 100% 64%;
+  --primary-foreground: 210 4% 11%;
+  --secondary: 216 6% 17%;
+  --secondary-foreground: 210 6% 80%;
+  --muted: 216 6% 17%;
+  --muted-foreground: 210 4% 60%;
+  --accent: 212 40% 23%;
+  --accent-foreground: 210 6% 85%;
+  --destructive: 16 100% 65%;
+  --destructive-foreground: 210 4% 11%;
+  --border: 220 3% 23%;
+  --input: 220 3% 23%;
+  --input-strong: 220 5% 48%;
+  --ring: 212 100% 64%;
+
+  /* User Bubble - Storybook hover-navy in dark mode */
+  --user-bubble-bg: 212 40% 23%;
+  --user-bubble-fg: 210 6% 85%;
+  --user-bubble-border: 212 35% 30%;
+
+  /* AI Bubble - Raised surface in dark mode */
+  --ai-bubble-bg: 216 6% 17%;
+  --ai-bubble-fg: 210 6% 80%;
+  --ai-bubble-border: 216 5% 25%;
+
+  --success: 101 52% 49%;
+  --warning: 41 100% 45%;
+  --info: 212 100% 64%;
+  --info-foreground: 210 4% 11%;
+  --tint: 0.14;
+}
+
+/* Dark mode fallback using system preference when .dark class not applied */
+@media (prefers-color-scheme: dark) {
+  .sui-root:not(.light) {
+    --background: 220 4% 14%;
+    --foreground: 210 6% 80%;
+    --card: 210 4% 11%;
+    --card-foreground: 210 6% 80%;
+    --popover: 210 4% 11%;
+    --popover-foreground: 210 6% 80%;
+    --primary: 212 100% 64%;
+    --primary-foreground: 210 4% 11%;
+    --secondary: 216 6% 17%;
+    --secondary-foreground: 210 6% 80%;
+    --muted: 216 6% 17%;
+    --muted-foreground: 210 4% 60%;
+    --accent: 212 40% 23%;
+    --accent-foreground: 210 6% 85%;
+    --destructive: 16 100% 65%;
+    --destructive-foreground: 210 4% 11%;
+    --border: 220 3% 23%;
+    --input: 220 3% 23%;
+    --input-strong: 220 5% 48%;
+    --ring: 212 100% 64%;
+
+    /* User Bubble - Storybook hover-navy in dark mode */
+    --user-bubble-bg: 212 40% 23%;
+    --user-bubble-fg: 210 6% 85%;
+    --user-bubble-border: 212 35% 30%;
+
+    /* AI Bubble - Raised surface in dark mode */
+    --ai-bubble-bg: 216 6% 17%;
+    --ai-bubble-fg: 210 6% 80%;
+    --ai-bubble-border: 216 5% 25%;
+
+    --success: 101 52% 49%;
+    --warning: 41 100% 45%;
+    --info: 212 100% 64%;
+    --info-foreground: 210 4% 11%;
+    --tint: 0.14;
+  }
+}
+
+/* ============================================
+   Base Reset & CSS Isolation
+   ============================================ */
+
+/* Isolate StoryUI from Storybook's theme CSS variables */
+.sui-root {
+  /* Reset inherited properties to prevent Storybook theme bleeding */
+  all: revert;
+
+  /* Re-apply necessary layout */
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+
+  /* Typography */
+  font-family: var(--font-sans);
+  font-size: 14px !important;
+  line-height: 1.5;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Layout */
+  height: 100%;
+  width: 100%;
+  display: flex;
+
+  /* Prevent inheriting Storybook's color scheme */
+  color-scheme: light;
+}
+
+.sui-root.dark {
+  color-scheme: dark;
+}
+
+.sui-root *,
+.sui-root *::before,
+.sui-root *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  /* Prevent Storybook CSS variable inheritance */
+  color: inherit;
+}
+
+/* ============================================
+   Layout Structure
+   ============================================ */
+
+/* Sidebar */
+.sui-sidebar {
+  width: var(--sidebar-width);
+  background: hsl(var(--card));
+  border-right: 1px solid hsl(var(--border));
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width var(--transition-normal), opacity var(--transition-normal);
+  overflow: hidden;
+}
+
+/* Collapsed from the header's sidebar button: no rail, nothing to focus */
+.sui-sidebar.collapsed {
+  width: 0;
+  border-right: 0;
+}
+
+.sui-sidebar-header {
+  padding: var(--space-4);
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.sui-sidebar-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: var(--space-2);
+}
+
+/* "New story" — full width, one row, 36px like the mockup */
+.sui-sidebar-new {
+  width: 100%;
+  height: 36px;
+  margin-bottom: 12px;
+}
+
+/* Sidebar chat list - flex grow to fill space */
+.sui-sidebar-chats {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: var(--space-4);
+}
+
+/* Context Menu */
+.sui-context-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 50;
+  min-width: 140px;
+  padding: var(--space-1);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px hsl(210 10% 20% / 0.15);
+}
+
+.sui-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: 14px !important;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all var(--transition-fast);
+}
+
+.sui-context-menu-item:hover {
+  background: hsl(var(--accent));
+}
+
+.sui-context-menu-item-danger {
+  color: hsl(var(--destructive));
+}
+
+.sui-context-menu-item-danger:hover {
+  background: hsl(var(--destructive) / 0.1);
+}
+
+/* Rename input */
+.sui-chat-item-rename {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.sui-rename-input {
+  flex: 1;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid hsl(var(--input-strong));
+  border-radius: var(--radius-sm);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 14px !important;
+  outline: none;
+}
+
+.sui-rename-input:focus {
+  border-color: hsl(var(--ring));
+}
+
+/* Main Content */
+.sui-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+  background: hsl(var(--background));
+}
+
+/* Header: three columns so the mode tabs sit centred regardless of what the
+   left and right clusters contain. */
+.sui-header {
+  height: var(--header-height);
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: 12px;
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  flex-shrink: 0;
+}
+
+.sui-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sui-header-center {
+  display: flex;
+  justify-content: center;
+}
+
+.sui-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.sui-header-title {
+  font-size: 15px !important;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  white-space: nowrap;
+}
+
+/* Current story as a quiet dropdown chip beside the wordmark */
+.sui-title-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  max-width: 280px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: inherit;
+  font-size: 13px !important;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sui-title-chip:hover,
+.sui-title-chip[aria-expanded="true"] {
+  background: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+.sui-title-chip:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+}
+
+.sui-title-chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Connection status: dot + one word; the detail lives in its title and in
+   the settings menu */
+.sui-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px !important;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.sui-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: hsl(var(--success));
+}
+
+.sui-status--bad {
+  color: hsl(var(--destructive));
+}
+
+.sui-status--bad .sui-status-dot {
+  background: hsl(var(--destructive));
+}
+
+/* Icon buttons: sidebar toggle, gear, turn actions, composer attach */
+.sui-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sui-icon-btn:hover:not(:disabled),
+.sui-icon-btn[aria-expanded="true"],
+.sui-icon-btn[aria-pressed="true"] {
+  background: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+.sui-icon-btn:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+}
+
+.sui-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sui-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   Popover menus (story switcher, settings, turn actions, model chooser)
+   ============================================ */
+.sui-menu-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.sui-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 60;
+  min-width: 200px;
+  max-width: 320px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.sui-menu--right {
+  left: auto;
+  right: 0;
+}
+
+.sui-menu--up {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.sui-menu--stories {
+  min-width: 240px;
+}
+
+.sui-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: 13px !important;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.sui-menu-item:hover,
+.sui-menu-item:focus-visible {
+  background: hsl(var(--secondary));
+  outline: none;
+}
+
+.sui-menu-item--active {
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+.sui-menu-item--danger {
+  color: hsl(var(--destructive));
+}
+
+.sui-menu-item--danger:hover,
+.sui-menu-item--danger:focus-visible {
+  background: hsl(var(--destructive) / 0.1);
+}
+
+.sui-menu-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sui-menu-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: hsl(var(--border));
+}
+
+.sui-menu-heading {
+  padding: 6px 10px 2px;
+  font-size: 11px !important;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-menu-group + .sui-menu-group {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Informational rows in the settings menu (server, toggles) */
+.sui-menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  font-size: 13px !important;
+  color: hsl(var(--foreground));
+  white-space: nowrap;
+}
+
+.sui-menu-row--toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sui-menu-row--toggle:hover {
+  background: hsl(var(--secondary));
+}
+
+.sui-menu-row-value {
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chat Area */
+.sui-chat-area {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* ============================================
+   Thread: right-aligned user bubbles, avatar-led assistant turns
+   ============================================ */
+.sui-thread {
+  width: 100%;
+  max-width: var(--max-chat-width);
+  padding: 28px 40px 16px;
+  display: flex;
+  flex-direction: column;
+  /* 24px between turns; 12px inside one */
+  gap: 24px;
+}
+
+.sui-turn {
+  animation: sui-fade-in var(--transition-normal);
+}
+
+@keyframes sui-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sui-turn-user {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sui-bubble {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: var(--radius-xl);
+  background: hsl(var(--user-bubble-bg));
+  border: 1px solid hsl(var(--user-bubble-border));
+  color: hsl(var(--user-bubble-fg));
+  font-size: 15px !important;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sui-turn-ai {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.sui-avatar {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: hsl(var(--accent));
+  color: hsl(var(--primary));
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+.sui-turn-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Meta row: steps disclosure, timing, "Show changes", verification pill */
+.sui-turn-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 13px !important;
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-turn-meta-text {
+  font-variant-numeric: tabular-nums;
+}
+
+.sui-turn-meta-dot {
+  opacity: 0.7;
+}
+
+.sui-steps-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px 2px 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 13px !important;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.sui-steps-toggle:hover {
+  color: hsl(var(--foreground));
+}
+
+.sui-steps-toggle:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+}
+
+.sui-steps-chevron {
+  display: inline-flex;
+  transition: transform var(--transition-fast);
+}
+
+.sui-steps-chevron.open {
+  transform: rotate(90deg);
+}
+
+.sui-link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: hsl(var(--primary));
+  font-family: inherit;
+  font-size: 13px !important;
+  cursor: pointer;
+}
+
+.sui-link-btn:hover {
+  text-decoration: underline;
+}
+
+.sui-link-btn:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Expanded steps: the progress log, numbered */
+.sui-steps {
+  margin: 0;
+  padding: 2px 0 2px 26px;
+  border-left: 2px solid hsl(var(--border));
+  list-style: decimal;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px !important;
+  line-height: 1.45;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Assistant prose: no card, reading-size type */
+.sui-turn-prose {
+  font-size: 15px !important;
+  line-height: 1.55;
+  color: hsl(var(--foreground));
+}
+
+.sui-turn-prose .sui-markdown {
+  font-size: 15px !important;
+  line-height: 1.55;
+  font-family: var(--font-sans);
+}
+
+/* Storybook's docs styles recolor paragraph text; pin it to the foreground
+   token so both themes derive from one source. */
+.sui-turn-prose .sui-markdown p,
+.sui-turn-prose .sui-markdown strong,
+.sui-turn-prose .sui-markdown em,
+.sui-turn-prose .sui-markdown span,
+.sui-turn-prose .sui-markdown li {
+  font-size: 15px !important;
+  line-height: 1.55;
+  color: hsl(var(--foreground)) !important;
+}
+
+.sui-turn-prose .sui-markdown p {
+  margin: 0 0 10px;
+}
+
+.sui-turn-prose .sui-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+/* Inline code as chips */
+.sui-turn-prose .sui-markdown code {
+  font-family: var(--font-mono);
+  font-size: 13px !important;
+  padding: 1px 5px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: hsl(var(--secondary)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Generated code, opened from "Show changes" or the < > action */
+.sui-code {
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-xl);
+  background: hsl(var(--card));
+}
+
+.sui-code pre {
+  margin: 0;
+  padding: 12px 14px;
+  max-height: 360px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 13px !important;
+  line-height: 1.5;
+  color: hsl(var(--foreground));
+}
+
+/* Quiet action row: visible on hover, on focus-within for keyboard users,
+   and while its menu is open. Always visible where hover does not exist. */
+.sui-turn-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: -4px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.sui-turn-ai:hover .sui-turn-actions,
+.sui-turn-ai:focus-within .sui-turn-actions,
+.sui-turn-actions.is-open {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .sui-turn-actions {
+    opacity: 1;
+  }
+}
+
+.sui-turn-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ============================================
+   Button Component (Storybook-inspired)
+   ============================================ */
+.sui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+  font-size: 14px !important;
+  font-weight: 700;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+.sui-button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+}
+
+.sui-button:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Button Variants - Storybook outline-button idiom, variables cover both themes */
+.sui-button-default {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--input));
+  border-radius: var(--radius-md);
+  height: 28px;
+  padding: 0 var(--space-3);
+}
+
+.sui-button-default:hover {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+
+.sui-button-secondary {
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  height: 28px;
+  padding: 0 var(--space-3);
+}
+
+.sui-button-secondary:hover {
+  background: hsl(var(--accent));
+}
+
+.sui-button-outline {
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--foreground));
+  border-radius: var(--radius-md);
+  height: 28px;
+  padding: 0 var(--space-3);
+}
+
+.sui-button-outline:hover {
+  background: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+.sui-button-destructive {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  border-radius: var(--radius-md);
+  height: 28px;
+  padding: 0 var(--space-3);
+}
+
+.sui-button-destructive:hover {
+  background: hsl(var(--destructive) / 0.9);
+}
+
+/* Button Sizes */
+.sui-button-sm {
+  height: 24px;
+  padding: 0 var(--space-2);
+  font-size: 14px !important;
+}
+
+.sui-button-lg {
+  height: 32px;
+  padding: 0 var(--space-4);
+}
+
+.sui-button-icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.sui-button-icon.sui-button-sm {
+  width: 24px;
+  height: 24px;
+}
+
+/* ============================================
+   ShadCN-Style Input Component
+   ============================================ */
+.sui-input {
+  display: flex;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  padding: 0 var(--space-3);
+  font-size: 14px !important;
+  color: hsl(var(--foreground));
+  transition: all var(--transition-fast);
+}
+
+.sui-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-input:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+}
+
+.sui-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================
+   Toggle switch (Storybook MCP context, in the settings menu)
+   ============================================ */
+.sui-toggle-switch {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.sui-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.sui-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.sui-toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: hsl(var(--background));
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.sui-toggle-switch input:checked + .sui-toggle-slider {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+.sui-toggle-switch input:checked + .sui-toggle-slider::before {
+  transform: translateX(14px);
+}
+
+.sui-toggle-switch input:focus-visible + .sui-toggle-slider {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.sui-menu-row--toggle:hover .sui-toggle-slider {
+  background-color: hsl(var(--accent));
+}
+
+.sui-menu-row--toggle:hover .sui-toggle-switch input:checked + .sui-toggle-slider {
+  background-color: hsl(var(--primary) / 0.9);
+}
+
+/* ============================================
+   ShadCN-Style Card Component
+   ============================================ */
+.sui-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+}
+
+.sui-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-6);
+}
+
+.sui-card-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sui-card-description {
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-card-content {
+  padding: 0 var(--space-6) var(--space-6);
+}
+
+.sui-card-footer {
+  display: flex;
+  align-items: center;
+  padding: var(--space-6);
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* ============================================
+   Chat Item (Sidebar) - Gemini-style
+   ============================================ */
+.sui-chat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: hsl(var(--foreground));
+  position: relative;
+}
+
+.sui-chat-item:hover {
+  background: hsl(var(--secondary));
+}
+
+/* Selected row matches Storybook's solid-primary sidebar selection */
+.sui-chat-item.active {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.sui-chat-item.active .sui-chat-item-title {
+  font-weight: 700;
+}
+
+.sui-chat-item.active .sui-chat-item-menu {
+  color: hsl(var(--primary-foreground));
+}
+
+.sui-chat-item.menu-open {
+  background: hsl(var(--secondary));
+}
+
+.sui-chat-item.active.menu-open {
+  background: hsl(var(--primary));
+}
+
+/* Voice Canvas provenance marker on chat-list items */
+.sui-chat-item-voice {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: -1px;
+  margin-right: 6px;
+  color: hsl(var(--success));
+}
+
+.sui-chat-item-title {
+  flex: 1;
+  /* Matches Storybook's own sidebar items (14px/400, measured in SB 10) */
+  font-size: 14px !important;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* Subtle indicator for stories with no chat history */
+.sui-chat-item--no-history {
+  border-left: 2px solid hsl(var(--border));
+}
+
+.sui-chat-item-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sui-chat-item-menu {
+  opacity: 0;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  color: hsl(var(--muted-foreground));
+  transition: all var(--transition-fast);
+}
+
+.sui-chat-item:hover .sui-chat-item-menu,
+.sui-chat-item:focus-within .sui-chat-item-menu,
+.sui-chat-item-menu:focus-visible,
+.sui-chat-item.menu-open .sui-chat-item-menu {
+  opacity: 1;
+}
+
+.sui-chat-item-menu:hover {
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+}
+
+/* ============================================
+   Welcome State (Gemini-inspired)
+   ============================================ */
+.sui-welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8);
+}
+
+.sui-welcome-greeting {
+  font-size: 20px;
+  font-weight: 800;
+  /* !important beats Storybook docs typography; the variable keeps both themes in sync */
+  color: hsl(var(--foreground)) !important;
+  margin: 0 0 var(--space-3) 0 !important;
+  padding: 0 !important;
+  border-bottom: none !important;
+  line-height: 1.3;
+}
+
+.sui-welcome-subtitle {
+  font-size: 15px !important;
+  color: hsl(var(--foreground) / 0.85) !important;
+  margin: 0 0 24px 0;
+  max-width: 420px;
+}
+
+.sui-welcome-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  max-width: 600px;
+}
+
+/* ============================================
+   Suggestion Chips (Storybook outline-button style)
+   ============================================ */
+.sui-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 12px;
+  /* !important beats Storybook docs styles; variables keep both themes in sync */
+  background: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--input)) !important;
+  border-radius: var(--radius-md);
+  font-size: 14px !important;
+  font-weight: 700;
+  line-height: 1;
+  color: hsl(var(--foreground)) !important;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sui-chip:hover {
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+.sui-chip:active {
+  transform: scale(0.98);
+}
+
+.sui-message-images {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.sui-message-image {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+}
+
+/* ============================================
+   Composer: bordered card, prompt above a control row
+   ============================================ */
+.sui-composer-area {
+  padding: 8px 40px 20px;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sui-composer {
+  width: 100%;
+  max-width: var(--max-chat-width);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 10px;
+  /* Form-control boundary: 3:1 against the page (WCAG 1.4.11) */
+  border: 1px solid hsl(var(--input-strong));
+  border-radius: var(--radius-xl);
+  background: hsl(var(--card));
+  transition: all var(--transition-fast);
+}
+
+.sui-composer:focus-within {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+}
+
+.sui-composer-field {
+  width: 100%;
+  padding: 2px 0;
+  border: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: 15px !important;
+  line-height: 1.5;
+  min-height: 26px;
+  max-height: 200px;
+  resize: none;
+  outline: none;
+  overflow-y: auto;
+  /* Auto-expands with content via JS, scrolls when max-height reached */
+}
+
+.sui-composer-field::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 1; /* Firefox dims placeholders by default */
+}
+
+.sui-composer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sui-composer-spacer {
+  flex: 1 1 auto;
+}
+
+.sui-composer .sui-icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sui-composer .sui-voice-toggle {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+}
+
+.sui-composer .sui-voice-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Provider + model, as one chip that opens the chooser */
+.sui-model-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: inherit;
+  font-size: 12px !important;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sui-model-chip:hover,
+.sui-model-chip[aria-expanded="true"] {
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--input-strong));
+}
+
+.sui-model-chip:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+}
+
+.sui-composer-send {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-full);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sui-composer-send:hover:not(:disabled) {
+  background: hsl(var(--primary) / 0.9);
+}
+
+.sui-composer-send:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.sui-composer-send:disabled {
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  cursor: not-allowed;
+}
+
+.sui-composer-send svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   Image Previews
+   ============================================ */
+.sui-image-previews {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px 0;
+  flex-wrap: wrap;
+}
+
+/* Reference documents attached to the next message: one chip per file. */
+.sui-doc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 2px 0;
+}
+
+.sui-doc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 6px 3px 8px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  background: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sui-doc-chip-size {
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-doc-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+}
+
+.sui-doc-chip-remove:hover {
+  color: hsl(var(--foreground));
+  background: hsl(var(--muted));
+}
+
+.sui-image-preview-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-image-preview-item {
+  position: relative;
+}
+
+.sui-image-preview-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid hsl(var(--border));
+}
+
+.sui-image-preview-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px !important;
+  border: none;
+  cursor: pointer;
+}
+
+/* ============================================
+   Progress Indicator
+   ============================================ */
+/* Same surface tokens as the AI bubble: the progress card morphs into the
+   response card on completion, and matching surfaces make that continuous. */
+.sui-progress {
+  background: hsl(var(--ai-bubble-bg));
+  border: 1px solid hsl(var(--ai-bubble-border));
+  border-radius: var(--radius-xl);
+  padding: 14px 16px;
+}
+
+.sui-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.sui-progress-label {
+  font-weight: 700;
+  font-size: 15px !important;
+  color: hsl(var(--foreground));
+}
+
+.sui-progress-step {
+  font-size: 14px !important;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-progress-bar {
+  height: 3px;
+  background: hsl(var(--secondary));
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.sui-progress-fill {
+  height: 100%;
+  background: hsl(var(--primary));
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal);
+}
+
+.sui-progress-retry {
+  margin-top: 14px;
+  padding: 6px 12px;
+  background: hsl(var(--warning) / 0.12);
+  color: hsl(var(--warning));
+  border: 1px solid hsl(var(--warning) / 0.3);
+  border-radius: var(--radius-md);
+  font-size: 14px !important;
+  display: inline-block;
+}
+
+/* ============================================
+   Drop Overlay
+   ============================================ */
+.sui-drop-overlay {
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--info) / 0.1);
+  border: 2px dashed hsl(var(--info));
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+.sui-drop-overlay-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: hsl(var(--info));
+  font-weight: 700;
+}
+
+/* ============================================
+   Error Message
+   ============================================ */
+.sui-error {
+  background: hsl(var(--destructive) / 0.15);
+  color: hsl(var(--destructive));
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: 14px !important;
+}
+
+/* ============================================
+   Completion Card - shares bubble styling with message bubbles
+   Uses theme variables with !important to prevent design system overrides
+   ============================================ */
+.sui-completion {
+  max-width: 85%;
+  padding: 14px 16px;
+  border-radius: var(--radius-xl);
+  font-size: 15px !important;
+  line-height: 1.55;
+  background: hsl(var(--ai-bubble-bg)) !important;
+  color: hsl(var(--ai-bubble-fg)) !important;
+  border: 1px solid hsl(var(--ai-bubble-border)) !important;
+}
+
+.sui-completion-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  color: hsl(var(--success)) !important;
+}
+
+.sui-completion-components {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.sui-completion-tag {
+  padding: 0.125rem var(--space-2);
+  background: hsl(var(--primary) / 0.1) !important;
+  color: hsl(var(--primary)) !important;
+  border-radius: 3px;
+  font-size: 14px !important;
+  font-family: var(--font-mono);
+}
+
+.sui-completion-metrics {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Fallback story styling (error placeholder was created) */
+.sui-completion-fallback .sui-completion-header {
+  color: hsl(var(--warning)) !important;
+}
+
+.sui-completion-fallback-warning {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: hsl(var(--warning) / 0.12) !important;
+  border-radius: var(--radius-md);
+  font-size: 14px !important;
+}
+
+.sui-completion-fallback-warning strong {
+  display: block;
+  color: hsl(var(--warning)) !important;
+  margin-bottom: var(--space-1);
+}
+
+.sui-completion-fallback-warning p {
+  margin: 0;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Error completion styling (generation failed completely) */
+.sui-completion-error .sui-completion-header {
+  color: hsl(var(--destructive)) !important;
+}
+
+/* ============================================
+   Checkbox
+   ============================================ */
+.sui-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: hsl(var(--primary));
+  cursor: pointer;
+}
+
+/* ============================================
+   Loading Animation
+   ============================================ */
+.sui-loading::after {
+  content: '';
+  animation: sui-dots 1.5s infinite;
+}
+
+@keyframes sui-dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+}
+
+/* ============================================
+   Markdown Content
+   ============================================ */
+.sui-markdown strong {
+  font-weight: 700;
+}
+
+.sui-markdown em {
+  font-style: italic;
+}
+
+.sui-markdown code {
+  font-family: var(--font-mono);
+  font-size: 14px !important;
+  background: hsl(var(--muted));
+  padding: 0.125em 0.375em;
+  border-radius: var(--radius-sm);
+}
+
+.sui-markdown p {
+  margin-bottom: var(--space-3);
+  line-height: 1.6;
+}
+
+.sui-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+/* Headings */
+.sui-markdown h1,
+.sui-markdown h2,
+.sui-markdown h3,
+.sui-markdown h4,
+.sui-markdown h5,
+.sui-markdown h6 {
+  font-weight: 700;
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-3);
+  line-height: 1.3;
+}
+
+.sui-markdown h1:first-child,
+.sui-markdown h2:first-child,
+.sui-markdown h3:first-child {
+  margin-top: 0;
+}
+
+.sui-markdown h1 { font-size: 1.5em; }
+.sui-markdown h2 { font-size: 1.25em; }
+.sui-markdown h3 { font-size: 1.125em; }
+.sui-markdown h4 { font-size: 1em; }
+
+/* Lists */
+.sui-markdown ul,
+.sui-markdown ol {
+  margin-bottom: var(--space-3);
+  padding-left: var(--space-5);
+  line-height: 1.6;
+}
+
+.sui-markdown ul {
+  list-style-type: disc;
+}
+
+.sui-markdown ol {
+  list-style-type: decimal;
+}
+
+.sui-markdown li {
+  margin-bottom: var(--space-2);
+  line-height: 1.6;
+}
+
+.sui-markdown li:last-child {
+  margin-bottom: 0;
+}
+
+.sui-markdown li > ul,
+.sui-markdown li > ol {
+  margin-top: var(--space-2);
+  margin-bottom: 0;
+}
+
+/* Code blocks */
+.sui-markdown pre {
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+
+.sui-markdown pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Blockquotes */
+.sui-markdown blockquote {
+  border-left: 3px solid hsl(var(--primary));
+  padding-left: var(--space-4);
+  margin-left: 0;
+  margin-bottom: var(--space-3);
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+/* Tables */
+.sui-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-3);
+  font-size: 14px !important;
+}
+
+.sui-markdown th,
+.sui-markdown td {
+  border: 1px solid hsl(var(--border));
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+}
+
+.sui-markdown th {
+  background: hsl(var(--muted));
+  font-weight: 700;
+}
+
+/* Horizontal rule */
+.sui-markdown hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: var(--space-4) 0;
+}
+
+/* Links */
+.sui-markdown a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sui-markdown a:hover {
+  opacity: 0.8;
+}
+
+/* Inline status icons */
+.sui-icon-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin-right: 6px;
+  position: relative;
+  top: -1px;
+}
+
+.sui-icon-success {
+  color: hsl(var(--success));
+}
+
+.sui-icon-error {
+  color: hsl(var(--destructive));
+}
+
+.sui-icon-tip {
+  color: hsl(var(--warning));
+}
+
+.sui-icon-wrench {
+  color: hsl(var(--info));
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+.sui-root ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.sui-root ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sui-root ::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: var(--radius-full);
+}
+
+.sui-root ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+.sui-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sui-hidden {
+  display: none;
+}
+
+/* ============================================
+   Orphan Stories Footer
+   ============================================ */
+.sui-orphan-footer {
+  flex-shrink: 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid hsl(var(--border));
+  margin-top: auto;
+}
+
+.sui-orphan-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 14px !important;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.sui-orphan-delete-btn:hover:not(:disabled) {
+  background: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive));
+}
+
+.sui-orphan-delete-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sui-orphan-delete-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.sui-orphan-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid hsl(var(--muted-foreground) / 0.3);
+  border-top-color: hsl(var(--muted-foreground));
+  border-radius: 50%;
+  animation: sui-spin 0.6s linear infinite;
+}
+
+@keyframes sui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   Voice Controls
+   ============================================ */
+
+.sui-voice-wrap {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.sui-voice-toggle {
+  all: revert;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-lg, 6px);
+  border: none;
+  background: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.2s ease;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.sui-voice-toggle:hover {
+  background: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+.sui-voice-toggle--active {
+  background: hsl(var(--destructive, 0 84% 60%));
+  border-color: hsl(var(--destructive, 0 84% 60%));
+  color: white;
+}
+
+.sui-voice-toggle--active:hover {
+  background: hsl(var(--destructive, 0 84% 60%) / 0.9);
+  border-color: hsl(var(--destructive, 0 84% 60%) / 0.9);
+  color: white;
+}
+
+.sui-voice-toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sui-voice-pulse {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid hsl(var(--destructive, 0 84% 60%));
+  animation: sui-voice-pulse-ring 1.5s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes sui-voice-pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.sui-voice-status {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg, 8px);
+  padding: 8px 14px;
+  font-size: 14px !important;
+  line-height: 1.4;
+  white-space: nowrap;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 4px 12px hsl(var(--foreground) / 0.08);
+  z-index: 50;
+  pointer-events: none;
+}
+
+.sui-voice-status-interim {
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+.sui-voice-status-listening {
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-voice-status-error {
+  color: hsl(var(--destructive, 0 84% 60%));
+}
+
+/* Privacy dialog */
+
+.sui-voice-privacy-overlay {
+  position: fixed;
+  inset: 0;
+  background: hsl(var(--foreground) / 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.sui-voice-privacy-dialog {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg, 8px);
+  padding: 24px;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 8px 32px hsl(var(--foreground) / 0.15);
+}
+
+.sui-voice-privacy-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin: 0 0 8px 0;
+}
+
+.sui-voice-privacy-text {
+  font-size: 14px !important;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+  margin: 0 0 20px 0;
+}
+
+.sui-voice-privacy-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.sui-voice-privacy-cancel,
+.sui-voice-privacy-accept {
+  all: revert;
+  padding: 8px 16px;
+  border-radius: var(--radius-md, 6px);
+  font-size: 14px !important;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+.sui-voice-privacy-cancel {
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-voice-privacy-cancel:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+.sui-voice-privacy-accept {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.sui-voice-privacy-accept:hover {
+  background: hsl(var(--primary) / 0.9);
+}
+
+/* ============================================================
+   Voice Canvas Mode
+   ============================================================ */
+
+.sui-canvas-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  position: relative;
+}
+
+.sui-canvas-preview {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.sui-canvas-live-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.sui-canvas-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: transparent;
+}
+
+.sui-canvas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-canvas-empty-icon {
+  opacity: 0.3;
+  margin-bottom: 20px;
+}
+
+.sui-canvas-empty-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin: 0 0 8px;
+}
+
+.sui-canvas-empty-desc {
+  font-size: 15px;
+  margin: 0 0 16px;
+  max-width: 400px;
+}
+
+.sui-canvas-empty-hint {
+  font-size: 14px !important;
+  font-style: italic;
+  opacity: 0.6;
+  margin: 0;
+}
+
+/* Floating voice bar */
+.sui-canvas-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+  gap: 8px 12px;
+  min-height: 56px;
+}
+
+.sui-canvas-bar--active {
+  border-top-color: hsl(var(--primary) / 0.5);
+  background: hsl(var(--card) / 0.95);
+}
+
+.sui-canvas-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sui-canvas-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Text input in voice bar */
+.sui-canvas-text-input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: hsl(var(--foreground));
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sui-canvas-text-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-canvas-text-input:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.15);
+}
+
+.sui-canvas-text-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Unsupported browser state */
+.sui-canvas-unsupported {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 32px;
+  gap: 16px;
+  color: hsl(var(--muted-foreground));
+  height: 100%;
+}
+
+.sui-canvas-unsupported svg {
+  opacity: 0.4;
+}
+
+.sui-canvas-unsupported-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin: 0;
+}
+
+.sui-canvas-unsupported-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 360px;
+  margin: 0;
+}
+
+/* Mic button */
+.sui-canvas-mic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid hsl(var(--border));
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.sui-canvas-mic:hover {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+
+.sui-canvas-mic--active {
+  background: hsl(0 80% 50%);
+  border-color: hsl(0 80% 50%);
+  color: white;
+  animation: sui-canvas-mic-glow 2s ease-in-out infinite;
+}
+
+.sui-canvas-mic-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid hsl(0 80% 50%);
+  animation: sui-voice-pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes sui-canvas-mic-glow {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(0 80% 50% / 0.4); }
+  50% { box-shadow: 0 0 12px 4px hsl(0 80% 50% / 0.2); }
+}
+
+/* Transcript display */
+.sui-canvas-transcript {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.sui-canvas-status-rendering {
+  color: hsl(var(--primary));
+  animation: sui-canvas-pulse-text 1s ease-in-out infinite;
+}
+
+@keyframes sui-canvas-pulse-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.sui-canvas-status-interim {
+  color: hsl(var(--foreground));
+  font-style: italic;
+}
+
+.sui-canvas-status-final {
+  color: hsl(var(--foreground));
+}
+
+.sui-canvas-status-listening {
+  color: hsl(var(--destructive));
+  animation: sui-canvas-pulse-text 2s ease-in-out infinite;
+}
+
+.sui-canvas-status-info {
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-canvas-status-hint {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.6;
+}
+
+/* Action buttons */
+.sui-canvas-action {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius, 6px);
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sui-canvas-action:hover:not(:disabled) {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.sui-canvas-action:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Save button */
+.sui-canvas-save {
+  padding: 6px 14px;
+  border-radius: var(--radius, 6px);
+  border: none;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-size: 14px !important;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.sui-canvas-save:hover {
+  background: hsl(var(--primary) / 0.9);
+}
+
+.sui-canvas-save--converting {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.sui-canvas-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Generation progress */
+.sui-canvas-progress {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  height: 100%;
+  justify-content: center;
+}
+
+.sui-canvas-progress-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid hsl(var(--border));
+  border-top-color: hsl(var(--primary));
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.sui-canvas-progress-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sui-canvas-progress-phase {
+  font-size: 15px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.sui-canvas-progress-detail {
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Success state */
+.sui-canvas-success {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sui-canvas-success-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.sui-canvas-success-components {
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground));
+  padding-left: 28px;
+}
+
+/* Error state */
+.sui-canvas-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: hsl(0 80% 97%);
+  color: hsl(0 70% 45%);
+  font-size: 14px !important;
+  border-top: 1px solid hsl(0 80% 90%);
+}
+
+.sui-canvas-error-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.6;
+  padding: 0 4px;
+}
+
+.sui-canvas-error-dismiss:hover {
+  opacity: 1;
+}
+
+/* Save confirmation toast */
+.sui-canvas-saved-toast {
+  position: absolute;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: hsl(142 70% 35%);
+  color: #fff;
+  font-size: 14px !important;
+  font-weight: 700;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: sui-canvas-toast-in 0.2s ease;
+  z-index: 20;
+}
+
+@keyframes sui-canvas-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Error output from react-live (syntax / runtime errors in generated code) */
+.sui-canvas-live-error {
+  margin: 0;
+  padding: 12px 16px;
+  background: hsl(0 80% 97%);
+  color: hsl(0 70% 45%);
+  font-size: 14px !important;
+  font-family: monospace;
+  border-top: 1px solid hsl(0 80% 90%);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Overlay shown while re-generating an existing component */
+.sui-canvas-regen-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: hsl(var(--background, 0 0% 100%) / 0.75);
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground, 0 0% 45%));
+  backdrop-filter: blur(2px);
+}
+
+/* Small spinner variant for the overlay */
+.sui-canvas-progress-spinner--sm {
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
+  animation: sui-canvas-spin 0.8s linear infinite;
+}
+
+/* Live component preview area — sets a light base color to counter
+   Storybook's dark docs theme, then lets the design system's own
+   class-based styles take full control. No element-level overrides. */
+.sui-canvas-live {
+  flex: 1;
+  overflow: auto;
+  min-height: 200px;
+  animation: sui-canvas-appear 0.4s ease-out;
+  color: #1a1b1e;
+  background: #fff;
+  color-scheme: light;
+}
+
+@keyframes sui-canvas-appear {
+  from { opacity: 0; transform: scale(0.97) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Status bar between preview and voice bar */
+.sui-canvas-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground));
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.3);
+}
+
+.sui-canvas-explanation {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Save dialog */
+.sui-canvas-save-dialog {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.5);
+}
+
+.sui-canvas-save-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius, 6px);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 14px !important;
+  outline: none;
+}
+
+.sui-canvas-save-input:focus {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+}
+
+.sui-canvas-save-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--radius, 6px);
+  background: hsl(var(--primary, 210 100% 50%));
+  color: hsl(var(--primary-foreground, 0 0% 100%));
+  font-size: 14px !important;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sui-canvas-save-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.sui-canvas-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Metrics badge */
+.sui-canvas-metrics {
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Mode tabs: bordered group, 4px radius, the active tab tinted primary */
+.sui-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+}
+
+.sui-mode-toggle-btn {
+  height: 24px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: inherit;
+  font-size: 13px !important;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.sui-mode-toggle-btn:hover {
+  color: hsl(var(--foreground));
+}
+
+.sui-mode-toggle-btn:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+}
+
+/* A primary tint (not the accent token) keeps primary text at 4.5:1 on the
+   tab in both schemes. */
+.sui-mode-toggle-btn--active {
+  background: hsl(var(--primary) / var(--tint));
+  color: hsl(var(--primary));
+}
+
+/* ============================================
+   Conversational chat additions (chatSummary era)
+   ============================================ */
+
+/* Shown when a story file was written but Storybook never indexed it. Reads as
+   a notice, not an error — the story exists, it just isn't reachable yet. */
+.sui-index-stalled {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--sui-border, rgba(128, 128, 128, 0.32));
+  border-left: 3px solid var(--sui-warning, #d08700);
+  border-radius: var(--radius-xl);
+  background: var(--sui-surface-subtle, rgba(128, 128, 128, 0.06));
+}
+
+.sui-index-stalled-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--sui-text-secondary, inherit);
+}
+
+.sui-chip-suggestion,
+.sui-chip-retry {
+  height: auto;
+  min-height: 30px;
+  padding: 6px 12px;
+  font-size: 14px !important;
+  line-height: 1.3;
+  text-align: left;
+  white-space: normal;
+}
+
+/* Suggestions are quiet: regular weight, muted colour, 4px radius. */
+.sui-chip-suggestion {
+  font-weight: 400;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.sui-chip-suggestion:hover {
+  color: hsl(var(--primary)) !important;
+}
+
+.sui-chip-retry {
+  border-color: hsl(var(--destructive) / 0.5) !important;
+  color: hsl(var(--destructive)) !important;
+}
+
+/* Intent (plan) line inside the progress indicator. Color tokens instead of
+   opacity — dimming the whole line washed out the bold "Plan:" label too. */
+.sui-progress-intent {
+  font-size: 15px !important;
+  margin-bottom: 12px;
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-progress-intent strong {
+  color: hsl(var(--foreground));
+}
+
+.sui-progress-intent-components {
+  opacity: 0.7;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .sui-root *,
+  .sui-root *::before,
+  .sui-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   Storybook docs-page style bleed protection
+   ============================================
+   The panel renders inside an addon-docs page, whose typography styles
+   (heading border-bottoms, margins, letter-spacing) otherwise leak in. */
+.sui-root :is(h1, h2, h3, h4, h5, h6) {
+  border-bottom: none !important;
+  letter-spacing: normal;
+}
+
+/* ============================================
+   Voice Canvas — live code stream (watch the model write)
+   ============================================ */
+.sui-canvas-stream {
+  margin: 12px auto 0;
+  max-width: 560px;
+  max-height: 240px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column-reverse; /* stick to the newest lines */
+  text-align: left;
+  background: hsl(var(--muted) / 0.6);
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 14px !important;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sui-canvas-stream--overlay {
+  max-width: 420px;
+  max-height: 160px;
+  background: hsl(var(--background) / 0.92);
+}
+
+/* Dark mode: lighter tint behind the primary-colored completion tags keeps
+   the #479DFF accent itself AA-compliant (4.64:1) without drifting its hue. */
+.sui-root.dark .sui-completion-tag {
+  background: hsl(var(--primary) / 0.06) !important;
+}
+
+
+/* ============================================================
+   Design Context editor
+   The highest-authority input to generation, so it reads as a
+   first-class workspace rather than a settings afterthought.
+   ============================================================ */
+
+.sui-context {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+  padding: 20px 24px 24px;
+  overflow: hidden;
+}
+
+.sui-context-intro { flex: 0 0 auto; }
+
+.sui-context-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--sui-text, inherit);
+}
+
+.sui-context-sub {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--sui-text-secondary, #6b7280);
+}
+
+.sui-context-error,
+.sui-context-status {
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.sui-context-error {
+  border: 1px solid var(--sui-danger, #dc2626);
+  background: color-mix(in srgb, var(--sui-danger, #dc2626) 8%, transparent);
+}
+
+.sui-context-status {
+  border: 1px solid var(--sui-border, rgba(128, 128, 128, 0.32));
+  background: var(--sui-surface-subtle, rgba(128, 128, 128, 0.06));
+}
+
+/* Empty state — this is the moment that teaches the feature, so it argues
+   for itself rather than just offering a button. */
+.sui-context-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 62ch;
+  padding: 24px;
+  border: 1px dashed var(--sui-border, rgba(128, 128, 128, 0.32));
+  border-radius: 8px;
+  background: var(--sui-surface-subtle, rgba(128, 128, 128, 0.04));
+}
+
+.sui-context-empty-title { margin: 0; font-size: 15px; font-weight: 600; }
+
+.sui-context-empty-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--sui-text-secondary, #6b7280);
+}
+
+.sui-context-primary {
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--sui-accent, #2563eb);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sui-context-primary:disabled { opacity: 0.55; cursor: default; }
+.sui-context-primary:not(:disabled):hover { filter: brightness(1.08); }
+
+.sui-context-body {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.sui-context-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.sui-context-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sui-text-secondary, #6b7280);
+}
+
+.sui-context-list-head button {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--sui-border, rgba(128, 128, 128, 0.32));
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sui-context-item {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+}
+
+.sui-context-item--active { background: var(--sui-surface-subtle, rgba(128, 128, 128, 0.1)); }
+
+.sui-context-item-open {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sui-context-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sui-context-item-size {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--sui-text-secondary, #6b7280);
+}
+
+.sui-context-item-size--over { color: var(--sui-warning, #d08700); font-weight: 600; }
+
+.sui-context-item-delete {
+  flex: 0 0 auto;
+  width: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sui-text-secondary, #6b7280);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.sui-context-item:hover .sui-context-item-delete,
+.sui-context-item-delete:focus-visible { opacity: 1; }
+
+.sui-context-budget { margin-top: 12px; padding: 0 6px; }
+
+.sui-context-budget-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--sui-border, rgba(128, 128, 128, 0.25));
+  overflow: hidden;
+}
+
+.sui-context-budget-fill {
+  height: 100%;
+  background: var(--sui-accent, #2563eb);
+  transition: width 160ms ease;
+}
+
+.sui-context-budget-fill--over { background: var(--sui-warning, #d08700); }
+
+.sui-context-budget-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--sui-text-secondary, #6b7280);
+}
+
+.sui-context-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.sui-context-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sui-context-editor-name { font-size: 13px; font-weight: 600; }
+
+.sui-context-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sui-context-dirty {
+  font-size: 12px;
+  color: var(--sui-warning, #d08700);
+}
+
+.sui-context-textarea {
+  flex: 1 1 auto;
+  min-height: 260px;
+  padding: 12px 14px;
+  border: 1px solid var(--sui-border, rgba(128, 128, 128, 0.32));
+  border-radius: 6px;
+  background: var(--sui-surface, transparent);
+  color: inherit;
+  font-family: var(--sui-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 2;
+  resize: none;
+}
+
+.sui-context-textarea:focus-visible {
+  outline: 2px solid var(--sui-accent, #2563eb);
+  outline-offset: -1px;
+}
+
+.sui-context-editor-foot,
+.sui-context-placeholder {
+  font-size: 12px;
+  color: var(--sui-text-secondary, #6b7280);
+}
+
+.sui-context-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border: 1px dashed var(--sui-border, rgba(128, 128, 128, 0.28));
+  border-radius: 6px;
+}
+
+@media (max-width: 720px) {
+  .sui-context-body { grid-template-columns: 1fr; }
+  .sui-context-list { max-height: 180px; }
+}
+
+/* ============================================================
+   Verification badge + handoff
+   ============================================================ */
+
+/* The badge sits inline in a turn's meta row as a pill; its detail panel
+   drops to a full-width row underneath (display: contents lets the row's
+   flex-wrap place both). */
+.sui-verify {
+  display: contents;
+}
+
+.sui-verify-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border: 0;
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: 13px !important;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+button.sui-verify-pill {
+  cursor: pointer;
+}
+
+button.sui-verify-pill:hover {
+  filter: brightness(0.96);
+}
+
+.sui-root.dark button.sui-verify-pill:hover {
+  filter: brightness(1.12);
+}
+
+button.sui-verify-pill:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.sui-verify-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.sui-verify--ok .sui-verify-pill {
+  background: hsl(var(--success) / var(--tint));
+  color: hsl(var(--success));
+}
+
+.sui-verify--warn .sui-verify-pill {
+  background: hsl(var(--warning) / var(--tint));
+  color: hsl(var(--warning));
+}
+
+.sui-verify--bad .sui-verify-pill {
+  background: hsl(var(--destructive) / var(--tint));
+  color: hsl(var(--destructive));
+}
+
+.sui-verify--muted .sui-verify-pill {
+  background: hsl(var(--secondary));
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-verify-detail {
+  flex-basis: 100%;
+  padding: 10px 12px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-xl);
+  background: hsl(var(--card));
+  font-size: 13px !important;
+  line-height: 1.45;
+  color: hsl(var(--foreground));
+}
+
+.sui-verify-summary {
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-verify-metrics {
+  margin-top: 4px;
+  font-size: 12px !important;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--muted-foreground));
+}
+
+.sui-verify-list {
+  margin: 8px 0 0;
+  padding: 4px 0 0;
+  list-style: none;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.sui-verify-item {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.sui-verify-item + .sui-verify-item {
+  border-top: 1px solid hsl(var(--border) / 0.6);
+}
+
+.sui-verify-item-sev {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sui-verify-item--blocker .sui-verify-item-sev { color: hsl(var(--destructive)); }
+.sui-verify-item--warning .sui-verify-item-sev { color: hsl(var(--warning)); }
+
+.sui-verify-item-ev { font-size: 12px; color: hsl(var(--muted-foreground)); }
+
+.sui-verify-item-sel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  overflow-wrap: anywhere;
+}
+
+/* Handoff dialog */
+.sui-handoff-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.sui-handoff {
+  width: min(520px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 22px 24px;
+  border: 1px solid var(--sui-border, rgba(128, 128, 128, 0.32));
+  border-radius: 10px;
+  background: var(--sui-surface, #fff);
+  color: inherit;
+}
+
+.sui-handoff-title { margin: 0 0 6px; font-size: 17px; font-weight: 600; }
+
+.sui-handoff-sub {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--sui-text-secondary, #6b7280);
+}
+
+.sui-handoff-field { display: grid; gap: 6px; margin-bottom: 14px; font-size: 13px; }
+
+.sui-handoff-input {
+  padding: 8px 10px;
+  border: 1px solid var(--sui-border, rgba(128, 128, 128, 0.32));
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-family: var(--sui-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 13px;
+}
+
+.sui-handoff-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sui-handoff-check em { color: var(--sui-text-secondary, #6b7280); font-style: normal; }
+
+.sui-handoff-note {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--sui-text-secondary, #6b7280);
+}
+
+.sui-handoff-error {
+  margin-top: 12px;
+  padding: 9px 11px;
+  border: 1px solid var(--sui-danger, #dc2626);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.sui-handoff-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.sui-handoff-result {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.sui-handoff-result dt { color: var(--sui-text-secondary, #6b7280); }
+.sui-handoff-result dd { margin: 0; overflow-wrap: anywhere; }
+
+/* ── Voice Canvas: Decisions panel ─────────────────────────── */
+
+.sui-canvas-decisions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  width: min(320px, calc(100% - 24px));
+  display: flex;
+  flex-direction: column;
+  background: var(--sui-surface);
+  color: var(--sui-text);
+  border: 1px solid var(--sui-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  z-index: 15;
+  overflow: hidden;
+}
+
+.sui-canvas-decisions-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--sui-border);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sui-canvas-decisions-close {
+  background: none;
+  border: 0;
+  color: var(--sui-text-secondary);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.sui-canvas-decisions-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sui-canvas-decision {
+  padding: 10px;
+  border: 1px solid var(--sui-border);
+  border-radius: 8px;
+  background: var(--sui-surface-subtle);
+  font-size: 12px;
+}
+
+.sui-canvas-decision-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.sui-canvas-decision-request {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sui-canvas-decision-kind {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sui-text-secondary);
+}
+
+.sui-canvas-decision--applied .sui-canvas-decision-kind,
+.sui-canvas-decision--generated .sui-canvas-decision-kind { color: var(--sui-success); }
+.sui-canvas-decision--deciding .sui-canvas-decision-kind { color: var(--sui-accent); }
+.sui-canvas-decision--fallback .sui-canvas-decision-kind { color: var(--sui-warning); }
+.sui-canvas-decision--failed .sui-canvas-decision-kind { color: var(--sui-danger); }
+
+.sui-canvas-decision-detail {
+  margin-top: 4px;
+  color: var(--sui-text-secondary);
+}
+
+.sui-canvas-decision-steps {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.sui-canvas-decision-steps li {
+  display: grid;
+  grid-template-columns: 88px 1fr auto;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.sui-canvas-decision-step { color: var(--sui-text-secondary); }
+.sui-canvas-decision-value { overflow-wrap: anywhere; }
+.sui-canvas-decision-by {
+  font-family: var(--sui-mono);
+  font-size: 10px;
+  color: var(--sui-text-secondary);
+}
+
+.sui-canvas-decision-stats {
+  margin-top: 8px;
+  font-family: var(--sui-mono);
+  font-size: 10px;
+  color: var(--sui-text-secondary);
+}
+
+.sui-canvas-action--on {
+  color: var(--sui-accent);
+}
+.sui-canvas-decision--setting .sui-canvas-decision-kind { color: var(--sui-success); }
+.sui-canvas-decision--waiting .sui-canvas-decision-kind { color: var(--sui-accent); }
+
+/* The design keeps its full width beside the Decisions panel, not under it. */
+.sui-canvas-preview--decisions .sui-canvas-live-wrapper {
+  width: calc(100% - min(344px, 45%));
+}
+.sui-canvas-preview--decisions .sui-canvas-decisions {
+  width: min(320px, calc(45% - 24px));
+}
+.sui-canvas-empty-hint--save {
+  margin-top: 4px;
+  max-width: 440px;
+  font-style: normal;
+}
+
+/* The model is writing: status pill above the live code, centred as one group. */
+.sui-canvas-regen-overlay {
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+.sui-canvas-regen-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: hsl(var(--background, 0 0% 100%) / 0.9);
+  border: 1px solid hsl(var(--border, 0 0% 90%));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  color: hsl(var(--foreground, 0 0% 10%));
+  font-weight: 500;
+}
+.sui-canvas-regen-overlay .sui-canvas-stream--overlay {
+  margin: 0;
+  width: min(520px, 100%);
+  max-width: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.sui-canvas-jev-notice {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 16;
+  max-width: min(640px, calc(100% - 24px));
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: hsl(38 92% 50% / 0.14);
+  border: 1px solid hsl(38 92% 50% / 0.45);
+  color: var(--sui-text);
+  font-size: 13px;
+  line-height: 1.45;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
