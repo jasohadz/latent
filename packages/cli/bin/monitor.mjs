@@ -10,13 +10,15 @@ const PAGE = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Latent Ask — Live Monitor</title>
+<title>Latent SLM — Live Monitor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root {
     --bg: #14141a; --bg-alt: #1c1c24; --text: #eceef2; --text-dim: #8b8b96;
     --border: #2c2c36; --accent: #9d90ff; --accent-dim: #26223f;
-    --ok: #3fae5c; --warn: #e8b64b; --mono: "SFMono-Regular", Consolas, Menlo, monospace;
+    --ok: #3fae5c; --ok-bg: rgba(63,174,92,0.12); --warn: #e8b64b;
+    --danger: #e0524b; --danger-bg: rgba(224,82,75,0.14);
+    --mono: "SFMono-Regular", Consolas, Menlo, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   * { box-sizing: border-box; }
@@ -50,17 +52,54 @@ const PAGE = `<!DOCTYPE html>
   @keyframes blink { 50% { opacity: 0; } }
   .waiting { color: var(--text-dim); font-style: italic; padding: 40px 0; text-align: center; }
   .error { color: #ff8080; background: rgba(255,80,80,0.1); border: 1px solid #ff8080; border-radius: 8px; padding: 12px 16px; margin-top: 10px; font-family: var(--mono); font-size: 0.85rem; }
+
+  .strap { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-dim); color: var(--accent); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; padding: 5px 12px; border-radius: 999px; margin-bottom: 18px; }
+  .hero { display: flex; align-items: center; gap: 16px; border-radius: 14px; padding: 20px 24px; margin-bottom: 18px; border: 1px solid var(--border); background: var(--bg-alt); transition: background 0.3s, border-color 0.3s; }
+  .hero.status-clean { background: var(--ok-bg); border-color: var(--ok); }
+  .hero.status-failed { background: var(--danger-bg); border-color: var(--danger); }
+  .hero-icon { font-size: 2.1rem; line-height: 1; flex-shrink: 0; }
+  .hero-status { font-size: 1.25rem; font-weight: 700; }
+  .hero.status-clean .hero-status { color: var(--ok); }
+  .hero.status-failed .hero-status { color: var(--danger); }
+  .hero-meta { color: var(--text-dim); font-size: 0.85rem; margin-top: 3px; }
+  .watch-explainer { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 20px; }
+  .checks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .check-chip { display: flex; align-items: flex-start; gap: 10px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 0.82rem; transition: background 0.3s, border-color 0.3s; }
+  .check-chip .icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .check-chip.pass .icon { color: var(--ok); }
+  .check-chip.fail { border-color: var(--danger); background: var(--danger-bg); }
+  .check-chip.fail .icon { color: var(--danger); }
+  .check-chip .chip-label { font-weight: 600; }
+  .check-chip .chip-detail { color: var(--text-dim); font-size: 0.75rem; margin-top: 2px; }
+  .explain-card { background: var(--bg-alt); border: 1px solid var(--accent); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  .explain-card .explain-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .explain-card .explain-tag { font-family: var(--mono); font-size: 0.68rem; background: var(--accent-dim); color: var(--accent); padding: 2px 8px; border-radius: 5px; }
+  .explain-card .explain-badge { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 5px; }
+  .explain-card .explain-badge.verified { background: var(--ok-bg); color: var(--ok); }
+  .explain-card .explain-badge.unverified { background: var(--danger-bg); color: var(--danger); }
+  .explain-card .explain-text { font-size: 0.98rem; margin-bottom: 12px; }
+  .explain-card .explain-quote { font-family: var(--mono); font-size: 0.8rem; color: var(--text-dim); border-left: 3px solid var(--accent); padding: 6px 12px; }
+  .timeline { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px; }
+  .timeline .tick-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); flex-shrink: 0; }
+  .timeline .tick-dot.failed { background: var(--danger); }
+  .watch-log-details { color: var(--text-dim); font-size: 0.8rem; }
+  .watch-log-details summary { cursor: pointer; user-select: none; margin-bottom: 8px; }
+  .log-line { padding: 4px 0; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 0.78rem; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Latent Ask — Live Monitor</h1>
-  <p class="sub">Watching the RAG pipeline run in real time. Connected — waiting for a question.</p>
-  <div id="root"><p class="waiting">Run <code>latent ask "&lt;question&gt;" --monitor</code> in the terminal that started this page.</p></div>
+  <div class="strap">🤖 Local model · Llama-3.2-3B · 100% offline · zero API calls</div>
+  <h1 id="title">Latent SLM — Live Monitor</h1>
+  <p class="sub" id="subtitle">Connected — waiting for a command to start.</p>
+  <div id="root"><p class="waiting">Run <code>latent ask/draft-doc/watch ... --monitor</code> in the terminal that started this page.</p></div>
 </div>
 <script>
 const root = document.getElementById("root");
+const titleEl = document.getElementById("title");
+const subtitleEl = document.getElementById("subtitle");
 let els = {};
+let currentMode = "ask";
 
 function reset(question, checkComponent) {
   els = {};
@@ -98,7 +137,172 @@ function escapeHtml(s) {
   return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 }
 
+// --- draft-doc mode: one card per targeted prop, filled in as each one's ---
+// --- generation finishes. No token streaming (grammar-constrained JSON ---
+// --- generation isn't legible mid-stream, same reason ask --cite skips it). ---
+function initDraftDoc() {
+  titleEl.textContent = "Latent draft-doc — Live Monitor";
+  subtitleEl.textContent = "Connected — waiting for draft-doc to start.";
+  root.innerHTML = '<div id="dd-header" class="question"><span class="label">draft-doc</span>waiting…</div><div id="dd-list"></div><div id="dd-footer"></div>';
+}
+function draftDocCard(name) {
+  const card = document.createElement("div");
+  card.className = "chunk";
+  card.id = "dd-" + name;
+  card.innerHTML = '<span class="tag">generating</span><span class="name">' + escapeHtml(name) + '</span><div class="snippet">Asking the model…</div>';
+  return card;
+}
+
+// --- watch mode: a hero status banner + a checks grid (so a viewer sees at ---
+// --- a glance *what* is being watched, not just a pass/fail log line), an ---
+// --- AI-explanation card whenever a check actually fails (cleared once it ---
+// --- clears), and a compact tick-history timeline; the full raw log is kept ---
+// --- collapsed behind <details> for anyone who wants it. ---
+const CHECK_CATEGORIES = [
+  { icon: "🎨", label: "Figma tokens", test: (f) => f === "sync figma" },
+  { icon: "🎭", label: "Text/effect styles", test: (f) => f === "check-styles" },
+  { icon: "🧩", label: "Component parity", test: (f) => f.startsWith("check-parity ") },
+  { icon: "🔗", label: "Figma↔code bindings", test: (f) => f.startsWith("check-component-bindings ") },
+  { icon: "📄", label: "Docs schema", test: (f) => f === "check-docs" },
+];
+let watchIntervalSeconds = null;
+
+function initWatch() {
+  titleEl.textContent = "Latent watch — Live Monitor";
+  subtitleEl.textContent = "Connected — waiting for the first verify pass.";
+  root.innerHTML =
+    '<div class="hero" id="watch-hero"><div class="hero-icon" id="hero-icon">⏳</div><div><div class="hero-status" id="hero-status">Waiting for first check…</div><div class="hero-meta" id="hero-meta">—</div></div></div>' +
+    '<div class="watch-explainer">Watching Figma tokens, text/effect styles, component parity, Figma↔code bindings, and docs schema against the live repo for drift — explained locally, in plain English, whenever something breaks.</div>' +
+    '<div class="checks-grid" id="checks-grid"></div>' +
+    '<div id="watch-explanations"></div>' +
+    '<div class="timeline" id="watch-timeline"></div>' +
+    '<details class="watch-log-details"><summary>Full tick log</summary><div id="watch-log"></div></details>';
+  renderChecksGrid([]);
+}
+
+function renderChecksGrid(failedList) {
+  const grid = document.getElementById("checks-grid");
+  if (!grid) return;
+  grid.innerHTML = CHECK_CATEGORIES.map((cat) => {
+    const failing = failedList.filter(cat.test);
+    const pass = failing.length === 0;
+    return '<div class="check-chip ' + (pass ? "pass" : "fail") + '">' +
+      '<span class="icon">' + (pass ? "✓" : "✕") + '</span>' +
+      '<div><div class="chip-label">' + cat.icon + " " + cat.label + '</div>' +
+      (pass ? '' : '<div class="chip-detail">' + escapeHtml(failing.join(", ")) + '</div>') +
+      '</div></div>';
+  }).join("");
+}
+
+function setHero(status, timestamp) {
+  const hero = document.getElementById("watch-hero");
+  if (!hero) return;
+  const clean = status === "clean";
+  hero.className = "hero " + (clean ? "status-clean" : "status-failed");
+  document.getElementById("hero-icon").textContent = clean ? "✅" : "⚠️";
+  document.getElementById("hero-status").textContent = clean
+    ? "All clear — Figma, code, and docs are in sync"
+    : "Drift detected";
+  document.getElementById("hero-meta").textContent =
+    "Last checked " + new Date(timestamp).toLocaleTimeString() +
+    (watchIntervalSeconds ? " · rechecking every " + watchIntervalSeconds + "s" : "");
+}
+
+function addTimelineDot(status) {
+  const tl = document.getElementById("watch-timeline");
+  if (!tl) return;
+  const dot = document.createElement("div");
+  dot.className = "tick-dot" + (status === "clean" ? "" : " failed");
+  dot.title = status + " — " + new Date().toLocaleTimeString();
+  tl.appendChild(dot);
+  while (tl.children.length > 60) tl.removeChild(tl.firstChild);
+}
+
+function watchLogLine(text) {
+  const log = document.getElementById("watch-log");
+  if (!log) return;
+  const line = document.createElement("div");
+  line.className = "log-line";
+  line.textContent = text;
+  log.appendChild(line);
+  line.scrollIntoView({ block: "end" });
+}
+
 const es = new EventSource("/events");
+
+es.addEventListener("mode", (e) => {
+  const d = JSON.parse(e.data);
+  currentMode = d.mode;
+  if (currentMode === "draft-doc") initDraftDoc();
+  else if (currentMode === "watch") initWatch();
+  else {
+    titleEl.textContent = "Latent ask — Live Monitor";
+    subtitleEl.textContent = "Connected — waiting for a question.";
+  }
+});
+
+es.addEventListener("draft-doc-start", (e) => {
+  const d = JSON.parse(e.data);
+  const header = document.getElementById("dd-header");
+  if (header) header.innerHTML = '<span class="label">draft-doc — ' + escapeHtml(d.component) + '</span>Drafting: ' + (d.targets.length ? escapeHtml(d.targets.join(", ")) : "(nothing missing)");
+  subtitleEl.textContent = d.targets.length + " prop(s) targeted.";
+});
+
+es.addEventListener("draft-doc-item-start", (e) => {
+  const d = JSON.parse(e.data);
+  const list = document.getElementById("dd-list");
+  if (list) list.appendChild(draftDocCard(d.name));
+});
+
+es.addEventListener("draft-doc-item-done", (e) => {
+  const d = JSON.parse(e.data);
+  const card = document.getElementById("dd-" + d.name);
+  if (!card) return;
+  card.innerHTML =
+    '<span class="tag">' + (d.verified ? "verified" : "unverified") + '</span><span class="name">' + escapeHtml(d.name) + "</span>" +
+    (d.existingDescription ? '<div class="snippet"><b>existing:</b> ' + escapeHtml(d.existingDescription) + "</div>" : "") +
+    '<div class="snippet"><b>draft:</b> ' + escapeHtml(d.draftDescription) + "</div>" +
+    '<div class="parity ' + (d.verified ? "matches" : "drift") + '" style="margin-top:6px;">quote: "' + escapeHtml(d.quote) + '"' + (d.verified ? "" : " — UNVERIFIED, not a real substring of the source") + "</div>";
+});
+
+es.addEventListener("draft-doc-done", (e) => {
+  const d = JSON.parse(e.data);
+  const footer = document.getElementById("dd-footer");
+  if (footer) footer.innerHTML = '<p class="sub">Done — mode: ' + escapeHtml(d.mode) + (d.filesWritten && d.filesWritten.length ? " — wrote " + escapeHtml(d.filesWritten.join(", ")) : "") + "</p>";
+  subtitleEl.textContent = "Done.";
+});
+
+es.addEventListener("watch-config", (e) => {
+  const d = JSON.parse(e.data);
+  watchIntervalSeconds = d.intervalSeconds;
+});
+
+es.addEventListener("watch-tick", (e) => {
+  const d = JSON.parse(e.data);
+  subtitleEl.textContent = "Last check: " + d.timestamp + " — " + d.status;
+  setHero(d.status, d.timestamp);
+  renderChecksGrid(d.failed || []);
+  addTimelineDot(d.status);
+  watchLogLine("[" + d.timestamp + "] " + d.status + (d.unchanged ? " (unchanged)" : ""));
+  if (d.status === "clean") {
+    const box = document.getElementById("watch-explanations");
+    if (box) box.innerHTML = "";
+  }
+});
+
+es.addEventListener("watch-failure", (e) => {
+  const d = JSON.parse(e.data);
+  const box = document.getElementById("watch-explanations");
+  if (!box) return;
+  const card = document.createElement("div");
+  card.className = "explain-card";
+  card.innerHTML =
+    '<div class="explain-head"><span class="explain-tag">🤖 AI explanation</span><span class="explain-tag">' + escapeHtml(d.label) + '</span>' +
+    '<span class="explain-badge ' + (d.verified ? "verified" : "unverified") + '">' + (d.verified ? "✓ verified quote" : "✗ unverified") + '</span></div>' +
+    '<div class="explain-text">' + escapeHtml(d.explanation ?? "(no explanation available)") + '</div>' +
+    (d.quote ? '<div class="explain-quote">“' + escapeHtml(d.quote) + '”</div>' : "");
+  box.appendChild(card);
+});
 
 es.addEventListener("start", (e) => {
   const d = JSON.parse(e.data);

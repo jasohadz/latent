@@ -78,6 +78,9 @@ const COMMANDS = {
   index: { args: [], flags: ["--json"], responseTypes: ["index-result", "error"] },
   ask: { args: ["<question>"], flags: ["--json", "--check", "--monitor", "--cite"], responseTypes: ["ask-result", "error"] },
   "compose-check": { args: ["<file.json>"], flags: ["--json"], responseTypes: ["compose-check-result", "error"] },
+  "draft-doc": { args: ["<name>"], flags: ["--json", "--prop", "--write", "--force", "--monitor"], responseTypes: ["draft-doc-result", "error"] },
+  scaffold: { args: ["<name>"], flags: ["--json", "--like", "--write"], responseTypes: ["scaffold-result", "error"] },
+  watch: { args: [], flags: ["--json", "--interval", "--monitor"], responseTypes: ["watch-result"] },
 };
 
 const ERROR_CODES = {
@@ -89,6 +92,8 @@ const ERROR_CODES = {
   ERR_NO_INDEX: "No knowledge index found — run `latent index` first.",
   ERR_MODEL_DOWNLOAD_FAILED: "Could not download the local model on first run — check network access and try again.",
   ERR_INVALID_COMPOSITION_JSON: "The composition file is not valid JSON.",
+  ERR_UNKNOWN_PROP: "The requested prop is not in this component's declared contract.",
+  ERR_ALREADY_EXISTS: "A component with this name already has files on disk.",
 };
 
 function err(code, extra = {}) {
@@ -932,6 +937,24 @@ async function cmdIndex(json) {
   }, json);
 }
 
+// Shared by `ask --cite` and `draft-doc`: a claimed quote only counts as
+// grounded if it's a real, exact substring of the source it's attributed
+// to. Case-insensitive (models tend to capitalize a quoted fragment as if
+// it were a sentence start even when the source has it mid-sentence
+// lowercase) and strips markdown emphasis/backticks/every quote-mark
+// variant (straight/curly, single/double) before comparing — see `ask
+// --cite`'s own comments in CLAUDE.md for the two real false-negatives
+// that shook this out. Requires >=4 real characters so an empty/near-empty
+// quote can't trivially "match" via `"x".includes("")` always being true —
+// fail closed, not open.
+function normalizeQuoteText(s) {
+  return String(s ?? "").replace(/[*_`'‘’"“”]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+function verifyQuote(quote, sourceText) {
+  const normalizedQuote = normalizeQuoteText(quote);
+  return typeof sourceText === "string" && normalizedQuote.length >= 4 && normalizeQuoteText(sourceText).includes(normalizedQuote);
+}
+
 async function cmdAsk(question, json, checkComponent, monitor, cite) {
   if (!question) return print(err("ERR_MISSING_ARG", { arg: "question" }), json);
 
@@ -941,6 +964,7 @@ async function cmdAsk(question, json, checkComponent, monitor, cite) {
     mon = await createMonitor({});
     console.error(`\nMonitor running at ${mon.url} — open it in a browser, then this will continue.`);
     await mon.waitForClient();
+    mon.emit("mode", { mode: "ask" });
     mon.emit("start", { question, checkComponent: checkComponent ?? null });
   }
 
@@ -1096,13 +1120,7 @@ async function cmdAsk(question, json, checkComponent, monitor, cite) {
     // text wrapped in curly smart quotes ('PowerShell') — its own styling
     // choice, not a copy error, but exact substring matching has no
     // tolerance for either the punctuation swap or straight-vs-curly.
-    const normalize = (s) => String(s ?? "").replace(/[*_`'‘’"“”]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
-    claims = (parsed.claims ?? []).map((c) => {
-      const src = sourceTexts[c.source];
-      const normalizedQuote = normalize(c.quote);
-      const verified = typeof src === "string" && normalizedQuote.length >= 4 && normalize(src).includes(normalizedQuote);
-      return { ...c, verified };
-    });
+    claims = (parsed.claims ?? []).map((c) => ({ ...c, verified: verifyQuote(c.quote, sourceTexts[c.source]) }));
 
     answer = claims
       .map((c) => (c.verified ? c.text : `${c.text} [UNVERIFIED — no matching source text found]`))
@@ -1205,6 +1223,121 @@ async function cmdVerify(json) {
   const result = await computeVerify();
   print(result, json);
   if (result.status !== "clean") process.exitCode = 1;
+}
+
+// --- watch: runs `verify` (the real, deterministic Figma-live vs ---
+// --- committed-code vs docs cross-check) on a loop, and when it's not ---
+// --- clean, asks the local chat model to explain each failure in plain ---
+// --- English — grounded in the actual check output, same discipline as ---
+// --- ask --cite/draft-doc: a quote must be a real substring of the real ---
+// --- result JSON, or the explanation prints as unverified. The model ---
+// --- never decides pass/fail — verify's own deterministic checks still ---
+// --- do that; the model's only job is making an already-computed, ---
+// --- already-true failure legible to someone who won't read raw JSON. ---
+
+function contextForFailure(label, v) {
+  if (label === "sync figma") return v.syncFigma;
+  if (label === "check-styles") return v.checkStyles;
+  if (label === "check-docs") return v.checkDocs;
+  const [kind, ...rest] = label.split(" ");
+  const component = rest.join(" ");
+  if (kind === "check-parity") return v.checkParity.find((r) => (r.component ?? r.requested) === component);
+  if (kind === "check-component-bindings") return v.checkComponentBindings.find((r) => (r.component ?? r.requested) === component);
+  return null;
+}
+
+async function explainFailure(label, context, mon) {
+  if (mon) mon.emit("watch-explain-start", { label });
+  if (!context) {
+    const result = { label, explanation: null, quote: null, verified: false };
+    if (mon) mon.emit("watch-failure", result);
+    return result;
+  }
+  const sourceText = JSON.stringify(context, null, 2);
+  const chatModel = await loadModel(CHAT_MODEL_URI);
+  const llama = await getLlamaInstance();
+  const grammar = await llama.createGrammarForJsonSchema({
+    type: "object",
+    properties: { explanation: { type: "string" }, quote: { type: "string" } },
+  });
+  const llamaContext = await chatModel.createContext();
+  const session = new LlamaChatSession({ contextSequence: llamaContext.getSequence() });
+  const prompt = `A design-system consistency check named "${label}" just failed. Here is the real, mechanically-computed result as JSON — treat it as ground truth, not something to guess at:\n\n${sourceText}\n\nIn one or two plain-English sentences, explain to a non-programmer what's out of sync. "quote" must be an exact, verbatim substring copied from the JSON above that supports your explanation.\n\nRespond as JSON: {"explanation": "...", "quote": "..."}.`;
+  const raw = await session.prompt(prompt, { grammar });
+  const parsed = grammar.parse(raw);
+  await llamaContext.dispose();
+  const result = { label, explanation: parsed.explanation, quote: parsed.quote, verified: verifyQuote(parsed.quote, sourceText) };
+  if (mon) mon.emit("watch-failure", result);
+  return result;
+}
+
+// previousFailedKey lets the caller skip re-explaining a failure set that
+// hasn't changed since the last tick — computeVerify() itself is cheap and
+// always runs fresh (drift can appear or clear at any time), but the model
+// call is the expensive part, so it only runs when there's something new to
+// explain (first tick, or the set of failing checks actually changed).
+async function computeWatchOnce(mon, previousFailedKey) {
+  const v = await computeVerify();
+  const failedKey = v.failed.slice().sort().join("|");
+  const changed = failedKey !== previousFailedKey;
+  const explanations = [];
+  if (v.status !== "clean" && changed) {
+    for (const label of v.failed) explanations.push(await explainFailure(label, contextForFailure(label, v), mon));
+  }
+  return { type: "watch-result", timestamp: new Date().toISOString(), status: v.status, failed: v.failed, failedKey, changed, explanations };
+}
+
+function printWatchResult(result, json) {
+  if (json) return print(result, json);
+  console.log(`[${result.timestamp}] ${result.status}`);
+  for (const e of result.explanations) {
+    console.log(`\n${e.verified ? "✓" : "✗"} ${e.label}`);
+    console.log(`  ${e.explanation ?? "(no explanation available — the check result couldn't be matched to a specific component)"}`);
+    if (e.quote) console.log(`  quote: "${e.quote}"${e.verified ? "" : "  [UNVERIFIED — not a real substring of the check result]"}`);
+  }
+}
+
+// A real foreground loop, not a background daemon — run it in its own
+// terminal (or under nohup/a scheduled task/CI cron if you want it
+// unattended). Re-explains only when the *set* of failing checks changes
+// from the previous tick, not on every tick — an unattended run against an
+// unchanging failure wouldn't otherwise gain anything from re-asking the
+// model the same question every interval, at real GPU/CPU cost each time.
+async function cmdWatch(json, intervalSeconds, monitor) {
+  let mon = null;
+  if (monitor) {
+    const { createMonitor } = await import("./monitor.mjs");
+    mon = await createMonitor({});
+    console.error(`\nMonitor running at ${mon.url} — open it in a browser, then this will continue.`);
+    await mon.waitForClient();
+    mon.emit("mode", { mode: "watch" });
+    mon.emit("watch-config", { intervalSeconds: intervalSeconds ?? null });
+  }
+
+  if (!intervalSeconds) {
+    const result = await computeWatchOnce(mon, null);
+    if (mon) mon.emit("watch-tick", { timestamp: result.timestamp, status: result.status, failed: result.failed, unchanged: false });
+    printWatchResult(result, json);
+    if (mon) console.error(`Monitor still running at ${mon.url} — Ctrl+C to stop.`);
+    if (result.status !== "clean") process.exitCode = 1;
+    return;
+  }
+
+  if (!json) console.error(`Watching for Figma/GitHub/live drift every ${intervalSeconds}s — Ctrl+C to stop.`);
+  let lastFailedKey = null;
+  for (;;) {
+    const result = await computeWatchOnce(mon, lastFailedKey);
+    if (mon) mon.emit("watch-tick", { timestamp: result.timestamp, status: result.status, failed: result.failed, unchanged: !result.changed });
+    if (result.changed) {
+      printWatchResult(result, json);
+      lastFailedKey = result.failedKey;
+    } else if (json) {
+      print({ type: "watch-tick", timestamp: result.timestamp, status: result.status }, json);
+    } else {
+      console.log(`[${result.timestamp}] ${result.status} (unchanged)`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalSeconds * 1000));
+  }
 }
 
 function setAtDottedPath(root, dottedPath, value) {
@@ -1343,6 +1476,291 @@ async function cmdApplyDrift(json, write, force, tokensFile, stylesFile) {
   const result = await computeApplyDrift({ tokensFile, stylesFile, write, force });
   print(result, json);
   if (result.error) process.exitCode = 1;
+}
+
+// --- draft-doc: uses the local chat model to draft a `.doc.mjs` prop ---
+// --- description, grounded against the component's own real .tsx source. ---
+//
+// Same shape as apply-drift on purpose: dry-run by default, --write to
+// actually patch the file, refuses over uncommitted changes unless --force.
+// The one thing genuinely new here is *what* gates a write — apply-drift
+// only ever fills gaps or overwrites a value already proven wrong by a live
+// diff; there's no equivalent live diff for prose, so a drafted description
+// only gets written automatically when the prop had none at all. Overwriting
+// an existing, possibly hand-verified description (see Button.doc.mjs's
+// dated, Figma-node-referenced descriptions) requires the caller to name
+// that prop explicitly with --prop *and* pass --force — never happens by
+// scanning for "missing" alone.
+//
+// Grounding uses the same mechanism as `ask --cite` (grammar-constrained
+// JSON + a mechanical post-generation substring check via verifyQuote/
+// normalizeQuoteText above) rather than trusting the model's prose — a
+// drafted description is only ever a starting point for a human to check,
+// same discipline as [[latent-never-hallucinate-token-data]] everywhere else
+// in this repo. The model sees the *whole* component source file as its one
+// source (small enough files, per `wc -l`, that this fits comfortably in
+// context) rather than an extracted snippet — extracting just the relevant
+// interface block by regex risks quietly cutting off the very JSDoc comment
+// that would ground the best answer.
+function replacePropDescription(source, propName, newDescription) {
+  const nameNeedle = `name: "${propName}"`;
+  const nameIdx = source.indexOf(nameNeedle);
+  if (nameIdx === -1) return null;
+  // Bound the search to just this prop's own object literal — the next
+  // "{ name: "" marks the start of the following prop entry (or, if this
+  // is the last prop, the closing "]," of the props array) — so a
+  // description search can never cross into an adjacent prop even if this
+  // one's fields span multiple lines.
+  const nextPropIdx = source.indexOf('{ name: "', nameIdx + nameNeedle.length);
+  const windowEnd = nextPropIdx !== -1 ? nextPropIdx : source.indexOf("],", nameIdx);
+  const window = source.slice(nameIdx, windowEnd === -1 ? undefined : windowEnd);
+  const descMatch = window.match(/description:\s*"(?:[^"\\]|\\.)*"/);
+  if (!descMatch) return null;
+  const patchedWindow =
+    window.slice(0, descMatch.index) + `description: ${JSON.stringify(newDescription)}` + window.slice(descMatch.index + descMatch[0].length);
+  return source.slice(0, nameIdx) + patchedWindow + source.slice(nameIdx + window.length);
+}
+
+async function computeDraftDoc({ component, propName, write, force, mon }) {
+  if (!component) return err("ERR_MISSING_ARG", { arg: "name" });
+  const doc = await loadDoc(component);
+  if (!doc) return err("ERR_UNKNOWN_COMPONENT", { requested: component });
+
+  const srcFile = path.resolve(REPO_ROOT, doc.swizzlePath);
+  if (!existsSync(srcFile)) return err("ERR_FILE_NOT_FOUND", { path: srcFile });
+  const sourceText = readFileSync(srcFile, "utf-8");
+
+  let targets;
+  if (propName) {
+    const prop = (doc.props ?? []).find((p) => p.name === propName);
+    if (!prop) return err("ERR_UNKNOWN_PROP", { component, requested: propName });
+    targets = [prop];
+  } else {
+    // Default, no --prop: only real gaps — same set check-docs' doc-schema
+    // check would flag as `${label}.description` missing.
+    targets = (doc.props ?? []).filter((p) => !p.description);
+  }
+
+  if (mon) mon.emit("draft-doc-start", { component, targets: targets.map((p) => p.name) });
+
+  if (targets.length === 0) {
+    const result = { type: "draft-doc-result", component, mode: "nothing-to-draft", drafts: [] };
+    if (mon) mon.emit("draft-doc-done", result);
+    return result;
+  }
+
+  const chatModel = await loadModel(CHAT_MODEL_URI);
+  const llama = await getLlamaInstance();
+  const grammar = await llama.createGrammarForJsonSchema({
+    type: "object",
+    properties: {
+      description: { type: "string" },
+      quote: { type: "string" },
+    },
+  });
+
+  const drafts = [];
+  for (const prop of targets) {
+    if (mon) mon.emit("draft-doc-item-start", { name: prop.name });
+    // A fresh context per prop, not one reused across the loop — otherwise
+    // each successive prop's prompt/answer stays in the same chat history,
+    // and a small model reliably starts blending an earlier prop's answer
+    // into the next one's (the same "lost the thread in extra noise"
+    // failure `ask --check` was built to avoid, see its own comment above).
+    const llamaContext = await chatModel.createContext();
+    const session = new LlamaChatSession({ contextSequence: llamaContext.getSequence() });
+    const prompt = `Here is the real TypeScript source for the "${doc.name}" UI component:\n\n${sourceText}\n\nWrite ONE clear sentence documenting what the "${prop.name}" prop (declared type: ${prop.type}) does, for a component library's reference docs. You must ground it in the source above: "quote" must be an exact, verbatim substring copied from the source — not paraphrased — that supports your description. If the source doesn't clearly support a specific claim, keep the description generic rather than inventing behavior.\n\nRespond with a JSON object: {"description": "...", "quote": "..."}.`;
+    const raw = await session.prompt(prompt, { grammar });
+    const parsed = grammar.parse(raw);
+    const item = {
+      name: prop.name,
+      existingDescription: prop.description || null,
+      draftDescription: parsed.description,
+      quote: parsed.quote,
+      verified: verifyQuote(parsed.quote, sourceText),
+    };
+    drafts.push(item);
+    if (mon) mon.emit("draft-doc-item-done", item);
+    await llamaContext.dispose();
+  }
+
+  let filesWritten = [];
+  let writeError = null;
+  let wrote = false;
+  if (write) {
+    const docPath = path.join(CORE_SRC, `${component}.doc.mjs`);
+    const writable = drafts.filter((d) => d.verified && (!d.existingDescription || force));
+    if (writable.length > 0) {
+      const dirty = gitDirtyFiles([docPath]);
+      if (dirty.length > 0 && !force) {
+        writeError = `Refusing to write: uncommitted changes already exist in ${dirty.join(", ")}. Commit/stash them first, or pass --force to overwrite anyway.`;
+      } else {
+        let source = readFileSync(docPath, "utf-8");
+        for (const d of writable) {
+          const patched = replacePropDescription(source, d.name, d.draftDescription);
+          if (patched) source = patched;
+        }
+        writeFileSync(docPath, source);
+        filesWritten = [path.relative(REPO_ROOT, docPath)];
+        wrote = true;
+      }
+    }
+  }
+
+  const result = {
+    type: "draft-doc-result",
+    component,
+    mode: write ? (wrote ? "written" : writeError ? "blocked" : "nothing-to-write") : "dry-run",
+    drafts,
+    filesWritten,
+    error: writeError,
+  };
+  if (mon) mon.emit("draft-doc-done", result);
+  return result;
+}
+
+async function cmdDraftDoc(component, json, propName, write, force, monitor) {
+  let mon = null;
+  if (monitor) {
+    const { createMonitor } = await import("./monitor.mjs");
+    mon = await createMonitor({});
+    console.error(`\nMonitor running at ${mon.url} — open it in a browser, then this will continue.`);
+    await mon.waitForClient();
+    mon.emit("mode", { mode: "draft-doc" });
+  }
+
+  const result = await computeDraftDoc({ component, propName, write, force, mon });
+  if (mon) console.error(`Monitor still running at ${mon.url} — Ctrl+C to stop.`);
+  if (result.type === "error") {
+    print(result, json);
+    process.exitCode = 1;
+    return;
+  }
+  if (json) return print(result, json);
+
+  console.log(`${result.component} — ${result.mode}\n`);
+  for (const d of result.drafts) {
+    console.log(`${d.verified ? "✓" : "✗"} ${d.name}`);
+    if (d.existingDescription) console.log(`  existing: ${d.existingDescription}`);
+    console.log(`  draft:    ${d.draftDescription}`);
+    console.log(`  quote:    "${d.quote}"${d.verified ? "" : "  [UNVERIFIED — not a real substring of the source]"}\n`);
+  }
+  if (result.filesWritten.length > 0) console.log(`Written: ${result.filesWritten.join(", ")}`);
+  if (result.error) console.log(result.error);
+  if (result.error) process.exitCode = 1;
+}
+
+// --- scaffold: generates a new component's three-file boilerplate by ---
+// --- renaming an existing, real component's structure. Deterministic — ---
+// --- no model call, on purpose (see cmdScaffold's own note on why). ---
+
+function toKebabCase(pascalName) {
+  return pascalName.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+}
+
+// Renames every occurrence of the template component's PascalCase name to
+// the new one, including compound identifiers (ButtonProps, ButtonVariant,
+// ButtonBaseProps) — matches "Button" only when followed by another capital
+// letter (a compound name) or a word boundary (the bare name itself), so it
+// never touches an unrelated identifier that merely contains the substring.
+function renamePascalIdentifiers(source, oldName, newName) {
+  const re = new RegExp(`\\b${oldName}(?=[A-Z]|\\b)`, "g");
+  return source.replace(re, newName);
+}
+
+// CSS classes/import paths use the kebab-case form (Button -> lat-button,
+// including BEM-style children like .lat-toggle-multiple__option) — a
+// separate pass from the PascalCase one above, same source text.
+function renameKebabIdentifiers(source, oldKebab, newKebab) {
+  return source.split(oldKebab).join(newKebab);
+}
+
+async function computeScaffold({ name, likeName, write }) {
+  if (!name) return err("ERR_MISSING_ARG", { arg: "name" });
+  if (!likeName) return err("ERR_MISSING_ARG", { arg: "--like" });
+
+  const templateDoc = await loadDoc(likeName);
+  if (!templateDoc) return err("ERR_UNKNOWN_COMPONENT", { requested: likeName });
+
+  const targetDocPath = path.join(CORE_SRC, `${name}.doc.mjs`);
+  if (existsSync(targetDocPath)) return err("ERR_ALREADY_EXISTS", { name });
+
+  const templateTsxPath = path.resolve(REPO_ROOT, templateDoc.swizzlePath);
+  const templateCssPath = templateTsxPath.replace(/\.tsx$/, ".css");
+  if (!existsSync(templateTsxPath) || !existsSync(templateCssPath)) {
+    return err("ERR_FILE_NOT_FOUND", { path: templateTsxPath });
+  }
+
+  const oldKebab = toKebabCase(likeName);
+  const newKebab = toKebabCase(name);
+
+  let tsx = readFileSync(templateTsxPath, "utf-8");
+  tsx = renamePascalIdentifiers(tsx, likeName, name);
+  tsx = renameKebabIdentifiers(tsx, oldKebab, newKebab);
+  tsx = tsx.replace(`./${likeName}.css`, `./${name}.css`);
+
+  let css = readFileSync(templateCssPath, "utf-8");
+  css = renameKebabIdentifiers(css, oldKebab, newKebab);
+
+  // Deliberately NOT a renamed copy of the template's doc.mjs — its props/
+  // figmaTokens/doNot/example describe the *template's* real, Figma-
+  // verified contract, not the new component's (which doesn't have one
+  // yet). Shipping those values under a new name would silently assert
+  // false facts about a component that was never verified against Figma —
+  // exactly what [[latent-never-hallucinate-token-data]] exists to
+  // prevent. Every field below is either a real, deterministic fact about
+  // the file just generated (name/swizzlePath) or an explicit TODO —
+  // never a guess. This intentionally fails check-docs/verify until a
+  // human fills it in for real; that's the point, not a bug in scaffold.
+  const doc = `export default {
+  name: "${name}",
+  summary: "TODO — describe what ${name} does once it has a real Figma spec.",
+  props: [],
+  example: "TODO — a real usage example once props are implemented.",
+  doNot: ["TODO — add at least one real constraint or misuse case."],
+  swizzlePath: "packages/core/src/${name}.tsx",
+  extends: null,
+  figmaTokens: {},
+};
+`;
+
+  const files = [
+    { path: path.join(CORE_SRC, `${name}.tsx`), content: tsx },
+    { path: path.join(CORE_SRC, `${name}.css`), content: css },
+    { path: targetDocPath, content: doc },
+  ];
+
+  let wrote = false;
+  if (write) {
+    for (const f of files) writeFileSync(f.path, f.content);
+    wrote = true;
+  }
+
+  return {
+    type: "scaffold-result",
+    mode: write ? "written" : "dry-run",
+    name,
+    like: likeName,
+    files: files.map((f) => ({ path: path.relative(REPO_ROOT, f.path), content: f.content })),
+    filesWritten: wrote ? files.map((f) => path.relative(REPO_ROOT, f.path)) : [],
+    note:
+      "This is boilerplate only, copied and renamed from a real existing component's structure — no model was involved, this is a mechanical rename, not a generated design. props/figmaTokens/doNot/example are left as TODOs on purpose: they describe a real Figma-verified contract this new component doesn't have yet. verify/check-docs will (correctly) flag this component as incomplete until a human fills those in from a real Figma spec.",
+  };
+}
+
+async function cmdScaffold(name, json, likeName, write) {
+  const result = await computeScaffold({ name, likeName, write });
+  if (result.type === "error") {
+    print(result, json);
+    process.exitCode = 1;
+    return;
+  }
+  if (json) return print(result, json);
+
+  console.log(`${result.name} (from ${result.like}) — ${result.mode}\n`);
+  for (const f of result.files) console.log(`  ${f.path}`);
+  console.log(`\n${result.note}`);
+  if (result.filesWritten.length > 0) console.log(`\nWritten: ${result.filesWritten.join(", ")}`);
 }
 
 // --- compose-check: validates a generated page composition against the ---
@@ -1569,6 +1987,26 @@ async function main() {
       const monitor = rest.includes("--monitor");
       const cite = rest.includes("--cite");
       return cmdAsk(positional[0], json, checkComponent, monitor, cite);
+    }
+    case "draft-doc": {
+      const propFlagIdx = rest.indexOf("--prop");
+      const propName = propFlagIdx >= 0 ? rest[propFlagIdx + 1] : undefined;
+      const write = rest.includes("--write");
+      const force = rest.includes("--force");
+      const monitor = rest.includes("--monitor");
+      return cmdDraftDoc(positional[0], json, propName, write, force, monitor);
+    }
+    case "scaffold": {
+      const likeFlagIdx = rest.indexOf("--like");
+      const likeName = likeFlagIdx >= 0 ? rest[likeFlagIdx + 1] : undefined;
+      const write = rest.includes("--write");
+      return cmdScaffold(positional[0], json, likeName, write);
+    }
+    case "watch": {
+      const intervalFlagIdx = rest.indexOf("--interval");
+      const interval = intervalFlagIdx >= 0 ? parseInt(rest[intervalFlagIdx + 1], 10) : undefined;
+      const monitor = rest.includes("--monitor");
+      return cmdWatch(json, interval, monitor);
     }
     default:
       print(err("ERR_UNKNOWN_COMMAND", { requested: cmd }));
