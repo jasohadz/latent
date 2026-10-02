@@ -12,6 +12,8 @@ export interface TextFieldProps extends React.InputHTMLAttributes<HTMLInputEleme
 /**
  * TextField — single-line text input. Styling comes entirely from --lat-*
  * custom properties.
+ *
+ * @import import { TextField } from "@latent/core/TextField";
  */
 export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
   ({ appearance = "outline", error = false, className, ...rest }, ref) => {

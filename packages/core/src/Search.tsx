@@ -24,6 +24,8 @@ export interface SearchProps {
  * Built at one size (Density=Default) — a small/condensed tier is a
  * documented gap, not yet built (matches the Figma component's own noted
  * v1 scope). Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { Search } from "@latent/core/Search";
  */
 export const Search = React.forwardRef<HTMLInputElement, SearchProps>(
   (

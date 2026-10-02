@@ -15,6 +15,8 @@ export interface SelectOptionProps extends React.HTMLAttributes<HTMLDivElement> 
  * individually Tab-reachable rather than managed via a single roving
  * tabindex plus aria-activedescendant, same honest tradeoff NavDropdown's
  * own sub-list already documents.
+ *
+ * @import import { SelectOption } from "@latent/core/SelectOption";
  */
 export const SelectOption = React.forwardRef<HTMLDivElement, SelectOptionProps>(
   ({ label, selected = false, className, onClick, onKeyDown, ...rest }, ref) => {

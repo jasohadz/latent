@@ -12,6 +12,8 @@ export interface ToggleProps {
  * Toggle — a 2-option segmented control for mutually exclusive choices.
  * See ToggleMultiple for the same recipe generalized to N options.
  * Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { Toggle } from "@latent/core/Toggle";
  */
 export const Toggle = React.forwardRef<HTMLDivElement, ToggleProps>(
   ({ options, selectedIndex, onChange, className }, ref) => {

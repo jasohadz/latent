@@ -25,6 +25,8 @@ export interface MultiSelectProps {
  * itself (not below it, not a "N selected" summary) — matching the Style 1
  * Figma reference exactly. Stays open across selections (typical
  * multi-select UX); closes on outside click or Escape.
+ *
+ * @import import { MultiSelect } from "@latent/core/MultiSelect";
  */
 export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
   ({ label, placeholder = "Select...", items, value, onChange, disabled = false, className }, ref) => {

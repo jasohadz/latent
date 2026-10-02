@@ -32,6 +32,8 @@ export interface NavDropdownProps {
  * chevron flips chevron-down (collapsed) / chevron-up (expanded), matching
  * the standard open/closed disclosure convention. Styling comes entirely
  * from --lat-* custom properties.
+ *
+ * @import import { NavDropdown } from "@latent/core/NavDropdown";
  */
 export const NavDropdown = React.forwardRef<HTMLDivElement, NavDropdownProps>(
   ({ label, icon, selected = false, expanded, onToggle, subItems, iconOnly = false, className }, ref) => {

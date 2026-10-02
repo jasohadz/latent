@@ -14,6 +14,8 @@ export interface NavSubItemProps extends React.ButtonHTMLAttributes<HTMLButtonEl
  * with a fixed leading corner-down-right icon instead of a swappable one
  * and no trailing chevron. Styling comes entirely from --lat-* custom
  * properties.
+ *
+ * @import import { NavSubItem } from "@latent/core/NavSubItem";
  */
 export const NavSubItem = React.forwardRef<HTMLButtonElement, NavSubItemProps>(
   ({ label, selected = false, showIcon = true, disabled, className, ...rest }, ref) => {

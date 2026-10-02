@@ -13,6 +13,8 @@ export interface ChatWindowProps {
  * ChatWindow — a full AI chat panel. Single component, no variants. A
  * message slot stacked above a real ChatInput instance docked at the
  * bottom. Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { ChatWindow } from "@latent/core/ChatWindow";
  */
 export const ChatWindow = React.forwardRef<HTMLDivElement, ChatWindowProps>(
   ({ children, inputProps, className }, ref) => {

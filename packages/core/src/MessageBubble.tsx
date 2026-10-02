@@ -13,6 +13,8 @@ export interface MessageBubbleProps {
  * MessageBubble — a single chat message. Meant to populate ChatWindow's
  * message slot (one or more instances stacked per conversation). Styling
  * comes entirely from --lat-* custom properties.
+ *
+ * @import import { MessageBubble } from "@latent/core/MessageBubble";
  */
 export const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
   ({ sender, children, className }, ref) => {

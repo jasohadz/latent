@@ -13,6 +13,8 @@ export interface SwitchProps {
 /**
  * Switch — an on/off toggle for boolean settings. Styling comes entirely
  * from --lat-* custom properties.
+ *
+ * @import import { Switch } from "@latent/core/Switch";
  */
 export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
   ({ pressed, onChange, disabled = false, supportingText, className }, ref) => {

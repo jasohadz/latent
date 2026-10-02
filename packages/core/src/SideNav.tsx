@@ -22,6 +22,8 @@ export interface SideNavProps {
  * rail: brand/footer hide entirely, and the same nav items render
  * icon-only above just the expand toggle. Styling comes entirely from
  * --lat-* custom properties.
+ *
+ * @import import { SideNav } from "@latent/core/SideNav";
  */
 export const SideNav = React.forwardRef<HTMLDivElement, SideNavProps>(
   (

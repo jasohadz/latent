@@ -26,6 +26,8 @@ export interface TopNavProps {
  * TopNav — a floating glass top navigation bar with mega-menu dropdowns
  * for Product and Download. Styling comes entirely from --lat-* custom
  * properties.
+ *
+ * @import import { TopNav } from "@latent/core/TopNav";
  */
 export const TopNav = React.forwardRef<HTMLDivElement, TopNavProps>(
   (

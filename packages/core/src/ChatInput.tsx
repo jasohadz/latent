@@ -15,6 +15,8 @@ export interface ChatInputProps {
  * ChatInput — a message composer bar for AI chat interfaces. Used as the
  * input row inside ChatWindow. Styling comes entirely from --lat-*
  * custom properties.
+ *
+ * @import import { ChatInput } from "@latent/core/ChatInput";
  */
 export const ChatInput = React.forwardRef<HTMLInputElement, ChatInputProps>(
   ({ value, onChange, onSubmit, onAttach, placeholder = "Message Latent...", className }, ref) => {

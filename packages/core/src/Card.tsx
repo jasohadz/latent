@@ -88,6 +88,8 @@ function ProgressiveBlur({ horizontal }: { horizontal: boolean }) {
  * Card — flexible content container. 6 layout variants share one set of
  * boolean and text properties. Styling comes entirely from --lat-* custom
  * properties.
+ *
+ * @import import { Card } from "@latent/core/Card";
  */
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   (

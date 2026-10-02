@@ -19,6 +19,8 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLSpanElement> {
 /**
  * Avatar — user representation as initials, an icon, or a placeholder image.
  * Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { Avatar } from "@latent/core/Avatar";
  */
 export const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
   ({ size = "medium", shape = "circle", initial, icon, src, alt = "", className, ...rest }, ref) => {

@@ -13,6 +13,8 @@ export interface StatProps {
  * Stat — a compact highlight card for a single number or metric with a
  * supporting label. For landing pages and dashboards. Styling comes
  * entirely from --lat-* custom properties.
+ *
+ * @import import { Stat } from "@latent/core/Stat";
  */
 export const Stat = React.forwardRef<HTMLDivElement, StatProps>(
   ({ showIcon = true, icon, value, label, className }, ref) => {

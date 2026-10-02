@@ -15,6 +15,8 @@ export interface AccordionItemProps {
  * AccordionItem — a single collapsible FAQ-style row. Not a full list —
  * stack multiple instances and control `open` per-instance to build one.
  * Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { AccordionItem } from "@latent/core/AccordionItem";
  */
 export const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps>(
   ({ title, children, open, onToggle, disabled = false, className }, ref) => {

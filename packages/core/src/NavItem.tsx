@@ -23,6 +23,8 @@ export interface NavItemProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
  * NavItem — the atomic row used inside Side Nav's expanded nav list and as
  * Nav Dropdown's trigger. Styling comes entirely from --lat-* custom
  * properties.
+ *
+ * @import import { NavItem } from "@latent/core/NavItem";
  */
 export const NavItem = React.forwardRef<HTMLButtonElement, NavItemProps>(
   (

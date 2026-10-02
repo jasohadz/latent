@@ -18,6 +18,8 @@ export interface BadgeGroupProps extends React.ButtonHTMLAttributes<HTMLButtonEl
  * BadgeGroup — a clickable label row that optionally pairs with a real
  * Badge instance, for "what's new" banners or filter-summary links.
  * Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { BadgeGroup } from "@latent/core/BadgeGroup";
  */
 export const BadgeGroup = React.forwardRef<HTMLButtonElement, BadgeGroupProps>(
   ({ position = "leading", size = "small", badgeLabel = "New", children, className, ...rest }, ref) => {

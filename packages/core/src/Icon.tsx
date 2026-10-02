@@ -25,6 +25,8 @@ function toPascalCase(kebab: string): string {
  * and weight from --lat-stroke-width-* custom properties; color is inherited
  * via currentColor (set on an ancestor, or override --lat-color-icon-*
  * through a className) — never hardcode a fill or stroke width.
+ *
+ * @import import { Icon } from "@latent/core/Icon";
  */
 export const Icon = React.forwardRef<SVGSVGElement, IconProps>(
   ({ name, size = "md", weight = "light", className, ...rest }, ref) => {

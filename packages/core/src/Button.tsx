@@ -39,6 +39,8 @@ export type ButtonProps =
  * Button — primitive action trigger. Styling comes entirely from
  * --lat-* custom properties (see packages/theme-neutral). Never hardcode
  * a color/spacing value here; add a new custom property if one is missing.
+ *
+ * @import import { Button } from "@latent/core/Button";
  */
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (

@@ -71,6 +71,8 @@ function getWeeks(month: number, year: number): DayCell[][] {
  * Calendar — a date-picker grid with month/year navigation. Controlled:
  * the consumer owns `month`/`year`/selection state and responds to the
  * callbacks. Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { Calendar } from "@latent/core/Calendar";
  */
 export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
   (

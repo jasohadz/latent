@@ -11,6 +11,8 @@ export interface ToggleMultipleProps {
 /**
  * ToggleMultiple — Toggle's 2-option recipe generalized to N options.
  * Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { ToggleMultiple } from "@latent/core/ToggleMultiple";
  */
 export const ToggleMultiple = React.forwardRef<HTMLDivElement, ToggleMultipleProps>(
   ({ options, selectedIndex, onChange, className }, ref) => {

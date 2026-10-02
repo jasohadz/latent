@@ -19,6 +19,8 @@ export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * Alert — an inline banner for announcements and actionable notices.
  * Styling comes entirely from --lat-* custom properties, never hardcoded.
+ *
+ * @import import { Alert } from "@latent/core/Alert";
  */
 export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ({ appearance = "inverse", icon, children, onDismiss, onExpand, className, ...rest }, ref) => {

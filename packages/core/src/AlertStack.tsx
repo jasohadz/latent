@@ -11,6 +11,8 @@ export interface AlertStackProps extends React.HTMLAttributes<HTMLDivElement> {
  * that separates on hover/focus. Pure CSS: no expanded/collapsed prop, since
  * the Figma reference's own annotation defines this as a hover behavior, not
  * a controlled state.
+ *
+ * @import import { AlertStack } from "@latent/core/AlertStack";
  */
 export const AlertStack = React.forwardRef<HTMLDivElement, AlertStackProps>(
   ({ children, className, ...rest }, ref) => {

@@ -16,6 +16,8 @@ export interface MegaMenuItemProps extends React.ButtonHTMLAttributes<HTMLButton
 /**
  * MegaMenuItem — the atomic row used inside TopNav's Product and Download
  * dropdown panels. Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { MegaMenuItem } from "@latent/core/MegaMenuItem";
  */
 export const MegaMenuItem = React.forwardRef<HTMLButtonElement, MegaMenuItemProps>(
   ({ layout = "standard", icon, title, description, badgeLabel = "New", className, ...rest }, ref) => {

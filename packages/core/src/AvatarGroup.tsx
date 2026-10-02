@@ -18,6 +18,8 @@ export interface AvatarGroupProps {
  * (Avatar's single-character constraint would clip multi-digit counts) —
  * it's styled to match instead. Styling comes entirely from --lat-*
  * custom properties.
+ *
+ * @import import { AvatarGroup } from "@latent/core/AvatarGroup";
  */
 export const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
   ({ spacing = "overlap", avatars, overflowCount, className }, ref) => {

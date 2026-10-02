@@ -22,6 +22,8 @@ export interface SelectProps {
  * Select — a labeled single-value dropdown: a bordered trigger showing the
  * chosen value (or a placeholder) + chevron, opening a floating panel of
  * real SelectOption rows. Closes on selection, outside click, or Escape.
+ *
+ * @import import { Select } from "@latent/core/Select";
  */
 export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
   ({ label, placeholder = "Select...", items, value, onChange, disabled = false, className }, ref) => {

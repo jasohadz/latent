@@ -12,6 +12,8 @@ export interface TopNavLinkProps extends React.ButtonHTMLAttributes<HTMLButtonEl
  * TopNavLink — the atomic link used inside TopNav's bar for Product,
  * Download, and Pricing. Styling comes entirely from --lat-* custom
  * properties.
+ *
+ * @import import { TopNavLink } from "@latent/core/TopNavLink";
  */
 export const TopNavLink = React.forwardRef<HTMLButtonElement, TopNavLinkProps>(
   ({ label, active = false, showChevron = true, className, ...rest }, ref) => {

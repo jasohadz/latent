@@ -13,6 +13,8 @@ export interface FieldProps extends TextFieldProps {
  * Field — a labeled form-field wrapper around a real TextField instance.
  * No value axis of its own — the nested TextField carries its own value/
  * state. Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { Field } from "@latent/core/Field";
  */
 export const Field = React.forwardRef<HTMLInputElement, FieldProps>(
   ({ label, helperText, error, id, className, ...rest }, ref) => {

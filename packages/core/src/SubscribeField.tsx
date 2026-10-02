@@ -26,6 +26,8 @@ export interface SubscribeFieldProps {
  * SubscribeField — an email-capture row pairing a real TextField instance
  * with a real Button instance, plus a terms disclaimer below. Styling
  * comes entirely from --lat-* custom properties.
+ *
+ * @import import { SubscribeField } from "@latent/core/SubscribeField";
  */
 export const SubscribeField = React.forwardRef<HTMLInputElement, SubscribeFieldProps>(
   (

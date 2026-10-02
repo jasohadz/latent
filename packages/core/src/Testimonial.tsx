@@ -15,6 +15,8 @@ export interface TestimonialProps {
  * Avatar instance, name, and role. No boolean properties — every field is
  * always shown; use Card for an icon-less/button-less variant instead.
  * Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { Testimonial } from "@latent/core/Testimonial";
  */
 export const Testimonial = React.forwardRef<HTMLDivElement, TestimonialProps>(
   ({ quote, name, role, avatarInitial, className }, ref) => {

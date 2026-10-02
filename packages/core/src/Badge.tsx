@@ -17,6 +17,8 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 /**
  * Badge — a small status/label pill. Styling comes entirely from --lat-*
  * custom properties; never hardcode a color/spacing value here.
+ *
+ * @import import { Badge } from "@latent/core/Badge";
  */
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
   ({ variant = "neutral", size = "medium", icon, onDismiss, className, children, ...rest }, ref) => {

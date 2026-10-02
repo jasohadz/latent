@@ -12,6 +12,8 @@ export interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 /**
  * TextArea — multi-line text input. Same visual family as TextField, fixed
  * at 100px height. Styling comes entirely from --lat-* custom properties.
+ *
+ * @import import { TextArea } from "@latent/core/TextArea";
  */
 export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
   ({ appearance = "outline", error = false, className, ...rest }, ref) => {
