@@ -1,0 +1,58 @@
+name: Storybook
+
+# Builds Storybook on every push to main and every pull request, then
+# publishes it to Chromatic for visual review — but only when the repo has a
+# CHROMATIC_PROJECT_TOKEN secret. A fork that hasn't set up Chromatic still
+# gets the build check and passes; it just skips the publish.
+#
+# This is the last step of the rebrand workflow in HOW-TO.md: once a synced
+# rebrand is reconciled and committed (the pre-commit hook regenerates
+# theme.css, fonts.css, and Story UI's docs from the token JSON), merging it
+# here rebuilds Storybook with the new brand and puts every changed story in
+# front of a reviewer on Chromatic. `verify` runs first, so a stale generated
+# file (say, token JSON edited in the GitHub UI, where the hook never ran)
+# fails the run instead of publishing the old brand.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  storybook:
+    runs-on: ubuntu-latest
+    env:
+      CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Chromatic compares against ancestor builds, so it needs history.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: verify (includes theme.css / fonts.css / Story UI docs freshness)
+        run: node packages/cli/bin/latent.mjs verify --json
+
+      - name: build Storybook
+        run: npm run build-storybook
+
+      - name: publish to Chromatic
+        if: ${{ env.CHROMATIC_PROJECT_TOKEN != '' }}
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ env.CHROMATIC_PROJECT_TOKEN }}
+          storybookBuildDir: storybook-static
+          # New visual changes are for a human to accept in Chromatic, not a
+          # reason to fail the build.
+          exitZeroOnChanges: true
+
+      - name: Chromatic skipped
+        if: ${{ env.CHROMATIC_PROJECT_TOKEN == '' }}
+        run: echo "No CHROMATIC_PROJECT_TOKEN secret — built Storybook but skipped publishing. See HOW-TO.md, step 4."

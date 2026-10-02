@@ -62,7 +62,51 @@ agent (Claude Code or otherwise) at `CLAUDE.md` and the
 `design-system-builder` skill instead — both describe the same pull/
 reconcile workflow the plugin automates, done by hand via an MCP Figma tool.
 
-## 4. Build layouts
+## 4. See your brand in Storybook
+
+Nothing in Storybook needs editing for a rebrand. The stories render the real
+components, the components read only `--lat-*` variables, and the commit in
+step 3 already regenerated everything those variables come from:
+
+- `packages/theme-neutral/theme.css`: every token as a CSS variable
+  (`packages/tokens/build-theme.mjs`)
+- `packages/theme-neutral/fonts.css`: loads your brand's font families from
+  Google Fonts. If a family isn't on Google Fonts (a commercial or self-hosted
+  font), add `packages/tokens/font-sources.json` mapping its name to the
+  stylesheet that loads it: `{ "Your Sans": "https://.../your-sans.css" }`.
+- `packages/storybook/story-ui-docs/`: what Story UI's AI reads to learn your
+  components and tokens
+
+**Run it locally:**
+
+```bash
+npm run storybook              # http://localhost:6006
+npm run storybook-with-ui      # same, plus Story UI's AI story generator
+```
+
+Use the toolbar to switch light/dark mode. Story UI is optional: it needs an
+Anthropic API key in `packages/storybook/.env` (`ANTHROPIC_API_KEY=...`,
+gitignored), then open `http://localhost:6006/?path=/workspace/`. While
+Storybook runs, it also serves an MCP endpoint at
+`http://localhost:6006/mcp` (component docs and stories for coding agents);
+`.mcp.json` registers it for Claude Code.
+
+**Publish it automatically (optional, Chromatic):**
+`.github/workflows/storybook.yml` already runs on every push to `main` and
+every pull request: it runs `verify`, builds Storybook, and publishes to
+Chromatic if you've given it a token. To turn publishing on:
+
+1. Create a project at [chromatic.com](https://www.chromatic.com) linked to
+   your GitHub repo, and copy its project token.
+2. Add it as a repo secret named `CHROMATIC_PROJECT_TOKEN`
+   (GitHub, Settings, Secrets and variables, Actions), or from a terminal:
+   `gh secret set CHROMATIC_PROJECT_TOKEN`.
+
+From then on, merging a reconciled rebrand rebuilds Storybook and shows every
+story it changed in Chromatic for you to accept. Without the secret the
+workflow still builds Storybook as a check and skips the publish.
+
+## 5. Build layouts
 
 Once step 3 is clean, agents building actual product layouts should read
 `packages/tokens/*.json` and `styles.json` directly — fast, no live Figma
@@ -72,7 +116,7 @@ without needing Figma access at all.
 
 For a faster, conversational alternative to reading `.doc.mjs` files
 directly — "what variants does Button have," "why is check-parity failing
-on this component" — see step 6 below.
+on this component" — see step 7 below.
 
 **Before generating a composition of multiple components** — a page
 section, a template, anything assembling several real components
@@ -99,7 +143,7 @@ actually shows. See `CLAUDE.md`'s "Building and previewing UI work"
 section before treating either as sufficient on its own — confirmed the
 hard way, not hypothetically.
 
-## 5. Editing or adding components
+## 6. Editing or adding components
 
 A new component is exactly three files in `packages/core/src/` sharing a
 basename — `Name.tsx`, `Name.css`, `Name.doc.mjs` — following `Button` as
@@ -127,7 +171,7 @@ would mean a CSS scanner (flag hex colors / raw px outside `var()`,
 independent of what's declared) — not built yet; flagging it here rather
 than implying the current check is exhaustive.
 
-## 6. Set up the local Q&A assistant (optional)
+## 7. Set up the local Q&A assistant (optional)
 
 Latent ships a local, offline "ask it a question" layer over every component's contract and this repo's own docs — no API key, no account, nothing sent over the network once it's set up. It runs entirely on your machine via `node-llama-cpp` (an npm dependency, not a separate app to install) and a committed `vectra` search index.
 

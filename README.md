@@ -7,7 +7,7 @@ Working proof-of-concept, verified by actually running every CLI command
 
 See [GUIDE.md](./GUIDE.md) for the full phase-by-phase build order, or
 [HOW-TO.md](./HOW-TO.md) if you're adopting this for your own brand —
-clone → rebrand in Figma → sync into the repo → build with agents.
+clone → rebrand in Figma → sync into the repo → see it in Storybook → build with agents.
 
 If you're a designer building components (not the CLI/schema itself),
 start with [DESIGNER-CHECKLIST.md](./DESIGNER-CHECKLIST.md) — a plain-language,
