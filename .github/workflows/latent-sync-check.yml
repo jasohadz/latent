@@ -1,8 +1,9 @@
 name: Latent Sync Check
 
 # Runs `node packages/cli/bin/latent.mjs verify --json` — sync figma,
-# check-styles, check-parity (every component), and check-docs, all in one
-# command — against every push the Latent Sync Figma plugin
+# check-styles, check-parity and check-component-bindings (every
+# component), check-docs, and the generated theme/Story UI docs' freshness,
+# all in one command — against every push the Latent Sync Figma plugin
 # (packages/figma-plugin/) makes to figma-sync — so drift is reported as a
 # check on the branch/PR the plugin already links to, instead of relying on
 # someone remembering to run these locally after merging. Invokes the CLI

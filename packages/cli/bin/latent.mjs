@@ -50,6 +50,12 @@ const DOC_BLOCKLIST = [
     reason:
       "brand assets/latent_logo_package/DESIGN.md (gitignored, third-party-generated 'design.md' brand kit, dated 2026-07-11, version: alpha) claims this as the primary brand blue — it does not match the real primitive color.blue.600 (#2563eb) and is superseded. That file is explicitly written to be picked up by AI coding agents; a bare mention elsewhere likely repeats it as current rather than flagging it as stale.",
   },
+  {
+    term: "tokens.json",
+    allowNear: /~~|\bv1\b|reconcil|there is no|no longer|any more/i,
+    reason:
+      "packages/tokens/tokens.json was replaced by primitives/semantic/density/breakpoint.json in the Token Schema v2 migration (TOKEN-SCHEMA-V2.md) and no longer exists. Found still named as 'the single source of truth' in README, CLAUDE.md, CONTRIBUTING, and the design-system-builder skill on 2026-10-02 — an agent following that would edit a file that isn't there.",
+  },
 ];
 
 // primitives/breakpoint are single-mode per token; semantic/density are

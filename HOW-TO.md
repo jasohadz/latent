@@ -149,7 +149,9 @@ A new component is exactly three files in `packages/core/src/` sharing a
 basename — `Name.tsx`, `Name.css`, `Name.doc.mjs` — following `Button` as
 the reference. `list`/`docs`/`swizzle`/`check-parity` discover it
 automatically (`discoverComponents()` scans for `*.doc.mjs`, nothing to
-register by hand).
+register by hand). It also needs a Storybook story, an `@import` tag in
+its JSDoc, and its name in the Latent Sync plugin's `COMPONENT_NAMES` — see
+`CONTRIBUTING.md`'s "Adding a primitive component" for the full list.
 
 If a brand needs more than a token rebrand — a new component, or changes to
 `packages/core/src/*.tsx`/`.css` — the same rule from `CLAUDE.md` applies

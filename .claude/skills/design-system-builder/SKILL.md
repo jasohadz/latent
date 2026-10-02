@@ -11,7 +11,7 @@ Latent follows a strict, deliberately small pattern. The reference build order l
 
 Every primitive is exactly three files in `packages/core/src/`, sharing a basename, following `Button` as the reference implementation:
 
-1. **`ComponentName.tsx`** — the component. Style only via `--lat-*` custom properties (see `packages/theme-neutral/theme.css` for what exists). Never hardcode a color, spacing, radius, or font value — if the token you need doesn't exist yet, add it to `packages/tokens/tokens.json` first (see below), then consume it.
+1. **`ComponentName.tsx`** — the component. Style only via `--lat-*` custom properties (see `packages/theme-neutral/theme.css` for what exists). Never hardcode a color, spacing, radius, or font value — if the token you need doesn't exist yet, add it to the right token file in `packages/tokens/` first (see below), then consume it.
 2. **`ComponentName.css`** — the styles, using `var(--lat-*)` exclusively.
 3. **`ComponentName.doc.mjs`** — a default-exported object with:
    - `name`, `summary`
@@ -25,11 +25,13 @@ Every primitive is exactly three files in `packages/core/src/`, sharing a basena
 
 No exceptions on `name`/`summary`/`props`/`example`/`doNot`/`swizzlePath`/`extends`/`figmaTokens` — `check-docs`' schema check enforces all eight as required (only `extends` may be `null`). `states`/`accessibility` are the only genuinely optional fields.
 
-`discoverComponents()` scans `packages/core/src` for `*.doc.mjs` files, so adding the three files is enough — no CLI edit needed for `list`/`docs`/`swizzle`/`check-parity` to see the new component. `check-component-bindings` needs one more step: add the component's PascalCase name to `COMPONENT_NAMES` in `packages/figma-plugin/code.js` (append-only, mirrors the filename) so the plugin's next extraction includes it in `component-bindings.live.json` — until then it reports `no-live-data` for that component, which is informational, not blocking.
+`discoverComponents()` scans `packages/core/src` for `*.doc.mjs` files, so adding the three files is enough — no CLI edit needed for `list`/`docs`/`swizzle`/`check-parity` to see the new component. `check-component-bindings` needs one more step: add the component's PascalCase name to `COMPONENT_NAMES` in `packages/figma-plugin/code.js` (append-only, mirrors the filename) so the plugin's next extraction includes it in `component-bindings.live.json` (`check-docs`' plugin-coverage check fails until you do; after that, `check-component-bindings` reports `no-live-data` until the plugin next runs, which is informational, not blocking).
+
+Two more things every new component needs: an `@import import { Name } from "@latent/core/Name";` tag in the JSDoc directly above its export (Storybook's component manifest uses it for the import path), and a story in `packages/storybook/stories/Name.stories.tsx` — check it in `npm run storybook` in light and dark mode before calling the component done.
 
 ## Editing tokens
 
-`packages/tokens/tokens.json` is the single source of truth. When you change it:
+`packages/tokens/{primitives,semantic,density,breakpoint}.json` are the source of truth — one file per Figma variable collection (there is no `tokens.json`). When you change one:
 
 1. Regenerate `packages/theme-neutral/theme.css` with `node packages/tokens/build-theme.mjs` (never hand-edit it — the pre-commit hook also regenerates it when token JSON is staged).
 2. If the token is Figma-authored, the Figma variable collection must mirror the same name/nesting — coordinate the rename/change on both sides.

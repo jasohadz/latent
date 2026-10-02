@@ -19,10 +19,21 @@ layers and properties should be named so they map predictably to code.
 
 ## What's here
 
-- `packages/tokens/tokens.json` — single source of truth for spacing/color/radius/type
-- `packages/theme-neutral/theme.css` — token values as CSS custom properties (`--lat-*`)
-- `packages/core/src/Button.tsx` + `.css` + `.doc.mjs` — one full component, styled
-  entirely via custom properties, with a machine-readable doc file
+- `packages/tokens/{primitives,semantic,density,breakpoint}.json` — the source of
+  truth for spacing/color/radius/type, one file per Figma variable collection
+  (plus `styles.json` for Text/Effect Styles)
+- `packages/theme-neutral/theme.css` + `fonts.css` — token values as CSS custom
+  properties (`--lat-*`) and the font loader, both **generated** from the token
+  JSON (`latent build-theme`; the pre-commit hook does it for you)
+- `packages/core/src/` — 36 components, each exactly `Name.tsx` + `.css` +
+  `.doc.mjs` (styled entirely via custom properties, with a machine-readable
+  doc file). `Button` is the reference example.
+- `packages/storybook/` — Storybook for every component, with light/dark and
+  density toggles, Story UI (AI story generation), an MCP endpoint for coding
+  agents, accessibility checks, and Chromatic publishing from CI — see its
+  [README](./packages/storybook/README.md)
+- `packages/figma-plugin/` — **Latent Sync**, the Figma plugin that exports
+  your variables, styles, and component bindings to the repo
 - `packages/cli/bin/latent.mjs` — the agent-facing CLI
 - `.latent-index/` — committed, local RAG index over every component's
   contract and the repo's docs, queried by `latent ask` (see below)
@@ -38,6 +49,7 @@ node packages/cli/bin/latent.mjs sync figma --file packages/tokens/figma-export.
 node packages/cli/bin/latent.mjs check-parity Button --json
 node packages/cli/bin/latent.mjs check-docs --json
 node packages/cli/bin/latent.mjs verify --json
+node packages/cli/bin/latent.mjs build-theme --json
 node packages/cli/bin/latent.mjs index --json
 node packages/cli/bin/latent.mjs ask "what variants does Button have"
 ```
@@ -49,7 +61,8 @@ Figma is left entirely to whoever adopts it. Latent treats that sync as a
 CLI-native operation with the same fail-loudly discipline as everything else:
 
 - **`sync figma --file <export.json>`** — diffs a Figma variable export
-  against `packages/tokens/tokens.json` and reports three drift categories:
+  against the token files (`packages/tokens/{primitives,semantic,density,breakpoint}.json`)
+  and reports three drift categories:
   `missingInCode` (new in Figma, not yet in the schema), `missingInFigma`
   (in code, not in the Figma export), and `valueMismatches` (same token
   name, different value — usually someone edited only one side). Exits
@@ -62,10 +75,18 @@ CLI-native operation with the same fail-loudly discipline as everything else:
   (an append-only blocklist, e.g. a Figma collection's old pre-rename
   name). Catches documentation drift with the same non-zero-exit discipline
   as everything else here.
+- **`check-component-bindings <component>`** — confirms each token a
+  component's doc claims is actually bound somewhere in the real Figma
+  component (from the Latent Sync plugin's export), catching a doc that's
+  consistent with its own CSS but wrong about Figma.
+- **`build-theme`** — generates `theme.css` and `fonts.css` from the token
+  JSON, so a synced rebrand reaches every consumer without anyone editing
+  CSS. Dry-run by default; `--write` rewrites.
 - **`verify`** — runs all of the above (`sync figma`/`check-styles` against
-  the live export files, `check-parity` for every component, `check-docs`)
-  in one call, one aggregated result. The single command to reach for,
-  whether that's you at the terminal or CI.
+  the live export files, `check-parity` and `check-component-bindings` for
+  every component, `check-docs`, and whether the generated theme and Story
+  UI docs are up to date) in one call, one aggregated result. The single
+  command to reach for, whether that's you at the terminal or CI.
 - **`ask "<question>"`** — a local, offline Q&A layer over every component's
   `.doc.mjs` contract and the repo's own docs, backed by `node-llama-cpp`
   (in-process, no separate app or API key) and a committed `vectra` index
@@ -104,6 +125,10 @@ check that runs `verify` for you; run the exact same command yourself —
 single pass/fail answer without waiting on CI. Without the plugin, you can
 still pull one-off via an MCP Figma tool (e.g. F8igma Console's
 `figma_get_variables`) to a JSON file with the same nesting as
-`tokens.json`, then run `sync figma --file` against it by hand.
+the token files, then run `sync figma --file` against it by hand.
+
+**Storybook:** `npm run storybook` (http://localhost:6006). Every push to
+`main` rebuilds it in CI and publishes it to Chromatic — see
+[packages/storybook/README.md](./packages/storybook/README.md).
 
 

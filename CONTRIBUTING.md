@@ -27,12 +27,27 @@ Every primitive follows the exact same three-file pattern as `Button`
 No exceptions on the `.doc.mjs` file — it's what makes the CLI,
 `check-parity`, and `check-docs`' schema check work at all.
 
+Every new component also needs:
+
+- an `@import import { Name } from "@latent/core/Name";` tag in the JSDoc
+  directly above its export (so Storybook's component manifest shows the
+  real import path)
+- a story in `packages/storybook/stories/Name.stories.tsx`
+- its name in `packages/figma-plugin/code.js`'s `COMPONENT_NAMES`, so Latent
+  Sync extracts its Figma bindings (`check-docs` fails without it)
+
+Story UI's docs regenerate on commit; you don't edit them.
+`node packages/cli/bin/latent.mjs scaffold <Name> --like <Existing> --write`
+generates the three component files to start from.
+
 ## Tokens
 
-`packages/tokens/tokens.json` is the single source of truth for spacing,
-color, radius, and typography. Figma variable collections must mirror its
-names and nesting exactly — if you rename or restructure a token, update
-both sides and re-run:
+`packages/tokens/{primitives,semantic,density,breakpoint}.json` are the
+source of truth for spacing, color, radius, and typography: one file per
+Figma variable collection, which must mirror its names and nesting exactly.
+`theme.css` and `fonts.css` are generated from them (`latent build-theme`,
+run automatically by the pre-commit hook) — never edit those by hand. If you
+rename or restructure a token, update both sides and re-run:
 
 ```
 node packages/cli/bin/latent.mjs sync figma --file <export>.json --json
@@ -75,3 +90,7 @@ All of these should exit cleanly (or fail with an expected, typed error)
 before you push. Or run `node packages/cli/bin/latent.mjs verify --json`
 instead of the individual `sync figma`/`check-parity`/`check-component-bindings`/`check-docs` calls
 above — the one-command version, same aggregated pass/fail CI runs.
+
+If you touched a component or its story, also run `npm run build-storybook`
+(CI does, and it's the only thing that catches a static-build-only failure)
+and look at the story in `npm run storybook`, in both light and dark mode.
