@@ -11,13 +11,27 @@
 }
 
 .lat-badge-group--small {
-  padding: var(--lat-spacing-4);
   font-size: var(--lat-font-style-body-small);
 }
 
 .lat-badge-group--large {
-  padding: var(--lat-spacing-4);
   font-size: var(--lat-font-style-body);
+}
+
+/* Padding is asymmetric per position (same for both sizes): the side that
+   holds a Badge pill hugs it at spacing-4, the plain-text side gets more
+   room. Matches Figma's Badge Group variants. */
+.lat-badge-group--leading {
+  padding: var(--lat-spacing-4) var(--lat-spacing-10) var(--lat-spacing-4) var(--lat-spacing-4);
+}
+
+.lat-badge-group--trailing {
+  padding: var(--lat-spacing-4) var(--lat-spacing-4) var(--lat-spacing-4) var(--lat-spacing-16);
+}
+
+.lat-badge-group--none {
+  gap: var(--lat-spacing-4);
+  padding: var(--lat-spacing-4) var(--lat-spacing-4) var(--lat-spacing-4) var(--lat-spacing-16);
 }
 
 .lat-badge-group__text {

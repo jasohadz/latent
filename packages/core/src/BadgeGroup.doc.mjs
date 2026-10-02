@@ -32,8 +32,11 @@ export default {
   // strips separators/case and a typography/font- prefix, not synonyms).
   figmaTokensSkipLiveCheck: ["text font-size (large)"],
   figmaTokens: {
-    "container padding": "spacing.4",
+    "container padding (badge side / vertical)": "spacing.4",
+    "container padding-right (leading)": "spacing.10",
+    "container padding-left (trailing, none)": "spacing.16",
     "container gap": "spacing.8",
+    "container gap (none)": "spacing.4",
     "container background": "color.background.muted",
     "container border-radius": "radius.full",
     "text color": "color.text.primary",

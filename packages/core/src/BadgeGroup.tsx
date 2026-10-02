@@ -24,6 +24,7 @@ export const BadgeGroup = React.forwardRef<HTMLButtonElement, BadgeGroupProps>(
     const classes = [
       "lat-badge-group",
       `lat-badge-group--${size}`,
+      `lat-badge-group--${position}`,
       className,
     ]
       .filter(Boolean)
