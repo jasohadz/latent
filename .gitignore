@@ -11,3 +11,5 @@ build-storybook.log
 # Local secrets (Story UI API key, etc.)
 .env
 .env.*
+# Story UI server runtime state
+.story-ui/
