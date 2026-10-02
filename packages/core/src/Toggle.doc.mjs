@@ -8,7 +8,7 @@ export default {
   ],
   example: `<Toggle options={["List", "Grid"]} selectedIndex={0} onChange={setView} />`,
   doNot: [
-    "Don't use Toggle for more than 2 options — use ToggleMultiple instead.",
+    "Don't use Toggle for more than 2 options — use Tabs instead.",
   ],
   swizzlePath: "packages/core/src/Toggle.tsx",
   extends: null,

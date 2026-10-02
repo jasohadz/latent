@@ -1,7 +1,7 @@
 import React from "react";
-import "./ToggleMultiple.css";
+import "./Tabs.css";
 
-export interface ToggleMultipleProps {
+export interface TabsProps {
   options: string[];
   selectedIndex: number;
   onChange: (index: number) => void;
@@ -9,14 +9,14 @@ export interface ToggleMultipleProps {
 }
 
 /**
- * ToggleMultiple — Toggle's 2-option recipe generalized to N options.
+ * Tabs — Toggle's 2-option recipe generalized to N options.
  * Styling comes entirely from --lat-* custom properties.
  *
- * @import import { ToggleMultiple } from "@latent/core/ToggleMultiple";
+ * @import import { Tabs } from "@latent/core/Tabs";
  */
-export const ToggleMultiple = React.forwardRef<HTMLDivElement, ToggleMultipleProps>(
+export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
   ({ options, selectedIndex, onChange, className }, ref) => {
-    const classes = ["lat-toggle-multiple", className].filter(Boolean).join(" ");
+    const classes = ["lat-tabs", className].filter(Boolean).join(" ");
     const buttonRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
 
     // role="tablist"/"tab" (below) is the WAI-ARIA tabs pattern, which
@@ -53,8 +53,8 @@ export const ToggleMultiple = React.forwardRef<HTMLDivElement, ToggleMultiplePro
             tabIndex={i === selectedIndex ? 0 : -1}
             aria-selected={i === selectedIndex}
             className={[
-              "lat-toggle-multiple__option",
-              i === selectedIndex ? "lat-toggle-multiple__option--selected" : "",
+              "lat-tabs__option",
+              i === selectedIndex ? "lat-tabs__option--selected" : "",
             ]
               .filter(Boolean)
               .join(" ")}
@@ -68,4 +68,4 @@ export const ToggleMultiple = React.forwardRef<HTMLDivElement, ToggleMultiplePro
   }
 );
 
-ToggleMultiple.displayName = "ToggleMultiple";
+Tabs.displayName = "Tabs";

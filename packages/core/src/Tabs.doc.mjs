@@ -1,22 +1,26 @@
 export default {
-  name: "ToggleMultiple",
+  name: "Tabs",
   summary: "Toggle's 2-option segmented-control recipe generalized to N options (demonstrated with 5 in Figma).",
   props: [
     { name: "options", type: "string[]", default: "—", description: "The option labels, in order." },
     { name: "selectedIndex", type: "number", default: "—", description: "Which option is currently selected." },
     { name: "onChange", type: "(index: number) => void", default: "—", description: "Fires when an option is clicked." },
   ],
-  example: `<ToggleMultiple options={["Day", "Week", "Month", "Quarter", "Year"]} selectedIndex={1} onChange={setRange} />`,
+  example: `<Tabs options={["Day", "Week", "Month", "Quarter", "Year"]} selectedIndex={1} onChange={setRange} />`,
   doNot: [
-    "Don't use ToggleMultiple for exactly 2 options — use Toggle instead (same recipe, narrower/simpler API).",
+    "Don't use Tabs for exactly 2 options — use Toggle instead (same recipe, narrower/simpler API).",
   ],
-  swizzlePath: "packages/core/src/ToggleMultiple.tsx",
+  // Renamed from ToggleMultiple on 2026-10-02 to match the Figma component's
+  // new name. Breaking for anyone who swizzled it: the file, export, props
+  // type (TabsProps), and CSS classes (.lat-tabs, .lat-tabs__option) all
+  // changed; behavior and tokens didn't.
+  swizzlePath: "packages/core/src/Tabs.tsx",
   extends: null,
   states: [
     { name: "selected", description: "Raised surface background, primary text color, semibold weight.", tokens: ["option selected background", "option selected color", "option selected weight"] },
     { name: "unselected", description: "No background, tertiary text color, regular weight.", tokens: ["option unselected color", "option unselected weight"] },
   ],
-  // Same component, same fix — ToggleMultiple.tsx is Toggle.tsx's exact
+  // Same component, same fix — Tabs.tsx is Toggle.tsx's exact
   // recipe generalized to N options (modulo wraparound instead of a
   // 2-option ternary), confirmed by reading both sources. Fixed 2026-08-26,
   // same change and same reasoning as Toggle.doc.mjs — see there.
@@ -31,7 +35,7 @@ export default {
       { attribute: 'role="tablist" / role="tab" / aria-selected', description: "Now backed by the keyboard behavior these roles imply — previously present without it. Matters more here than on Toggle since more options meant more Tab stops to step through with nothing to indicate the tabs pattern was only cosmetic." },
     ],
     focusBehaviors: [
-      "No custom/token-bound focus ring exists in ToggleMultiple.css — confirmed by reading the source. No outline: none either, so the browser's own unstyled default outline still shows on keyboard focus — same recurring gap as Toggle's/Switch's, an accident of omission, not a deliberate design.",
+      "No custom/token-bound focus ring exists in Tabs.css — confirmed by reading the source. No outline: none either, so the browser's own unstyled default outline still shows on keyboard focus — same recurring gap as Toggle's/Switch's, an accident of omission, not a deliberate design.",
     ],
   },
   // "option unselected weight" is skipped below (figmaTokensSkipLiveCheck):

@@ -85,7 +85,7 @@ body {
   /* No generic overflow:auto here on purpose — it was clipping TopNav's
      dropdown panel, which is position:absolute and extends past the card's
      own height. Components that genuinely need horizontal scroll (e.g.
-     ToggleMultiple's wide row) opt in via --scroll-x below instead. */
+     Tabs's wide row) opt in via --scroll-x below instead. */
 }
 
 .gallery__card-body--column {

@@ -51,6 +51,12 @@ const DOC_BLOCKLIST = [
       "brand assets/latent_logo_package/DESIGN.md (gitignored, third-party-generated 'design.md' brand kit, dated 2026-07-11, version: alpha) claims this as the primary brand blue — it does not match the real primitive color.blue.600 (#2563eb) and is superseded. That file is explicitly written to be picked up by AI coding agents; a bare mention elsewhere likely repeats it as current rather than flagging it as stale.",
   },
   {
+    term: "ToggleMultiple",
+    allowNear: /renamed|was (?:called|named)|~~|font-size was/i,
+    reason:
+      "The ToggleMultiple component was renamed Tabs on 2026-10-02 to match Figma (packages/core/src/Tabs.*, .lat-tabs). A bare mention points at files, exports, and classes that no longer exist.",
+  },
+  {
     term: "tokens.json",
     allowNear: /~~|\bv1\b|reconcil|there is no|no longer|any more/i,
     reason:
@@ -1818,7 +1824,7 @@ function renamePascalIdentifiers(source, oldName, newName) {
 }
 
 // CSS classes/import paths use the kebab-case form (Button -> lat-button,
-// including BEM-style children like .lat-toggle-multiple__option) — a
+// including BEM-style children like .lat-tabs__option) — a
 // separate pass from the PascalCase one above, same source text.
 function renameKebabIdentifiers(source, oldKebab, newKebab) {
   return source.split(oldKebab).join(newKebab);

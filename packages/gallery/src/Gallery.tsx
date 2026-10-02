@@ -33,7 +33,7 @@ import { Testimonial } from "@latent/core/Testimonial";
 import { TextArea } from "@latent/core/TextArea";
 import { TextField } from "@latent/core/TextField";
 import { Toggle } from "@latent/core/Toggle";
-import { ToggleMultiple } from "@latent/core/ToggleMultiple";
+import { Tabs } from "@latent/core/Tabs";
 import { TopNav, type TopNavMenu } from "@latent/core/TopNav";
 import { TopNavLink } from "@latent/core/TopNavLink";
 
@@ -189,8 +189,8 @@ export function Gallery() {
           <Toggle options={["List", "Grid"]} selectedIndex={toggleIndex} onChange={setToggleIndex} />
         </ComponentCard>
 
-        <ComponentCard name="ToggleMultiple" scrollX>
-          <ToggleMultiple
+        <ComponentCard name="Tabs" scrollX>
+          <Tabs
             options={["Day", "Week", "Month", "Quarter", "Year"]}
             selectedIndex={toggleMultiIndex}
             onChange={setToggleMultiIndex}

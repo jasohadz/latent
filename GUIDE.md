@@ -13,7 +13,7 @@ phases depend on earlier ones being solid, especially the token schema.
    - `breakpoint.json` — mode-aware across `mobile`/`tablet`/`desktop`.
    Figma's variable collections (Primitives, Semantic, Density, Breakpoint) must mirror these names/nesting exactly — the Semantic collection was briefly misnamed "Style Tokens" in the Figma file itself and renamed back on 2026-08-20; `packages/figma-plugin`'s `matchLayer()` only recognizes the correct name.
 4. Primitives: 36 components now live in `packages/core/src/`, each following Button's exact three-file pattern (`.tsx` + `.css` + `.doc.mjs`, each with a `figmaTokens` mapping):
-   - **Atoms**: Button, Icon, Badge, Avatar, Toggle, ToggleMultiple, Switch, TextField, TextArea
+   - **Atoms**: Button, Icon, Badge, Avatar, Toggle, Tabs (renamed from ToggleMultiple 2026-10-02), Switch, TextField, TextArea
    - **Composites**: AccordionItem, Alert, AlertStack, Card, BadgeGroup, AvatarGroup, Testimonial, Field, SubscribeField, Search, Select, ComboBox, MultiSelect, SelectOption, Stat, Panel, Calendar
    - **Navigation**: NavItem, NavSubItem, NavDropdown, SideNav, TopNavLink, MegaMenuItem, TopNav
    - **Chat**: ChatInput, MessageBubble, ChatWindow
@@ -125,7 +125,7 @@ this. Phase 4 is that hardening pass, not page templates:
       ArrowLeft/ArrowRight/Home/End with automatic activation, same
       recipe in both files. Focus-ring gap (see `Switch` below)
       deliberately left as-is, documented not silently fixed. See
-      `Toggle.doc.mjs`/`ToggleMultiple.doc.mjs`'s `accessibility` fields.
+      `Toggle.doc.mjs`/`Tabs.doc.mjs`'s `accessibility` fields.
     - ~~**The `TopNav` family is systematically weaker than the `SideNav`
       family**~~ **Fixed 2026-08-26** (commit `3f448f0`): `MegaMenuItem`
       got real token-bound hover/pressed/focus-visible styling;

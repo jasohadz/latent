@@ -187,7 +187,7 @@ const COMPONENT_NAMES = [
   "Field", "MegaMenuItem", "MessageBubble", "MultiSelect", "NavDropdown",
   "NavItem", "NavSubItem", "Panel", "Search", "Select", "SelectOption",
   "SideNav", "Stat", "SubscribeField", "Switch", "Testimonial", "TextArea",
-  "TextField", "Toggle", "ToggleMultiple", "TopNav", "TopNavLink",
+  "TextField", "Toggle", "Tabs", "TopNav", "TopNavLink",
 ];
 
 // The Icons foundations page holds ~600 individual Lucide icon component

@@ -73,6 +73,11 @@ Example: `<Switch pressed={enabled} onChange={setEnabled} supportingText="Enable
 - Don't render a Switch with neither supportingText nor aria-label — screen readers announce it as an unnamed switch.
 - Don't hardcode the thumb travel distance in a consumer override — it's derived from the track/thumb/padding sizes here; change those instead.
 
+### Tabs
+Toggle's 2-option segmented-control recipe generalized to N options (demonstrated with 5 in Figma).
+Example: `<Tabs options={["Day", "Week", "Month", "Quarter", "Year"]} selectedIndex={1} onChange={setRange} />`
+- Don't use Tabs for exactly 2 options — use Toggle instead (same recipe, narrower/simpler API).
+
 ### Testimonial
 A quote card pairing a customer statement with a real Avatar instance, name, and role.
 Example: `<Testimonial quote="Latent made it trivial to keep our design and code in sync." name="Jordan Reyes" role="Design Systems Lead" />`
@@ -91,12 +96,7 @@ Example: `<TextField appearance="outline" value={value} onChange={(e) => setValu
 ### Toggle
 A 2-option segmented control for mutually exclusive choices (e.g.
 Example: `<Toggle options={["List", "Grid"]} selectedIndex={0} onChange={setView} />`
-- Don't use Toggle for more than 2 options — use ToggleMultiple instead.
-
-### ToggleMultiple
-Toggle's 2-option segmented-control recipe generalized to N options (demonstrated with 5 in Figma).
-Example: `<ToggleMultiple options={["Day", "Week", "Month", "Quarter", "Year"]} selectedIndex={1} onChange={setRange} />`
-- Don't use ToggleMultiple for exactly 2 options — use Toggle instead (same recipe, narrower/simpler API).
+- Don't use Toggle for more than 2 options — use Tabs instead.
 
 ### TopNav
 A floating glass top navigation bar with mega-menu dropdowns for Product and Download.
