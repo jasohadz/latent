@@ -1,4 +1,9 @@
-Every Latent component, what it's for, and the rules for using it. Props come from the TypeScript source. (MultiSelect–TopNavLink)
+Every Latent component, what it's for, and the rules for using it. Props come from the TypeScript source. (MessageBubble–TopNav)
+
+### MessageBubble
+A single chat message.
+Example: `<MessageBubble sender="assistant">How can I help?</MessageBubble>`
+- Don't render MessageBubble outside ChatWindow's message slot — its row alignment (assistant left, user right) assumes ChatWindow's full-width flex container.
 
 ### MultiSelect
 A labeled multi-value dropdown.
@@ -96,8 +101,3 @@ Example: `<ToggleMultiple options={["Day", "Week", "Month", "Quarter", "Year"]} 
 A floating glass top navigation bar with mega-menu dropdowns for Product and Download.
 Example: `<TopNav menu={menu} onMenuChange={setMenu} productItems={products} downloadFeatured={macDownload} downloadItems={otherDownloads} />`
 - Don't render Pricing with a chevron/menu — it's a plain link, unlike Product/Download.
-
-### TopNavLink
-The atomic link used inside TopNav's bar for Product, Download, and Pricing.
-Example: `<TopNavLink label="Product" active showChevron onClick={openProductMenu} />`
-- Don't set active on a link with no corresponding open panel (e.g.

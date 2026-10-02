@@ -1,0 +1,91 @@
+.lat-combo-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lat-spacing-4);
+  width: 100%;
+}
+
+.lat-combo-box__label {
+  color: var(--lat-color-text-secondary);
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
+  font-weight: var(--lat-font-weight-600);
+  line-height: var(--lat-font-line-height-200-normal);
+}
+
+.lat-combo-box__trigger {
+  /* A div, unlike Select's <button> trigger, defaults to content-box — which
+     would put padding/border outside the 100% width and overhang the panel. */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--lat-spacing-4);
+  width: 100%;
+  padding: var(--lat-spacing-8);
+  border-radius: var(--lat-radius-lg);
+  border: var(--lat-sizing-border-thin) solid var(--lat-color-border-default);
+  background: transparent;
+  cursor: text;
+}
+/* Hover excludes the open/focused states — otherwise this rule's higher
+   specificity keeps the hover gray over the brand border while the pointer
+   rests on an open combo box. */
+.lat-combo-box__trigger:hover:not(.lat-combo-box__trigger--disabled):not(.lat-combo-box__trigger--active):not(:focus-within) {
+  border-color: var(--lat-color-border-strong);
+}
+.lat-combo-box__trigger:focus-within,
+.lat-combo-box__trigger--active {
+  border-color: var(--lat-color-border-brand);
+}
+.lat-combo-box__trigger--disabled {
+  border-color: var(--lat-color-border-subtle);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.lat-combo-box__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--lat-font-family-sans);
+  font-size: var(--lat-font-style-body-small);
+  color: var(--lat-color-text-primary);
+}
+.lat-combo-box__input::placeholder {
+  color: var(--lat-color-text-tertiary);
+}
+.lat-combo-box__input:disabled {
+  cursor: not-allowed;
+}
+
+/* Both icons keep Icon.css's own baseline color, color.icon.default —
+   the same as Select's chevron. */
+.lat-combo-box__search-icon,
+.lat-combo-box__chevron {
+  flex-shrink: 0;
+}
+
+.lat-combo-box__panel {
+  position: absolute;
+  top: calc(100% + var(--lat-spacing-4));
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding: var(--lat-spacing-4);
+  overflow: hidden;
+  background-color: var(--lat-color-background-default);
+  border: var(--lat-sizing-border-thin) solid var(--lat-color-border-subtle);
+  border-radius: var(--lat-radius-lg);
+}
+
+/* The keyboard-highlighted row — Figma's open variant shows it as a
+   Select Option in its own state=hover, so it reuses that exact token. */
+.lat-combo-box__option--active {
+  background-color: var(--lat-color-background-brand);
+}

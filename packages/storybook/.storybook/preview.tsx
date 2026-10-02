@@ -21,12 +21,31 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    // Toolbar density switch — drives data-latent-density on <html>, which
+    // theme.css's :root[data-latent-density="condensed"] block reads
+    // (spacing, radius, type, and action heights all compress).
+    latentDensity: {
+      description: "Latent density",
+      toolbar: {
+        title: "Density",
+        icon: "component",
+        items: [
+          { value: "default", title: "Default" },
+          { value: "condensed", title: "Condensed" },
+        ],
+        dynamicTitle: true,
+      },
+    },
   },
-  initialGlobals: { latentMode: "light" },
+  initialGlobals: { latentMode: "light", latentDensity: "default" },
   decorators: [
     (Story, context) => {
       const mode = context.globals.latentMode ?? "light";
       document.documentElement.setAttribute("data-latent-mode", mode);
+      // "default" is theme.css's baseline, so it's the absence of the attribute.
+      const density = context.globals.latentDensity ?? "default";
+      if (density === "default") document.documentElement.removeAttribute("data-latent-density");
+      else document.documentElement.setAttribute("data-latent-density", density);
       return <Story />;
     },
   ],

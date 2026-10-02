@@ -1,4 +1,4 @@
-Every Latent component, what it's for, and the rules for using it. Props come from the TypeScript source. (AccordionItem–MessageBubble)
+Every Latent component, what it's for, and the rules for using it. Props come from the TypeScript source. (AccordionItem–MegaMenuItem)
 
 ### AccordionItem
 A single collapsible FAQ-style row.
@@ -69,6 +69,13 @@ A full AI chat panel.
 Example: `<ChatWindow inputProps={{ value: message, onChange: setMessage, onSubmit: send }}><MessageBubble sender="assistant">Hi!</MessageBubble></ChatWindow>`
 - Don't pass raw strings/JSX as children — only real MessageBubble instances are the documented content model; anything else skips MessageBubble's own sender-based alignment/color tokens.
 
+### ComboBox
+An editable, searchable dropdown: a labeled trigger with a leading search icon and a text input that filters a floating panel of real SelectOption rows as you type.
+Example: `<ComboBox label="Country" placeholder="Search country..." items={countries} value={country} onChange={setCountry} />`
+- Don't use ComboBox for a handful of options — Select is the simpler control when there's nothing worth searching.
+- Don't expect free-text values — onChange only ever fires with one of the items' values; text that matches nothing is discarded when the panel closes.
+- Don't expect a drop shadow on the panel — Figma's Combo Box (like Select) has only a 1px border.
+
 ### Field
 A labeled form-field wrapper around a real TextField instance, for standard form layouts.
 Example: `<Field label="Email" placeholder="you@example.com" helperText="This field is required" error />`
@@ -84,8 +91,3 @@ Example: `<Icon name="arrow-up" size="md" />`
 The atomic row used inside TopNav's Product and Download dropdown panels.
 Example: `<MegaMenuItem layout="featured" icon={<Icon name="apple" />} title="Download for macOS" description="Recommended for most users" badgeLabel="New" />`
 - Don't pass badgeLabel with layout="standard" and expect it to show — the Badge only renders when layout="featured".
-
-### MessageBubble
-A single chat message.
-Example: `<MessageBubble sender="assistant">How can I help?</MessageBubble>`
-- Don't render MessageBubble outside ChatWindow's message slot — its row alignment (assistant left, user right) assumes ChatWindow's full-width flex container.

@@ -183,7 +183,7 @@ async function extractStyles() {
 // component-bindings.live.json.
 const COMPONENT_NAMES = [
   "AccordionItem", "Alert", "AlertStack", "Avatar", "AvatarGroup", "Badge",
-  "BadgeGroup", "Button", "Calendar", "Card", "ChatInput", "ChatWindow",
+  "BadgeGroup", "Button", "Calendar", "Card", "ChatInput", "ChatWindow", "ComboBox",
   "Field", "MegaMenuItem", "MessageBubble", "MultiSelect", "NavDropdown",
   "NavItem", "NavSubItem", "Panel", "Search", "Select", "SelectOption",
   "SideNav", "Stat", "SubscribeField", "Switch", "Testimonial", "TextArea",
