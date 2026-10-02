@@ -20,13 +20,19 @@
   color: var(--lat-color-icon-default);
 }
 
+/* font-family set explicitly so text doesn't silently inherit the consuming
+   page's font (renders browser-default serif without a body rule). Not
+   declared in figmaTokens: Figma's Stat text has no font-family variable
+   bound (component-bindings.live.json, 2026-10-02). */
 .lat-stat__value {
   color: var(--lat-color-text-primary);
+  font-family: var(--lat-font-family-sans);
   font-size: var(--lat-font-style-h1);
   font-weight: var(--lat-font-weight-700);
 }
 
 .lat-stat__label {
   color: var(--lat-color-text-secondary);
+  font-family: var(--lat-font-family-sans);
   font-size: var(--lat-font-style-body);
 }

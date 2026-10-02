@@ -62,6 +62,7 @@
 
 .lat-card__title {
   color: var(--lat-color-text-primary);
+  font-family: var(--lat-font-family-sans);
   font-size: var(--lat-font-style-h4);
   line-height: var(--lat-font-line-height-600-normal);
   font-weight: var(--lat-font-weight-600);
@@ -69,6 +70,7 @@
 
 .lat-card__body {
   color: var(--lat-color-text-secondary);
+  font-family: var(--lat-font-family-sans);
   font-size: var(--lat-font-style-body);
 }
 

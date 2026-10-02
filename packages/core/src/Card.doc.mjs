@@ -59,6 +59,8 @@ export default {
     "icon color": "color.icon.default",
     "eyebrow color": "color.text.tertiary",
     "eyebrow font-family": "font-family.mono",
+    "title font-family": "font-family.sans",
+    "body font-family": "font-family.sans",
     "eyebrow font-size": "font-style.eyebrow",
     "eyebrow font-weight": "font-weight.500",
     "eyebrow line-height": "font-line-height.100-normal",
